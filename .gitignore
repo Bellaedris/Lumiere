@@ -1,0 +1,6 @@
+cmake-build-release/
+cmake-build-debug/
+bin/*
+!bin/shaders
+!bin/resources
+/src/MiniGLConfig.h

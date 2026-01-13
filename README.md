@@ -1,1 +1,1 @@
-# Lumiere
+An OpenGL rendering backend meant to be the lowest level brick of a game engine and video game project i'm working on.

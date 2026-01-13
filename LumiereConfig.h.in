@@ -1,0 +1,3 @@
+// the configured options and settings for Lumiere
+#define LUMIERE_VERSION_MAJOR @Lumiere_VERSION_MAJOR@
+#define LUMIERE_VERSION_MINOR @Lumiere_VERSION_MINOR@
