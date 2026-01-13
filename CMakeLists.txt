@@ -5,24 +5,26 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
 
 # fix for a weird bug that caused windows.h to expand "max" and "min" keywords into macros.
 add_definitions(-DNOMINMAX)
 
-link_directories(${CMAKE_SOURCE_DIR}/lib)
+link_directories(${CMAKE_CURRENT_LIST_DIR}/lib)
 
-file(GLOB_RECURSE SOURCES
-        ${CMAKE_SOURCE_DIR}/src/*.h
-        ${CMAKE_SOURCE_DIR}/src/*.hpp
-        ${CMAKE_SOURCE_DIR}/src/*.cpp
+file(GLOB_RECURSE LUMIERE_SOURCES
+        ${CMAKE_CURRENT_LIST_DIR}/src/*.h
+        ${CMAKE_CURRENT_LIST_DIR}/src/*.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
 )
 
-add_executable(${CMAKE_PROJECT_NAME} ${SOURCES})
+add_library(Lumiere STATIC ${LUMIERE_SOURCES})
 
-configure_file(${CMAKE_PROJECT_NAME}Config.h.in ${CMAKE_SOURCE_DIR}/src/${CMAKE_PROJECT_NAME}Config.h)
-target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC "${PROJECT_BINARY_DIR}")
+target_include_directories(Lumiere PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src)
+
+configure_file(LumiereConfig.h.in ${CMAKE_CURRENT_LIST_DIR}/src/LumiereConfig.h)
+target_include_directories(Lumiere PUBLIC ${CMAKE_CURRENT_LIST_DIR}/includes)
 
 find_package(GLM CONFIG REQUIRED)
 message(STATUS "Found GLM in ${GLM_INCLUDE_DIR}")
@@ -36,16 +38,24 @@ if (OPENMP_FOUND)
 endif()
 
 add_library(GLAD thirdparty/glad.c)
-
 add_library(TINYOBJ thirdparty/tinyobjloader.cpp)
-
 add_library(STB_IMAGE thirdparty/stb_image.cpp)
 
 file(GLOB_RECURSE IMGUI_SOURCES includes/imgui/*.cpp)
-add_library(IMGUI ${IMGUI_SOURCES})
+add_library(IMGUI STATIC ${IMGUI_SOURCES})
 
 set(LIBS ${GLFW3_LIBRARY} ${OPENGL_LIBRARY} glm::glm GLAD ${CMAKE_DL_LIBS} STB_IMAGE TINYOBJ IMGUI)
 
-include_directories("${CMAKE_SOURCE_DIR}/includes")
+include_directories("${CMAKE_CURRENT_LIST_DIR}/includes")
 
-target_link_libraries(${CMAKE_PROJECT_NAME} ${LIBS})
+target_link_libraries(Lumiere
+    PUBLIC
+        glm::glm
+        IMGUI
+    PRIVATE
+        ${GLFW3_LIBRARY}
+        ${OPENGL_LIBRARY}
+        GLAD
+        ${CMAKE_DL_LIBS}
+        STB_IMAGE TINYOBJ
+)
