@@ -9,6 +9,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <map>
 
 namespace lum::gpu
 {
@@ -30,6 +31,8 @@ private:
     uint32_t m_program;
     bool m_created {false};
     ShaderType m_type {ShaderType::None};
+
+    std::map<std::string, int> uniformLocationCache;
     #pragma endregion Members
 
     GLuint GetShaderType(ShaderType type);
@@ -83,47 +86,50 @@ public:
     #pragma endregion Methods
 
     #pragma region Uniform data
-    GLint GetLocation(const std::string &name) const
+    int GetLocation(const std::string &name)
     {
-        return glGetUniformLocation(m_program, name.c_str());
+        if(uniformLocationCache.find(name) == uniformLocationCache.end())
+            uniformLocationCache.insert({std::string(name), 0});
+        else
+            return uniformLocationCache[name];
     }
 
-    void UniformData(const std::string& name, const glm::mat4 mat) const
+    void UniformData(const std::string& name, const glm::mat4 mat)
     {
         glUniformMatrix4fv(GetLocation(name), 1, false, glm::value_ptr(mat));
     }
 
-    void UniformData(const std::string& name, const float x, const float y, const float z, const float w) const
+    void UniformData(const std::string& name, const float x, const float y, const float z, const float w)
     {
         glUniform4f(GetLocation(name), x, y, z, w);
     }
 
-    void UniformData(const std::string& name, const glm::vec4& data) const
+    void UniformData(const std::string& name, const glm::vec4& data)
     {
         glUniform4f(GetLocation(name), data.x, data.y, data.z, data.w);
     }
 
-    void UniformData(const std::string& name, const glm::vec3& data) const
+    void UniformData(const std::string& name, const glm::vec3& data)
     {
         glUniform3f(GetLocation(name), data.x, data.y, data.z);
     }
 
-    void UniformData(const std::string& name, const glm::vec2& data) const
+    void UniformData(const std::string& name, const glm::vec2& data)
     {
         glUniform2f(GetLocation(name), data.x, data.y);
     }
 
-    void UniformData(const std::string &name, const float x, const float y, const float z) const
+    void UniformData(const std::string &name, const float x, const float y, const float z)
     {
         glUniform3f(GetLocation(name), x, y, z);
     }
 
-    void UniformData(const std::string& name, const float x) const
+    void UniformData(const std::string& name, const float x)
     {
         glUniform1f(GetLocation(name), x);
     }
 
-    void UniformData(const std::string& name, const int x) const
+    void UniformData(const std::string& name, const int x)
     {
         glUniform1i(GetLocation(name), x);
     }
