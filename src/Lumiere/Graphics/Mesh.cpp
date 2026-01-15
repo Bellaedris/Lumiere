@@ -7,24 +7,26 @@
 #include "Mesh.h"
 #include <assimp/Importer.hpp>
 
-namespace lum
+namespace lum::gfx
 {
 Mesh::Mesh()
     : m_buffer(gpu::Buffer::BufferType::Vertex)
     , m_indexBuffer(gpu::Buffer::BufferType::Index)
 {}
 
-Mesh::Mesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices)
+Mesh::Mesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material)
     : m_verticesData(std::move(vertices))
     , m_indices(std::move(indices))
     , m_buffer(gpu::Buffer::BufferType::Vertex)
     , m_indexBuffer(gpu::Buffer::BufferType::Index)
+    , m_material(material)
 {
     SetupGPU();
 }
 
 void Mesh::Draw() const
 {
+    m_material->Bind();
     m_vao.Bind();
     glDrawElements(GL_TRIANGLES, m_indices.size(), gpu::GLUtils::GetDataType(gpu::GLUtils::DataType::UnsignedInt), nullptr);
     m_vao.Unbind();
@@ -75,6 +77,6 @@ Mesh Mesh::GeneratePlane(float halfSize)
         1, 3, 2
     };
 
-    return {vertices, indices};
+    return {vertices, indices, nullptr};
 }
 } // mgl

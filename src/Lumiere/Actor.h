@@ -5,14 +5,14 @@
 #pragma once
 #include <string>
 
-#include "Mesh.h"
+#include "Graphics/Mesh.h"
 
 namespace lum
 {
 class Actor
 {
 private:
-    std::vector<MeshPtr> meshes;
+    std::vector<gfx::MeshPtr> m_meshes;
 public:
     explicit Actor(const std::string& path);
 
