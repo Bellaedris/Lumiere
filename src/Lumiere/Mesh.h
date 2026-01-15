@@ -57,7 +57,7 @@ private:
     gpu::Vao m_vao;
     #pragma endregion Members
 public:
-    Mesh(const char* filename);
+    Mesh();
     Mesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices);
 
     void RecalculateNormals();
@@ -70,4 +70,6 @@ public:
     static Mesh GeneratePlane(float halfSize);
     #pragma endregion Static helpers
 };
+
+using MeshPtr = std::shared_ptr<Mesh>;
 } // mgl

@@ -26,6 +26,8 @@ target_include_directories(Lumiere PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src)
 configure_file(LumiereConfig.h.in ${CMAKE_CURRENT_LIST_DIR}/src/LumiereConfig.h)
 target_include_directories(Lumiere PUBLIC ${CMAKE_CURRENT_LIST_DIR}/includes)
 
+find_package(ASSIMP REQUIRED)
+message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
 find_package(GLM CONFIG REQUIRED)
 message(STATUS "Found GLM in ${GLM_INCLUDE_DIR}")
 find_package(GLFW3 REQUIRED)
@@ -57,5 +59,7 @@ target_link_libraries(Lumiere
         ${OPENGL_LIBRARY}
         GLAD
         ${CMAKE_DL_LIBS}
-        STB_IMAGE TINYOBJ
+        STB_IMAGE
+        TINYOBJ
+        ${ASSIMP_LIBRARY}
 )
