@@ -24,7 +24,8 @@ public:
     enum BufferType
     {
         Vertex,
-        Index
+        Index,
+        Uniform
     };
 
     /**
@@ -83,6 +84,11 @@ public:
      * \brief Binds the buffer to be able to use it. Must be called before any operation on the buffer
      */
     void Bind() const;
+
+    /**
+     * \brief binds the buffer to an indexed target. Only available for Uniform Buffers.
+     */
+    void Bind(uint32_t index) const;
 
     /**
      * \brief Populate a buffer with data. The buffer must be bound beforehand using the Bind() method

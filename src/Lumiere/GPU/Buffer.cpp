@@ -6,44 +6,20 @@
 
 namespace lum::gpu
 {
-    Buffer::Buffer(BufferType type)
-        : m_type(type)
+    GLuint Buffer::GetBufferType(Buffer::BufferType type)
     {
-        glGenBuffers(1, &m_buffer);
-    }
-
-    Buffer::Buffer(Buffer &&other) noexcept
-        : m_type(other.m_type)
-        , m_buffer(other.m_buffer)
-    {
-        other.m_buffer = 0;
-    }
-
-    Buffer &Buffer::operator=(Buffer &&other) noexcept
-    {
-        if (this != &other)
+        switch(type)
         {
-            glDeleteBuffers(1, &m_buffer);
-            m_buffer = other.m_buffer;
-            m_type = other.m_type;
-            other.m_buffer = 0;
+            case BufferType::Vertex:
+                return GL_ARRAY_BUFFER;
+            case BufferType::Index:
+                return GL_ELEMENT_ARRAY_BUFFER;
+            case Uniform:
+                return GL_UNIFORM_BUFFER;
+            default:
+                std::cerr << "Invalid buffer type";
+                return GL_FALSE;
         }
-        return *this;
-    }
-
-    Buffer::~Buffer()
-    {
-        glDeleteBuffers(1, &m_buffer);
-    }
-
-    void Buffer::Bind() const
-    {
-        glBindBuffer(GetBufferType(m_type), m_buffer);
-    }
-
-    void Buffer::Write(uint32_t size, void *data, BufferUsage usage)
-    {
-        glNamedBufferData(m_buffer, size, data, GetBufferUsage(usage));
     }
 
     GLuint Buffer::GetBufferUsage(BufferUsage usage)
@@ -74,17 +50,59 @@ namespace lum::gpu
         }
     }
 
-    GLuint Buffer::GetBufferType(Buffer::BufferType type)
+    Buffer::Buffer(BufferType type)
+        : m_type(type)
     {
-        switch(type)
+        glGenBuffers(1, &m_buffer);
+    }
+
+    Buffer::~Buffer()
+    {
+        glDeleteBuffers(1, &m_buffer);
+    }
+
+    Buffer::Buffer(Buffer &&other) noexcept
+        : m_type(other.m_type)
+        , m_buffer(other.m_buffer)
+    {
+        other.m_buffer = 0;
+    }
+
+    Buffer &Buffer::operator=(Buffer &&other) noexcept
+    {
+        if (this != &other)
         {
-            case BufferType::Vertex:
-                return GL_ARRAY_BUFFER;
-            case BufferType::Index:
-                return GL_ELEMENT_ARRAY_BUFFER;
-            default:
-                std::cerr << "Invalid buffer type";
-                return GL_FALSE;
+            glDeleteBuffers(1, &m_buffer);
+            m_buffer       = other.m_buffer;
+            m_type         = other.m_type;
+            other.m_buffer = 0;
         }
+        return *this;
+    }
+
+    void Buffer::Bind() const
+    {
+        if (m_type == Uniform)
+        {
+            std::cerr << "Uniform Buffers must use the Bound(index) variant method, as they need to be bound to an indexed target.\n";
+            return;
+        }
+        glBindBuffer(GetBufferType(m_type), m_buffer);
+    }
+
+    void Buffer::Bind(uint32_t index) const
+    {
+        if (m_type != Uniform)
+        {
+            std::cerr << "Only Uniform Buffers can be bound to an indexed target.\n";
+            return;
+        }
+
+        glBindBufferBase(GetBufferType(m_type), index, m_buffer);
+    }
+
+    void Buffer::Write(uint32_t size, void *data, BufferUsage usage)
+    {
+        glNamedBufferData(m_buffer, size, data, GetBufferUsage(usage));
     }
 } // mgl::gpu
