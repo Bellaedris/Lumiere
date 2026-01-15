@@ -8,9 +8,30 @@
 
 namespace lum::gpu
 {
+    GLuint Shader::GetShaderType(Shader::ShaderType type)
+    {
+        switch(type)
+        {
+            case Vertex:
+                return GL_VERTEX_SHADER;
+            case Fragment:
+                return GL_FRAGMENT_SHADER;
+            case Compute:
+                return GL_COMPUTE_SHADER;
+            default:
+                std::cerr << "Invalid shader type";
+                return GL_FALSE;
+        }
+    }
+
     Shader::Shader()
         : m_program(glCreateProgram())
     {}
+
+    Shader::~Shader()
+    {
+        glDeleteProgram(m_program);
+    }
 
     Shader::Shader(Shader &&other) noexcept
         : m_program(other.m_program)
@@ -23,15 +44,10 @@ namespace lum::gpu
         if (this != &other)
         {
             glDeleteProgram(m_program);
-            m_program = other.m_program;
+            m_program       = other.m_program;
             other.m_program = 0;
         }
         return *this;
-    }
-
-    Shader::~Shader()
-    {
-        glDeleteProgram(m_program);
     }
 
     void Shader::AddShaderFromFile(Shader::ShaderType type, const char *path)
@@ -57,13 +73,13 @@ namespace lum::gpu
             return;
         }
 
-        const char* shaderSource = shaderData->c_str();
-        unsigned int shader = glCreateShader(GetShaderType(type));
+        const char*  shaderSource = shaderData->c_str();
+        unsigned int shader       = glCreateShader(GetShaderType(type));
         glShaderSource(shader, 1, &shaderSource, nullptr);
         glCompileShader(shader);
 
         // check for compilation errors
-        int success;
+        int  success;
         char infoLog[512];
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
@@ -81,7 +97,7 @@ namespace lum::gpu
     void Shader::Create()
     {
         glLinkProgram(m_program);
-        int success;
+        int  success;
         char infoLog[512];
         glGetShaderiv(m_program, GL_LINK_STATUS, &success);
 
@@ -99,22 +115,6 @@ namespace lum::gpu
         if(m_created == false)
             Create();
         glUseProgram(m_program);
-    }
-
-    GLuint Shader::GetShaderType(Shader::ShaderType type)
-    {
-        switch(type)
-        {
-            case Vertex:
-                return GL_VERTEX_SHADER;
-            case Fragment:
-                return GL_FRAGMENT_SHADER;
-            case Compute:
-                return GL_COMPUTE_SHADER;
-            default:
-                std::cerr << "Invalid shader type";
-                return GL_FALSE;
-        }
     }
 
     void Shader::Dispatch(uint32_t x, uint32_t y, uint32_t z)

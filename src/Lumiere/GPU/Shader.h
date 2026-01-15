@@ -88,10 +88,10 @@ public:
     #pragma region Uniform data
     int GetLocation(const std::string &name)
     {
-        if(uniformLocationCache.find(name) == uniformLocationCache.end())
-            uniformLocationCache.insert({std::string(name), 0});
-        else
-            return uniformLocationCache[name];
+        if(uniformLocationCache.contains(name) == false)
+            uniformLocationCache.emplace(std::string(name), glGetUniformLocation(m_program, name.c_str()));
+
+        return uniformLocationCache[name];
     }
 
     void UniformData(const std::string& name, const glm::mat4 mat)
@@ -135,4 +135,6 @@ public:
     }
     #pragma endregion Uniform data
 };
-} // mgl
+
+using ShaderPtr = std::shared_ptr<Shader>;
+} // lum

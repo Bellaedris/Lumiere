@@ -107,4 +107,6 @@ public:
     void SetBorderColor(const glm::vec4& color);
     void SetSize(int width, int height);
 };
+
+using TexturePtr = std::shared_ptr<Texture>;
 } // mgl
