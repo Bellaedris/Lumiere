@@ -14,15 +14,7 @@ namespace lum::utils
 {
     class FileUtils
     {
-    private:
-        #pragma region Mesh Loading
-        static void ProcessNode(aiNode* node, const aiScene* scene, std::vector<MeshPtr> &meshes);
-        static MeshPtr ProcessMesh(aiMesh* mesh, const aiScene* scene);
-        #pragma endregion Mesh Loading
-
     public:
         static std::optional<std::string> read_file(const char* filename);
-        static std::vector<MeshPtr> LoadMeshFromFile(const std::string filename);
     };
-
 } // mgl::utils

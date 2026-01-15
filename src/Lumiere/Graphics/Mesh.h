@@ -7,12 +7,13 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
-#include "GPU/Buffer.h"
-#include "GPU/VAO.h"
+#include "../GPU/Buffer.h"
+#include "../GPU/VAO.h"
+#include "IMaterial.h"
 
-#include "VectorUtils.h"
+#include "../VectorUtils.h"
 
-namespace lum
+namespace lum::gfx
 {
 class Mesh
 {
@@ -53,10 +54,11 @@ private:
 
     gpu::Buffer m_buffer, m_indexBuffer;
     gpu::Vao m_vao;
+    MaterialPtr m_material;
     #pragma endregion Members
 public:
     Mesh();
-    Mesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices);
+    Mesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material);
 
     void RecalculateNormals();
     void SetupGPU();

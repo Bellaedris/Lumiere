@@ -62,7 +62,7 @@ namespace lum::gpu
         PixelFormat format = PixelFormat::RGB;
         if(numChannels == 4)
             format = PixelFormat::RGBA;
-        SetWrapMode(WrapMode::ClampToEdge);
+        SetWrapMode(WrapMode::Repeat);
 
         SetSize(width, height);
         Write(data, format, GLUtils::DataType::UnsignedByte);
