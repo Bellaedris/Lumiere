@@ -40,7 +40,6 @@ if (OPENMP_FOUND)
 endif()
 
 add_library(GLAD thirdparty/glad.c)
-add_library(TINYOBJ thirdparty/tinyobjloader.cpp)
 add_library(STB_IMAGE thirdparty/stb_image.cpp)
 
 file(GLOB_RECURSE IMGUI_SOURCES includes/imgui/*.cpp)
@@ -60,6 +59,5 @@ target_link_libraries(Lumiere
         GLAD
         ${CMAKE_DL_LIBS}
         STB_IMAGE
-        TINYOBJ
         ${ASSIMP_LIBRARY}
 )
