@@ -32,6 +32,10 @@ namespace lum
             m_gpuDeltaTime.End();
             RenderUI();
 
+            // ImGui draw
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
             m_window.SwapBuffers();
             m_window.PollEvents();
         }
@@ -49,15 +53,15 @@ namespace lum
 
         // update dt
         m_deltaTimer.Reset();
-    }
 
-    void App::RenderUI()
-    {
         // Initialise a new frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+    }
 
+    void App::RenderUI()
+    {
         // the actual UI goes here
         #ifndef NDEBUG
         // debug-only view
@@ -92,10 +96,6 @@ namespace lum
             ImGui::End();
         }
         #endif
-
-        // render the UI
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
     void App::Cleanup()
