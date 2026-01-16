@@ -38,4 +38,29 @@ gpu::TexturePtr ResourcesManager::CacheTexture(gpu::Texture::TextureTarget targe
 
     return cached;
 }
+
+gpu::ShaderPtr ResourcesManager::GetShader(const std::string &name)
+{
+    if (const auto it = m_shaderCache.find(name); it != m_shaderCache.end())
+        return it->second;
+
+    return nullptr;
+}
+
+gpu::ShaderPtr ResourcesManager::CacheShader(const std::string& name, const std::vector<gpu::Shader::ShaderSource> &shaderSources)
+{
+    gpu::ShaderPtr shader = std::make_shared<gpu::Shader>();
+    for (const auto& shaderSource : shaderSources)
+        shader->AddShaderFromFile(shaderSource);
+
+    m_shaderCache.emplace(name, shader);
+
+    return shader;
+}
+
+void ResourcesManager::ShaderHotReload()
+{
+    for (auto& cacheElement : m_shaderCache)
+        cacheElement.second->Reload();
+}
 } // lum

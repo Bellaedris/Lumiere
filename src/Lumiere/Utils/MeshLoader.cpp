@@ -93,10 +93,8 @@ gfx::MeshPtr MeshLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
             albedo = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
     }
 
-    gpu::ShaderPtr pbrShader = std::make_shared<gpu::Shader>();
-    pbrShader->AddShaderFromFile(gpu::Shader::Vertex, "shaders/default.vert");
-    pbrShader->AddShaderFromFile(gpu::Shader::Fragment, "shaders/default.frag");
-    gfx::MaterialPtr pbrMat = std::make_shared<gfx::MaterialPBR>(pbrShader, albedo, nullptr, nullptr, nullptr);
+    gpu::ShaderPtr   pbrShader = lum::ResourcesManager::Instance()->GetShader(lum::ResourcesManager::PBR_LIT_SHADER_KEY);
+    gfx::MaterialPtr pbrMat    = std::make_shared<gfx::MaterialPBR>(pbrShader, albedo, nullptr, nullptr, nullptr);
 
     return std::make_unique<gfx::Mesh>(vertices, indices, pbrMat);
 }

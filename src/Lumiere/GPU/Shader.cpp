@@ -50,7 +50,7 @@ namespace lum::gpu
         return *this;
     }
 
-    void Shader::AddShaderFromFile(Shader::ShaderType type, const char *path)
+    void Shader::AddShaderFromFile(const ShaderSource &shaderInfo)
     {
         if(m_type == ShaderType::Compute)
         {
@@ -58,23 +58,23 @@ namespace lum::gpu
             return;
         }
 
-        if(type == ShaderType::Compute && m_type != ShaderType::None)
+        if(shaderInfo.type == ShaderType::Compute && m_type != ShaderType::None)
         {
             std::cerr << "A compute program must contain a single compute shader\n";
             return;
         }
 
-        m_type = type;
+        m_type = shaderInfo.type;
 
-        std::optional<std::string> shaderData = utils::FileUtils::read_file(path);
+        std::optional<std::string> shaderData = utils::FileUtils::read_file(shaderInfo.path.c_str());
         if(shaderData.has_value() == false)
         {
-            std::cerr << "Couldn't open file " << path << "\n";
+            std::cerr << "Couldn't open file " << shaderInfo.path << "\n";
             return;
         }
 
         const char*  shaderSource = shaderData->c_str();
-        unsigned int shader       = glCreateShader(GetShaderType(type));
+        unsigned int shader       = glCreateShader(GetShaderType(shaderInfo.type));
         glShaderSource(shader, 1, &shaderSource, nullptr);
         glCompileShader(shader);
 
@@ -86,12 +86,14 @@ namespace lum::gpu
         if (!success)
         {
             glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-            std::cout << "error compiling shaders at " << path << ": " << infoLog << std::endl;
+            std::cout << "error compiling shaders at " << shaderInfo.path << ": " << infoLog << std::endl;
+            return;
         }
 
         glAttachShader(m_program, shader);
 
         glDeleteShader(shader);
+        m_shaderSources.emplace_back(shaderInfo.type, std::string(shaderInfo.path));
     }
 
     void Shader::Create()
@@ -108,6 +110,20 @@ namespace lum::gpu
         }
         else
             m_created = true;
+    }
+
+    void Shader::Reload()
+    {
+        glDeleteProgram(m_program);
+        m_program = glCreateProgram();
+        m_type = ShaderType::None;
+
+        std::vector<ShaderSource> sourceToReload = m_shaderSources;
+        m_shaderSources.clear();
+        for (const ShaderSource& source : sourceToReload)
+            AddShaderFromFile(source);
+
+        Create();
     }
 
     void Shader::Bind()
