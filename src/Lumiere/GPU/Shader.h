@@ -26,12 +26,20 @@ public:
     };
     #pragma endregion Enum
 
+    #pragma region Struct
+    struct ShaderSource
+    {
+        ShaderType type;
+        std::string path;
+    };
+    #pragma endregion Struct
 private:
     #pragma region Members
     uint32_t m_program;
     bool m_created {false};
     ShaderType m_type {ShaderType::None};
 
+    std::vector<ShaderSource> m_shaderSources;
     std::map<std::string, int> uniformLocationCache;
     #pragma endregion Members
 
@@ -54,15 +62,20 @@ public:
      * \brief Add a shader to the shader program. Note that compute shader programs can only contain a single shader.
      * Other programs can contain as many non-compute programs. The usual workflow would be to either add a vertex,
      * then fragment shader, or to add a single compute.
-     * \param type The kind of shader to add. Only supports Vertex, Fragment and Compute for the moment
-     * \param path Path to the shader. Remember that by default, the runtime's root is where the exe is located, so PATH/TO/PROJECT/bin
+     * \param shaderInfo
      */
-    void AddShaderFromFile(ShaderType type, const char* path);
+    void AddShaderFromFile(const ShaderSource &shaderInfo);
 
     /**
      * \brief Finalizes the creation of the shader after adding all the individual shaders we wanted.
      */
     void Create();
+
+    /**
+     * \brief Recreate the program entirely. Equivalent to creating a new shader and calling the same AddShaderFromFile
+     * calls that were used to create the shader.
+     */
+    void Reload();
 
     /**
      * \brief Bind the shader for use
