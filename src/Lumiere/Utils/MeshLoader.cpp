@@ -7,6 +7,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include "../Graphics/Mesh.h"
+#include "Lumiere/ResourcesManager.h"
 #include "Lumiere/Graphics/MaterialPBR.h"
 
 namespace lum::utils
@@ -18,7 +19,6 @@ std::vector<gfx::MeshPtr> MeshLoader::LoadMeshFromFile(const std::string filenam
     const aiScene* scene = importer.ReadFile(filename.c_str(),
         aiProcess_JoinIdenticalVertices   |
         aiProcess_SortByPType             |
-        aiProcess_FlipUVs                 |
         aiProcess_GenNormals              | // create the normals if not already in the file
         aiProcess_CalcTangentSpace          // create tan/bitan
         );
@@ -81,10 +81,17 @@ gfx::MeshPtr MeshLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
     // Material
     aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
-    // we assume that for PBR materials, we only use the first albedo map.
-    aiString str;
-    mat->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-    gpu::TexturePtr albedo = std::make_shared<gpu::Texture>(gpu::Texture::TextureTarget::Target2D, (directory + "/" + std::string(str.C_Str())).c_str(), true);
+    gpu::TexturePtr albedo;
+    // we assume that for PBR materials, we only use one texture per channel.
+    aiString texPath;
+    if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == aiReturn_SUCCESS)
+    {
+        // try to retrieve the texture, and create it if it was not cached
+        const std::string fullPath = directory + "/" + texPath.C_Str();
+        albedo = ResourcesManager::Instance()->GetTexture(std::hash<std::string>()(fullPath));
+        if (albedo == nullptr)
+            albedo = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
+    }
 
     gpu::ShaderPtr pbrShader = std::make_shared<gpu::Shader>();
     pbrShader->AddShaderFromFile(gpu::Shader::Vertex, "shaders/default.vert");
