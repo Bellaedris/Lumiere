@@ -73,7 +73,7 @@ public:
     static GLint GetImageFormat(PixelFormat format);
     #pragma endregion EnumAccessFunctions
 private:
-
+    #pragma region Members
     uint32_t m_handle {0};
 
     int m_width {0};
@@ -83,6 +83,7 @@ private:
     Filtering m_minFilter {Filtering::LinearMipMapLinear};
     Filtering m_magFilter {Filtering::Linear};
     PixelFormat m_format {};
+    #pragma endregion Members
 public:
     Texture(TextureTarget target);
     Texture(TextureTarget target, const char* path, bool generateMipmaps);
