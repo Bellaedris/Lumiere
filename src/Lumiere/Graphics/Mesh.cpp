@@ -9,50 +9,19 @@
 
 namespace lum::gfx
 {
-Mesh::Mesh()
-    : m_buffer(gpu::Buffer::BufferType::Vertex)
-    , m_indexBuffer(gpu::Buffer::BufferType::Index)
-{}
-
-Mesh::Mesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material)
-    : m_verticesData(std::move(vertices))
-    , m_indices(std::move(indices))
+SubMesh::SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material)
+    : m_vertexSize(vertices.size())
+    , m_indexSize(indices.size())
     , m_buffer(gpu::Buffer::BufferType::Vertex)
     , m_indexBuffer(gpu::Buffer::BufferType::Index)
     , m_material(material)
 {
-    SetupGPU();
-}
-
-void Mesh::Draw() const
-{
-    m_material->Bind();
-    m_vao.Bind();
-    glDrawElements(GL_TRIANGLES, m_indices.size(), gpu::GLUtils::GetDataType(gpu::GLUtils::DataType::UnsignedInt), nullptr);
-    m_vao.Unbind();
-}
-
-void Mesh::DrawUnindexed()
-{
-
-}
-
-void Mesh::RecalculateNormals()
-{
-    for(int i = 0; i < m_indices.size(); i++)
-    {
-
-    }
-}
-
-void Mesh::SetupGPU()
-{
     m_vao.Bind();
     m_buffer.Bind();
-    m_buffer.Write(sizeof(VertexData) * m_verticesData.size(), m_verticesData.data(), gpu::Buffer::BufferUsage::STATIC_DRAW);
+    m_buffer.Write(sizeof(VertexData) * vertices.size(), vertices.data(), gpu::Buffer::BufferUsage::STATIC_DRAW);
 
     m_indexBuffer.Bind();
-    m_indexBuffer.Write(sizeof(uint32_t) * m_indices.size(), m_indices.data(), gpu::Buffer::BufferUsage::STATIC_DRAW);
+    m_indexBuffer.Write(sizeof(uint32_t) * indices.size(), indices.data(), gpu::Buffer::BufferUsage::STATIC_DRAW);
 
     m_vao.SetAttribute(0, gpu::GLUtils::DataType::Float, 0, 3, sizeof(VertexData)); // positions
     m_vao.SetAttribute(1, gpu::GLUtils::DataType::Float, offsetof(VertexData, normal), 3, sizeof(VertexData)); // normals
@@ -61,8 +30,31 @@ void Mesh::SetupGPU()
     m_vao.Unbind();
 }
 
+void SubMesh::Draw() const
+{
+    m_material->Bind();
+    m_vao.Bind();
+    glDrawElements(GL_TRIANGLES, static_cast<int>(m_indexSize), gpu::GLUtils::GetDataType(gpu::GLUtils::DataType::UnsignedInt), nullptr);
+    m_vao.Unbind();
+}
+
+void SubMesh::DrawUnindexed()
+{
+
+}
+
+void Mesh::Draw() const
+{
+    for (const SubMesh& submesh: m_subMeshes)
+    {
+        submesh.Draw();
+    }
+}
+
 Mesh Mesh::GeneratePlane(float halfSize)
 {
+    Mesh m(DEFAULT_PLANE_NAME);
+
     std::vector<VertexData> vertices =
     {
         {{-halfSize, 0, halfSize}, {0, 1, 0}, {0.0f, 1.0f}},
@@ -77,6 +69,10 @@ Mesh Mesh::GeneratePlane(float halfSize)
         1, 3, 2
     };
 
-    return {vertices, indices, nullptr};
+    SubMesh plane = {vertices, indices, nullptr};
+
+    m.AddSubMesh(plane);
+
+    return m;
 }
 } // mgl

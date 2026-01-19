@@ -63,4 +63,24 @@ void ResourcesManager::ShaderHotReload()
     for (auto& cacheElement : m_shaderCache)
         cacheElement.second->Reload();
 }
+
+gfx::MeshPtr ResourcesManager::GetMesh(const std::string &path)
+{
+    size_t hash = std::hash<std::string>{}(path);
+
+    if (const auto it = m_meshCache.find(hash); it != m_meshCache.end())
+        return it->second;
+
+    return nullptr;
+}
+
+gfx::MeshPtr ResourcesManager::CacheMesh(const std::string& path, std::vector<gfx::SubMesh> &meshData)
+{
+    size_t hash = std::hash<std::string>{}(path);
+
+    gfx::MeshPtr cached = std::make_shared<gfx::Mesh>(path, meshData);
+    m_meshCache.emplace(hash, cached);
+
+    return cached;
+}
 } // lum

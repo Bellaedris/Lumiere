@@ -7,64 +7,65 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
+#include <utility>
 #include "../GPU/Buffer.h"
 #include "../GPU/VAO.h"
 #include "IMaterial.h"
 
-#include "../VectorUtils.h"
-
 namespace lum::gfx
 {
-class Mesh
+
+#pragma region structs
+struct VertexData
 {
-public:
-    #pragma region structs
-    struct VertexData
-    {
-        glm::vec3 pos {};
-        glm::vec3 normal {};
-        glm::vec2 texcoord {};
-    };
+    glm::vec3 pos {};
+    glm::vec3 normal {};
+    glm::vec2 texcoord {};
+};
+#pragma endregion structs
 
-    struct VertexKey {
-        int vertexIndex;
-        int texcoordIndex;
-        int normalIndex;
-
-        bool operator<(const VertexKey& other) const {
-            if (vertexIndex  != other.vertexIndex)
-                return vertexIndex  < other.vertexIndex;
-
-            if (texcoordIndex != other.texcoordIndex)
-                return texcoordIndex < other.texcoordIndex;
-
-            return normalIndex < other.normalIndex;
-        }
-    };
-    #pragma endregion structs
-
+/**
+ * \brief A individual mesh that has vertices data, indices data and is described by a material
+ */
+class SubMesh
+{
 private:
     #pragma region Members
     /* TODO read vertexData, write these data into separate per-component vectors, then rebuild a vertexData array when
      these data change. This will allow a better flexibility and also allow us to efficiently build our buffer when
-     read objects have different input datas (for instance, no normals or UVs)
+     read objects have different input datas (for instance, no normals or UVs).
+     We also want to have our mesh data GPU side only, not CPU, maybe in the future we can have an interface between
+     gpu::Mesh and the user that allows for modification (for instance, fetch buffer data from the GPU, edit and reupload,
+     without storing a permanent CPU copy
      */
-    std::vector<VertexData> m_verticesData;
-    std::vector<uint32_t> m_indices;
 
+    uint32_t m_vertexSize, m_indexSize;
     gpu::Buffer m_buffer, m_indexBuffer;
     gpu::Vao m_vao;
     MaterialPtr m_material;
     #pragma endregion Members
 public:
-    Mesh();
-    Mesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material);
-
-    void RecalculateNormals();
-    void SetupGPU();
+    SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material);
 
     void Draw() const;
     void DrawUnindexed();
+};
+
+class Mesh
+{
+private:
+    std::string m_path;
+    std::vector<SubMesh> m_subMeshes {};
+
+    constexpr static const char* DEFAULT_PLANE_NAME = "Lumiere_default_plane";
+public:
+    Mesh(std::string path) : m_path {std::move(path)} {};
+    Mesh(std::string path, std::vector<SubMesh>& subMeshes) : m_path(std::move(path)), m_subMeshes(std::move(subMeshes)) {}
+
+    void AddSubMesh(SubMesh& submesh) { m_subMeshes.push_back(std::move(submesh)); };
+    const SubMesh& GetSubMesh(uint32_t subMeshIndex) const { return m_subMeshes[subMeshIndex]; };
+
+    void Draw() const;
 
     #pragma region Static helpers
     static Mesh GeneratePlane(float halfSize);

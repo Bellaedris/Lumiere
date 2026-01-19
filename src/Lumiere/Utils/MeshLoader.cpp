@@ -12,8 +12,14 @@
 
 namespace lum::utils
 {
-std::vector<gfx::MeshPtr> MeshLoader::LoadMeshFromFile(const std::string filename)
+gfx::MeshPtr MeshLoader::LoadMeshFromFile(const std::string &filename)
 {
+    // if we cached the mesh already, just return it
+    gfx::MeshPtr cachedMesh = ResourcesManager::Instance()->GetMesh(filename);
+    if (ResourcesManager::Instance()->GetMesh(filename) != nullptr)
+        return cachedMesh;
+
+    // else, load it with assimp
     Assimp::Importer importer;
 
     const aiScene* scene = importer.ReadFile(filename.c_str(),
@@ -30,32 +36,33 @@ std::vector<gfx::MeshPtr> MeshLoader::LoadMeshFromFile(const std::string filenam
     }
 
     directory = filename.substr(0, filename.find_last_of('/'));
-    std::vector<gfx::MeshPtr> meshes;
+    std::vector<gfx::SubMesh> meshes;
     ProcessNode(scene->mRootNode, scene, meshes);
 
-    return meshes;
+    std::cout << "Loaded mesh " << filename << "\n";
+    return ResourcesManager::Instance()->CacheMesh(filename, meshes);
 }
 
-void MeshLoader::ProcessNode(aiNode *node, const aiScene *scene, std::vector<gfx::MeshPtr> &meshes)
+void MeshLoader::ProcessNode(aiNode *node, const aiScene *scene, std::vector<gfx::SubMesh> &subMeshes)
 {
     for (uint32_t i = 0; i < node->mNumMeshes; i++)
     {
-         meshes.push_back(ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene));
+         subMeshes.push_back(ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene));
     }
     for (uint32_t i = 0; i < node->mNumChildren; i++)
     {
-        ProcessNode(node->mChildren[i], scene, meshes);
+        ProcessNode(node->mChildren[i], scene, subMeshes);
     }
 }
 
-gfx::MeshPtr MeshLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+gfx::SubMesh MeshLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 {
-    std::vector<gfx::Mesh::VertexData> vertices;
+    std::vector<gfx::VertexData> vertices;
     std::vector<uint32_t> indices;
 
     for (int i = 0; i < mesh->mNumVertices; i++)
     {
-        gfx::Mesh::VertexData vertex;
+        gfx::VertexData vertex;
         //positions
         vertex.pos = {mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
 
@@ -96,6 +103,6 @@ gfx::MeshPtr MeshLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
     gpu::ShaderPtr   pbrShader = lum::ResourcesManager::Instance()->GetShader(lum::ResourcesManager::PBR_LIT_SHADER_KEY);
     gfx::MaterialPtr pbrMat    = std::make_shared<gfx::MaterialPBR>(pbrShader, albedo, nullptr, nullptr, nullptr);
 
-    return std::make_unique<gfx::Mesh>(vertices, indices, pbrMat);
+    return {vertices, indices, pbrMat};
 }
 } // lum
