@@ -15,10 +15,12 @@ class MeshLoader
 private:
     std::string directory;
 
-    void         ProcessNode(aiNode* node, const aiScene* scene, std::vector<gfx::MeshPtr> &meshes);
-    gfx::MeshPtr ProcessMesh(aiMesh* mesh, const aiScene* scene);
+    void         ProcessNode(aiNode* node, const aiScene* scene, std::vector<gfx::SubMesh> &subMeshes);
+
+    gfx::SubMesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
 public:
     MeshLoader() = default;
-    std::vector<gfx::MeshPtr>  LoadMeshFromFile(const std::string filename);
+
+    gfx::MeshPtr LoadMeshFromFile(const std::string &filename);
 };
 } // lum

@@ -7,6 +7,7 @@
 
 #include "GPU/Texture.h"
 #include "GPU/Shader.h"
+#include "Graphics/Mesh.h"
 
 namespace lum
 {
@@ -21,8 +22,12 @@ private:
     #pragma region Members
     static ResourcesManager* m_instance;
 
+    /** \brief Texture cache is indexed by a hash of the texture path */
     std::map<size_t, gpu::TexturePtr> m_textureCache;
+    /** \brief Shader cache is indexed by the name of each shader */
     std::map<std::string, gpu::ShaderPtr> m_shaderCache;
+    /** \brief Mesh cache is indexed by a hash of the mesh's path */
+    std::map<size_t, gfx::MeshPtr> m_meshCache;
     #pragma endregion Members
 
 public:
@@ -65,5 +70,22 @@ public:
     gpu::ShaderPtr CacheShader(const std::string& name, const std::vector<gpu::Shader::ShaderSource> &shaderSources);
     void ShaderHotReload();
     #pragma endregion Shader cache
+
+    #pragma region Mesh Cache
+    /**
+     * \brief Try to access a texture, if it exists
+     * \param path The path to this texture
+     * \return The texture if it was cached, nullptr otherwise
+     */
+    gfx::MeshPtr GetMesh(const std::string &path);
+
+    /**
+     * \brief Constructs a Mesh in place, caches it, and returns its handle
+     * \param path Path to this mesh
+     * \param meshData an array of all its submeshes
+     * \return A handle to the newly cached Mesh
+     */
+    gfx::MeshPtr CacheMesh(const std::string& path, std::vector<gfx::SubMesh> &meshData);
+    #pragma endregion Mesh Cache
 };
 } // lum

@@ -12,7 +12,7 @@ namespace lum
 Actor::Actor(const std::string &path)
 {
     utils::MeshLoader loader;
-    m_meshes = std::move(loader.LoadMeshFromFile(path));
+    m_meshes = {std::move(loader.LoadMeshFromFile(path))};
 }
 
 void Actor::Draw() const
