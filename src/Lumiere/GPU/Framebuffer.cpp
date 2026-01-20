@@ -12,11 +12,9 @@ namespace lum::gpu
     }
 
     Framebuffer::Framebuffer(Framebuffer &&other) noexcept
-        : m_width(other.m_width)
+        : m_handle(other.m_handle)
+        , m_width(other.m_width)
         , m_height(other.m_height)
-        , m_handle(other.m_handle)
-        , m_depthTexture(std::move(other.m_depthTexture))
-        , m_colorTexture(std::move(other.m_colorTexture))
     {
         other.m_handle = 0;
     }
@@ -29,8 +27,6 @@ namespace lum::gpu
             m_handle = other.m_handle;
             m_width = other.m_width;
             m_height = other.m_height;
-            m_depthTexture = std::move(other.m_depthTexture);
-            m_colorTexture = std::move(other.m_colorTexture);
 
             other.m_handle = 0;
         }
@@ -44,43 +40,45 @@ namespace lum::gpu
         glGenFramebuffers(1, &m_handle);
     }
 
-    void Framebuffer::Attach(Attachment attachment, int colorAttachmentId)
+void Framebuffer::Attach(Attachment attachment, const TexturePtr& texture, int colorAttachmentId/* = 0 */
+    )
     {
         Bind(ReadWrite);
 
         if (attachment == Depth)
         {
             // depth attachment
-            m_depthTexture = std::make_unique<Texture>(Texture::Target2D);
-            m_depthTexture->SetSize(m_width, m_height);
-            m_depthTexture->SetWrapMode(Texture::ClampToBorder);
-            m_depthTexture->SetBorderColor({1., 1., 1., 1.});
-            m_depthTexture->SetMinFilter(Texture::Linear);
-            m_depthTexture->SetMagFilter(Texture::Linear);
-            m_depthTexture->Allocate(Texture::PixelFormat::DepthComponent, GLUtils::DataType::Float);
-            glNamedFramebufferTexture(m_handle, GL_DEPTH_ATTACHMENT, m_depthTexture->Handle(), 0);
+           texture->SetWrapMode(Texture::ClampToBorder);
+           texture->SetBorderColor({1., 1., 1., 1.});
+           texture->SetMinFilter(Texture::Linear);
+           texture->SetMagFilter(Texture::Linear);
+            glNamedFramebufferTexture(m_handle, GL_DEPTH_ATTACHMENT, texture->Handle(), 0);
         }
         else
         {
             // color attachment
-            m_colorTexture = std::make_unique<Texture>(Texture::Target2D);
-            m_colorTexture->SetSize(m_width, m_height);
-            // we don't need mipmaps for a framebuffer
-            m_colorTexture->SetMinFilter(Texture::Linear);
-            m_colorTexture->SetMagFilter(Texture::Linear);
-            m_colorTexture->Allocate(Texture::PixelFormat::RGBA, GLUtils::DataType::Float);
-            glNamedFramebufferTexture(m_handle, GL_COLOR_ATTACHMENT0 + attachment, m_colorTexture->Handle(), 0);
+            texture->SetMinFilter(Texture::Linear);
+            texture->SetMagFilter(Texture::Linear);
+            glNamedFramebufferTexture(m_handle, GL_COLOR_ATTACHMENT0 + colorAttachmentId, texture->Handle(), 0);
+            m_attachmentsState[colorAttachmentId] = true;
+            // update the active attachments array
+            m_usedAttachments.clear();
+            for (int i = 0;i < m_attachmentsState.size(); i++)
+                if (m_attachmentsState[i])
+                    m_usedAttachments.push_back(GL_COLOR_ATTACHMENT0 + i);
         }
         Unbind(ReadWrite);
     }
 
-    void Framebuffer::Bind(Type type)
+    void Framebuffer::Bind(Type type) const
     {
         glBindFramebuffer(GetType(type), m_handle);
+        // We must tell OpenGL which color attachment will be used
+        glNamedFramebufferDrawBuffers(m_handle, m_usedAttachments.size(), m_usedAttachments.data());
         glViewport(0, 0, static_cast<int>(m_width), static_cast<int>(m_height));
     }
 
-    void Framebuffer::Unbind(Type type)
+    void Framebuffer::Unbind(Type type) const
     {
         glBindFramebuffer(GetType(type), 0);
     }
@@ -115,26 +113,6 @@ namespace lum::gpu
                 std::cerr << "Invalid Attachment type\n";
                 return GL_FALSE;
         }
-    }
-
-    const std::unique_ptr<Texture>& Framebuffer::ColorTexture() const
-    {
-        if(m_colorTexture == nullptr)
-        {
-            std::cerr << "This framebuffer has no color attachment\n";
-            return nullptr;
-        }
-        return m_colorTexture;
-    }
-
-    const std::unique_ptr<Texture>& Framebuffer::DepthTexture() const
-    {
-        if(m_depthTexture == nullptr)
-        {
-            std::cerr << "This framebuffer has no depth attachment\n";
-            return nullptr;
-        }
-        return m_depthTexture;
     }
 
     void Framebuffer::BlitFramebuffer(

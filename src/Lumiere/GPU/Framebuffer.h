@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint>
 
 #include "Texture.h"
@@ -37,8 +38,9 @@ private:
 
     uint32_t m_width;
     uint32_t m_height;
-    std::unique_ptr<Texture> m_colorTexture {nullptr};
-    std::unique_ptr<Texture> m_depthTexture {nullptr};
+    /** \brief a framebuffer can hold up to 8 color attachments */
+    std::array<bool, 8> m_attachmentsState {};
+    std::vector<uint32_t> m_usedAttachments {};
     #pragma endregion Members
 public:
     ~Framebuffer();
@@ -49,19 +51,18 @@ public:
 
     Framebuffer(uint32_t width, uint32_t height);
 
-    [[nodiscard]] uint32_t Handle() { return m_handle; };
-    [[nodiscard]] const std::unique_ptr<Texture>& ColorTexture() const;
-    [[nodiscard]] const std::unique_ptr<Texture>& DepthTexture() const;
+    [[nodiscard]] uint32_t Handle() const { return m_handle; };
 
     /**
      * \brief Attach a texture to a framebuffer. Can be used to add depth, stencil or multiple color attachments
      * \param attachment The type of attachment to bind to this framebuffer
+     * \param texture the texture to attach
      * \param colorAttachmentId Optional. Only useful for color attachment, tell which color attachment will be bound,
      * more on that here https://registry.khronos.org/OpenGL-Refpages/gl4/html/glFramebufferTexture.xhtml
      */
-    void Attach(Attachment attachment, int colorAttachmentId = 0);
-    void Bind(Type type);
-    void Unbind(Type type);
+    void Attach(Attachment attachment, const TexturePtr& texture, int colorAttachmentId = 0);
+    void Bind(Type type) const;
+    void Unbind(Type type) const;
 
     #pragma region StaticMethods
     static void BlitFramebuffer(const std::unique_ptr<Framebuffer>& src, const std::unique_ptr<Framebuffer>& dst, int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0, int dstX1, int dstY1, Attachment whatToCopy, Texture::Filtering filter);
