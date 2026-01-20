@@ -18,8 +18,8 @@ namespace lum::gpu
  */
 class Texture
 {
-    #pragma region Enums
 public:
+    #pragma region Enums
     /**
      * \brief Different texture targets we can bind to. We only handle 2D textures and Cubemaps for now. @see
      */
@@ -72,6 +72,22 @@ public:
     static GLint GetPixelFormat(PixelFormat format);
     static GLint GetImageFormat(PixelFormat format);
     #pragma endregion EnumAccessFunctions
+    #pragma region Structs
+    /**
+     * \brief The minimal parameters required to build a texture.
+     */
+    struct TextureDesc
+    {
+        TextureTarget target;
+        int width;
+        int height;
+        PixelFormat format;
+        GLUtils::DataType dataType;
+        Filtering minFilter {LinearMipMapLinear};
+        Filtering magFilter {Linear};
+        WrapMode wrapMode {WrapMode::Repeat};
+    };
+    #pragma endregion Structs
 private:
     #pragma region Members
     uint32_t m_handle {0};
