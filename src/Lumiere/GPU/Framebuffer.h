@@ -52,7 +52,14 @@ public:
     [[nodiscard]] uint32_t Handle() { return m_handle; };
     [[nodiscard]] const std::unique_ptr<Texture>& ColorTexture() const;
     [[nodiscard]] const std::unique_ptr<Texture>& DepthTexture() const;
-    void Attach(Attachment attachment);
+
+    /**
+     * \brief Attach a texture to a framebuffer. Can be used to add depth, stencil or multiple color attachments
+     * \param attachment The type of attachment to bind to this framebuffer
+     * \param colorAttachmentId Optional. Only useful for color attachment, tell which color attachment will be bound,
+     * more on that here https://registry.khronos.org/OpenGL-Refpages/gl4/html/glFramebufferTexture.xhtml
+     */
+    void Attach(Attachment attachment, int colorAttachmentId = 0);
     void Bind(Type type);
     void Unbind(Type type);
 
