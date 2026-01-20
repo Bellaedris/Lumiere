@@ -44,7 +44,7 @@ namespace lum::gpu
         glGenFramebuffers(1, &m_handle);
     }
 
-    void Framebuffer::Attach(Attachment attachment)
+    void Framebuffer::Attach(Attachment attachment, int colorAttachmentId)
     {
         Bind(ReadWrite);
 
@@ -69,7 +69,7 @@ namespace lum::gpu
             m_colorTexture->SetMinFilter(Texture::Linear);
             m_colorTexture->SetMagFilter(Texture::Linear);
             m_colorTexture->Allocate(Texture::PixelFormat::RGBA, GLUtils::DataType::Float);
-            glNamedFramebufferTexture(m_handle, GL_COLOR_ATTACHMENT0, m_colorTexture->Handle(), 0);
+            glNamedFramebufferTexture(m_handle, GL_COLOR_ATTACHMENT0 + attachment, m_colorTexture->Handle(), 0);
         }
         Unbind(ReadWrite);
     }
