@@ -6,7 +6,7 @@
 
 #include <memory>
 #include "Window.h"
-#include "Camera.h"
+#include "Renderer/Camera.h"
 #include "GPU/Shader.h"
 #include "Graphics/Mesh.h"
 #include "GPU/Framebuffer.h"
@@ -25,7 +25,7 @@ namespace lum
         #pragma region Members
         Window m_window;
 
-        std::unique_ptr<Camera> m_camera {nullptr};
+        std::unique_ptr<rdr::Camera> m_camera {nullptr};
 
         gpu::Timer<std::chrono::seconds> m_deltaTimer;
         gpu::GPUTimer m_gpuDeltaTime;
