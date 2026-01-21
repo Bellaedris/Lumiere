@@ -21,8 +21,10 @@ ResourcesManager* ResourcesManager::Instance()
     return m_instance;
 }
 
-gpu::TexturePtr ResourcesManager::GetTexture(size_t hash)
+gpu::TexturePtr ResourcesManager::GetTexture(std::string path)
 {
+    size_t hash = std::hash<std::string>{}(path);
+
     if (const auto it = m_textureCache.find(hash); it != m_textureCache.end())
         return it->second;
 
@@ -34,6 +36,25 @@ gpu::TexturePtr ResourcesManager::CacheTexture(gpu::Texture::TextureTarget targe
     size_t hash = std::hash<std::string>{}(path);
 
     gpu::TexturePtr cached = std::make_shared<gpu::Texture>(target, path.c_str(), generateMipmaps);
+    m_textureCache.emplace(hash, cached);
+
+    return cached;
+}
+
+gpu::TexturePtr ResourcesManager::CreateTexture
+(
+    const std::string &              name,
+    const gpu::Texture::TextureDesc &desc
+)
+{
+    size_t hash = std::hash<std::string>{}(name);
+
+    gpu::TexturePtr cached = std::make_shared<gpu::Texture>(desc.target);
+    cached->SetSize(desc.width, desc.height);
+    cached->SetMagFilter(desc.magFilter);
+    cached->SetMinFilter(desc.minFilter);
+    cached->SetWrapMode(desc.wrapMode);
+    cached->Allocate(desc.format, desc.dataType);
     m_textureCache.emplace(hash, cached);
 
     return cached;

@@ -42,10 +42,10 @@ public:
     #pragma region Texture Cache
     /**
      * \brief Try to access a texture, if it exists
-     * \param hash The path to this texture hashed through std::hash<std::string>
+     * \param name The path to this texture hashed through std::hash<std::string>
      * \return The texture if it was cached, nullptr otherwise
      */
-    gpu::TexturePtr GetTexture(size_t hash);
+    gpu::TexturePtr GetTexture(std::string name);
 
     /**
      * \brief Constructs a texture in place and caches it.
@@ -55,6 +55,16 @@ public:
      * \return A handle to the newly cached texture
      */
     gpu::TexturePtr CacheTexture(gpu::Texture::TextureTarget target, const std::string &path, bool generateMipmaps);
+
+    /**
+     * \brief Create an empty texture in place and caches it. Used to create the textures we render to, for instance.
+     * \param name Name of the texture used to identify. For instance, "GBUFFER_ALBEDO"
+     * \param target What kind of texture we are creating
+     * \param format Format of the created texture
+     * \param dataType Type of data in the created texture
+     * \return A handle to the newly cached texture
+     */
+    gpu::TexturePtr CreateTexture(const std::string& name, const gpu::Texture::TextureDesc &);
     #pragma endregion Texture Cache
 
     #pragma region Shader cache
