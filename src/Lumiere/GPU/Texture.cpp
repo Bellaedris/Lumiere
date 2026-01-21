@@ -107,6 +107,7 @@ namespace lum::gpu
 
     void Texture::SetSize(int width, int height)
     {
+        Bind();
         m_width = width;
         m_height = height;
     }
@@ -267,13 +268,13 @@ namespace lum::gpu
             case DepthComponent:
                 return GL_DEPTH_COMPONENT32F;
             case DepthStencil:
-                return GL_DEPTH32F_STENCIL8;
+                return GL_DEPTH24_STENCIL8;
             case Red:
                 return type == GLUtils::Float ? GL_R32F : GL_R8;
             case RG:
                 return type == GLUtils::Float ? GL_RG32F : GL_RG8;
             case RGB:
-                return type == GLUtils::Float ? GL_RGB32F : GL_RGBA8;
+                return type == GLUtils::Float ? GL_RGB32F : GL_RGB8;
             case RGBA:
                 return type == GLUtils::Float ? GL_RGBA32F : GL_RGBA8;
             case SRGB:
