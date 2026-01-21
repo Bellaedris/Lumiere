@@ -66,6 +66,8 @@ void Framebuffer::Attach(Attachment attachment, const TexturePtr& texture, int c
             for (int i = 0;i < m_attachmentsState.size(); i++)
                 if (m_attachmentsState[i])
                     m_usedAttachments.push_back(GL_COLOR_ATTACHMENT0 + i);
+            // We must tell OpenGL which color attachment will be used
+            glDrawBuffers(m_usedAttachments.size(), m_usedAttachments.data());
         }
         Unbind(ReadWrite);
     }
@@ -73,8 +75,6 @@ void Framebuffer::Attach(Attachment attachment, const TexturePtr& texture, int c
     void Framebuffer::Bind(Type type) const
     {
         glBindFramebuffer(GetType(type), m_handle);
-        // We must tell OpenGL which color attachment will be used
-        glNamedFramebufferDrawBuffers(m_handle, m_usedAttachments.size(), m_usedAttachments.data());
         glViewport(0, 0, static_cast<int>(m_width), static_cast<int>(m_height));
     }
 
