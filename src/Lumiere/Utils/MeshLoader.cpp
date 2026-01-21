@@ -95,13 +95,12 @@ gfx::SubMesh MeshLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
     {
         // try to retrieve the texture, and create it if it was not cached
         const std::string fullPath = directory + "/" + texPath.C_Str();
-        albedo = ResourcesManager::Instance()->GetTexture(std::hash<std::string>()(fullPath));
+        albedo = ResourcesManager::Instance()->GetTexture(fullPath);
         if (albedo == nullptr)
             albedo = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
     }
 
-    gpu::ShaderPtr   pbrShader = lum::ResourcesManager::Instance()->GetShader(lum::ResourcesManager::PBR_LIT_SHADER_KEY);
-    gfx::MaterialPtr pbrMat    = std::make_shared<gfx::MaterialPBR>(pbrShader, albedo, nullptr, nullptr, nullptr);
+    gfx::MaterialPtr pbrMat    = std::make_shared<gfx::MaterialPBR>(albedo, nullptr, nullptr, nullptr);
 
     return {vertices, indices, pbrMat};
 }
