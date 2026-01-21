@@ -7,9 +7,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "VectorUtils.h"
+#include "../VectorUtils.h"
 
-namespace lum
+namespace lum::rdr
 {
 class Camera
 {

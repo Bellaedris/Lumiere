@@ -4,7 +4,7 @@
 
 #include "Camera.h"
 
-namespace lum
+namespace lum::rdr
 {
     Camera::Camera(const glm::vec3 &pos, float aspectRatio, float fov, float znear, float zfar)
         : m_position(pos)
