@@ -6,6 +6,7 @@
 
 #include <glad/glad.h>
 #include <vector>
+#include <iostream>
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -101,8 +102,15 @@ public:
     #pragma region Uniform data
     int GetLocation(const std::string &name)
     {
+        int location = glGetUniformLocation(m_program, name.c_str());
+        if (location < 0)
+        {
+            std::cerr << "Couldn't find uniform " << name << std::endl;
+            return -1;
+        }
+
         if(uniformLocationCache.contains(name) == false)
-            uniformLocationCache.emplace(std::string(name), glGetUniformLocation(m_program, name.c_str()));
+            uniformLocationCache.emplace(std::string(name), location);
 
         return uniformLocationCache[name];
     }

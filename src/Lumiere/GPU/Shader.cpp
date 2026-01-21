@@ -106,7 +106,7 @@ namespace lum::gpu
         if (!success)
         {
             glGetShaderInfoLog(m_program, 512, nullptr, infoLog);
-            std::cout << "error linking program: " << infoLog << std::endl;
+            std::cerr << "error linking program: " << infoLog << std::endl;
         }
         else
             m_created = true;
