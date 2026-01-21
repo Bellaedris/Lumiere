@@ -23,12 +23,11 @@ private:
 public:
     MaterialPBR
     (
-        const gpu::ShaderPtr & shader,
         const gpu::TexturePtr &albedo,
         const gpu::TexturePtr &normal,
         const gpu::TexturePtr &metalRough,
         const gpu::TexturePtr &emissive
     );
-    void Bind() override;
+    void Bind(const gpu::ShaderPtr& shader) override;
 };
 } // lum::gfx

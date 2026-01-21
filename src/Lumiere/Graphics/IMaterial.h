@@ -16,14 +16,11 @@ namespace lum::gfx
  */
 class IMaterial
 {
-protected:
-    gpu::ShaderPtr m_shader;
 public:
-    explicit IMaterial(const gpu::ShaderPtr& shader) : m_shader(shader) {};
     /**
      * \brief Activates the shader associated with this material and send all the required datas referenced
      */
-    virtual void Bind() = 0;
+    virtual void Bind(const gpu::ShaderPtr& shader) = 0;
 };
 using MaterialPtr = std::shared_ptr<IMaterial>;
 }

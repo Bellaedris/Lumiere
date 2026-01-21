@@ -32,7 +32,6 @@ SubMesh::SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indic
 
 void SubMesh::Draw() const
 {
-    m_material->Bind();
     m_vao.Bind();
     glDrawElements(GL_TRIANGLES, static_cast<int>(m_indexSize), gpu::GLUtils::GetDataType(gpu::GLUtils::DataType::UnsignedInt), nullptr);
     m_vao.Unbind();
