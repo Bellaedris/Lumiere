@@ -47,6 +47,8 @@ private:
 public:
     SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material);
 
+    const MaterialPtr& Material() const { return m_material; };
+
     void Draw() const;
     void DrawUnindexed();
 };
@@ -64,6 +66,7 @@ public:
 
     void AddSubMesh(SubMesh& submesh) { m_subMeshes.push_back(std::move(submesh)); };
     const SubMesh& GetSubMesh(uint32_t subMeshIndex) const { return m_subMeshes[subMeshIndex]; };
+    const std::vector<SubMesh>& Primitives() const { return m_subMeshes; };
 
     void Draw() const;
 
