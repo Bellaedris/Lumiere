@@ -117,6 +117,7 @@ namespace lum::gpu
         glDeleteProgram(m_program);
         m_program = glCreateProgram();
         m_type = ShaderType::None;
+        m_uniformLocationCache.clear();
 
         std::vector<ShaderSource> sourceToReload = m_shaderSources;
         m_shaderSources.clear();
