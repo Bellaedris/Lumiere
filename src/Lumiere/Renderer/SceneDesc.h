@@ -4,6 +4,7 @@
 
 #pragma once
 #include "Camera.h"
+#include "Lights.h"
 #include "Lumiere/Graphics/Mesh.h"
 
 namespace lum::rdr
@@ -16,6 +17,8 @@ class SceneDesc
 {
 protected:
     std::vector<gfx::MeshPtr> m_meshes {};
+    std::unique_ptr<LightList> m_lights {std::make_unique<LightList>()};
+
     Camera* m_mainCamera {nullptr};
 public:
     void AddMesh(const std::string &path);
@@ -23,6 +26,7 @@ public:
 
     Camera* Camera() const {return m_mainCamera;};
     const std::vector<gfx::MeshPtr>& Meshes() const { return m_meshes; };
+    const std::unique_ptr<LightList>& Lights() const { return m_lights; };
 
     /**
      * \brief Just a lambda to do things on all submeshes of a scene. Saves me a few double for loops,
