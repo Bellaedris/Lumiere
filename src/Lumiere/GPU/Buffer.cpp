@@ -26,23 +26,23 @@ namespace lum::gpu
     {
         switch(usage)
         {
-            case BufferUsage::STATIC_DRAW:
+            case BufferUsage::StaticDraw:
                 return GL_STATIC_DRAW;
-            case BufferUsage::STATIC_COPY:
+            case BufferUsage::StaticCopy:
                 return GL_STATIC_COPY;
-            case BufferUsage::STATIC_READ:
+            case BufferUsage::StaticRead:
                 return GL_STATIC_READ;
-            case BufferUsage::DYNAMIC_DRAW:
+            case BufferUsage::DynamicDraw:
                 return GL_DYNAMIC_DRAW;
-            case BufferUsage::DYNAMIC_COPY:
+            case BufferUsage::DynamicCopy:
                 return GL_DYNAMIC_COPY;
-            case BufferUsage::DYNAMIC_READ:
+            case BufferUsage::DynamicRead:
                 return GL_DYNAMIC_READ;
-            case BufferUsage::STREAM_DRAW:
+            case BufferUsage::StreamDraw:
                 return GL_STREAM_DRAW;
-            case BufferUsage::STREAM_COPY:
+            case BufferUsage::StreamCopy:
                 return GL_STREAM_COPY;
-            case BufferUsage::STREAM_READ:
+            case BufferUsage::StreamRead:
                 return GL_STREAM_READ;
             default:
                 std::cerr << "Invalid buffer usage";

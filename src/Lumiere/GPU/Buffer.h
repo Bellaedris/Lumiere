@@ -35,15 +35,15 @@ public:
      */
     enum BufferUsage
     {
-        STATIC_DRAW,
-        STATIC_READ,
-        STATIC_COPY,
-        DYNAMIC_DRAW,
-        DYNAMIC_READ,
-        DYNAMIC_COPY,
-        STREAM_DRAW,
-        STREAM_READ,
-        STREAM_COPY
+        StaticDraw,
+        StaticRead,
+        StaticCopy,
+        DynamicDraw,
+        DynamicRead,
+        DynamicCopy,
+        StreamDraw,
+        StreamRead,
+        StreamCopy
     };
     #pragma endregion Enum
 

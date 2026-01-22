@@ -41,7 +41,7 @@ private:
     ShaderType m_type {ShaderType::None};
 
     std::vector<ShaderSource> m_shaderSources;
-    std::map<std::string, int> uniformLocationCache;
+    std::map<std::string, int> m_uniformLocationCache;
     #pragma endregion Members
 
     GLuint GetShaderType(ShaderType type);
@@ -102,17 +102,15 @@ public:
     #pragma region Uniform data
     int GetLocation(const std::string &name)
     {
-        int location = glGetUniformLocation(m_program, name.c_str());
-        if (location < 0)
+        if(m_uniformLocationCache.contains(name) == false)
         {
-            std::cerr << "Couldn't find uniform " << name << std::endl;
-            return -1;
+            int location = glGetUniformLocation(m_program, name.c_str());
+            if (location < 0)
+                std::cerr << "Couldn't find uniform " << name << std::endl;
+            m_uniformLocationCache.emplace(std::string(name), location);
         }
 
-        if(uniformLocationCache.contains(name) == false)
-            uniformLocationCache.emplace(std::string(name), location);
-
-        return uniformLocationCache[name];
+        return m_uniformLocationCache[name];
     }
 
     void UniformData(const std::string& name, const glm::mat4 mat)
