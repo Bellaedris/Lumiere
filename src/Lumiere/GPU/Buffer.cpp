@@ -101,7 +101,7 @@ namespace lum::gpu
         glBindBufferBase(GetBufferType(m_type), index, m_buffer);
     }
 
-    void Buffer::Write(uint32_t size, void *data, BufferUsage usage)
+    void Buffer::Write(uint32_t size, void *data, BufferUsage usage) const
     {
         glNamedBufferData(m_buffer, size, data, GetBufferUsage(usage));
     }

@@ -97,7 +97,7 @@ public:
      * \param usage How the data will be used. This is a hint and only helps the driver speedup things.
      * See BufferUsage for more detailed informations.
      */
-    void Write(uint32_t size, void* data, BufferUsage usage);
+    void Write(uint32_t size, void* data, BufferUsage usage) const;
     #pragma endregion Methods
 };
 } // mgl::gpu
