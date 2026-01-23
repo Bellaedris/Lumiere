@@ -79,21 +79,11 @@ void GBuffer::Render(const SceneDesc &scene)
     gpu::ShaderPtr gbufferShader = ResourcesManager::Instance()->GetShader(GBUFFER_SHADER_NAME);
     gbufferShader->Bind();
 
-    // send light counts, as we will actively need them
-    gbufferShader->UniformData("pointLightCount", scene.Lights()->PointLightCount());
-    gbufferShader->UniformData("dirLightCount", scene.Lights()->DirectionalLightCount());
-
-    // scene.ForEach([&](const gfx::SubMesh& primitive, const gfx::MaterialPtr& material)
-    // {
-    //     material->Bind(gbufferShader);
-    //     primitive.Draw();
-    // });
-    for (const auto& mesh : scene.Meshes())
-        for (const auto& submesh : mesh->Primitives())
-        {
-            submesh.Material()->Bind(gbufferShader);
-            submesh.Draw();
-        }
+    scene.ForEach([&](const gfx::SubMesh& primitive, const gfx::MaterialPtr& material)
+    {
+        material->Bind(gbufferShader);
+        primitive.Draw();
+    });
 
     m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
 }
