@@ -19,6 +19,7 @@ class ResourcesManager
 {
 private:
     ResourcesManager() = default;
+
     #pragma region Members
     static ResourcesManager* m_instance;
 
@@ -31,6 +32,10 @@ private:
     #pragma endregion Members
 
 public:
+    #pragma region Default Names
+    constexpr static const char* DEFAULT_PLANE_NAME = "Lumiere_default_plane";
+    #pragma endregion Default Names
+
     // we can't copy the resource manager singleton
     ResourcesManager(const ResourcesManager&) = delete;
     ResourcesManager& operator=(const ResourcesManager&) = delete;
@@ -96,6 +101,8 @@ public:
      * \return A handle to the newly cached Mesh
      */
     gfx::MeshPtr CacheMesh(const std::string& path, std::vector<gfx::SubMesh> &meshData);
+
+    void GenerateDefaultMeshes();
     #pragma endregion Mesh Cache
 };
 } // lum
