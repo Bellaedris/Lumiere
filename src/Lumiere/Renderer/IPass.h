@@ -17,6 +17,8 @@ protected:
     /** \brief a pass may have a frame buffer, but it is not mandatory (for a compute-only pass, for instance) */
     std::unique_ptr<gpu::Framebuffer> m_framebuffer {nullptr};
 public:
+    virtual ~IPass() = default;
+
     IPass() : m_framebuffer(nullptr) {}
     IPass(uint32_t width, uint32_t height) : m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height)) {}
     virtual void Render(const SceneDesc &scene) = 0;

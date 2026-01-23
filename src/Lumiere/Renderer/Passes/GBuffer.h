@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "IPass.h"
+#include "../IPass.h"
 
 namespace lum::rdr
 {
@@ -12,7 +12,7 @@ namespace lum::rdr
  */
 class GBuffer : public IPass
 {
-private:
+public:
     #pragma region constants
     constexpr static const char* GBUFFER_ALBEDO_NAME = "GBUFFER_ALBEDO";
     constexpr static const char* GBUFFER_NORMALS_NAME = "GBUFFER_NORMALS";
@@ -21,7 +21,7 @@ private:
 
     constexpr static const char* GBUFFER_SHADER_NAME = "GBUFFER_SHADER";
     #pragma endregion constants
-public:
+
     GBuffer(uint32_t width, uint32_t height);
     void Render(const SceneDesc &scene) override;
 };
