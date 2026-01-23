@@ -20,6 +20,8 @@ struct VertexData
 {
     glm::vec3 pos {};
     glm::vec3 normal {};
+    glm::vec3 tangent {};
+    glm::vec3 bitangent {};
     glm::vec2 texcoord {};
 };
 #pragma endregion structs
@@ -58,8 +60,6 @@ class Mesh
 private:
     std::string m_path;
     std::vector<SubMesh> m_subMeshes {};
-
-    constexpr static const char* DEFAULT_PLANE_NAME = "Lumiere_default_plane";
 public:
     Mesh(std::string path) : m_path {std::move(path)} {};
     Mesh(std::string path, std::vector<SubMesh>& subMeshes) : m_path(std::move(path)), m_subMeshes(std::move(subMeshes)) {}
@@ -71,7 +71,7 @@ public:
     void Draw() const;
 
     #pragma region Static helpers
-    static Mesh GeneratePlane(float halfSize);
+    static std::vector<SubMesh> GeneratePlane(float halfSize);
     #pragma endregion Static helpers
 };
 

@@ -5,6 +5,8 @@
 #include <iostream>
 #include <set>
 #include "Mesh.h"
+
+#include <memory>
 #include <assimp/Importer.hpp>
 
 namespace lum::gfx
@@ -25,7 +27,9 @@ SubMesh::SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indic
 
     m_vao.SetAttribute(0, gpu::GLUtils::DataType::Float, 0, 3, sizeof(VertexData)); // positions
     m_vao.SetAttribute(1, gpu::GLUtils::DataType::Float, offsetof(VertexData, normal), 3, sizeof(VertexData)); // normals
-    m_vao.SetAttribute(2, gpu::GLUtils::DataType::Float, offsetof(VertexData, texcoord), 2, sizeof(VertexData)); // texcoords
+    m_vao.SetAttribute(2, gpu::GLUtils::DataType::Float, offsetof(VertexData, normal), 3, sizeof(VertexData)); // tangents
+    m_vao.SetAttribute(3, gpu::GLUtils::DataType::Float, offsetof(VertexData, normal), 3, sizeof(VertexData)); // bitangents
+    m_vao.SetAttribute(4, gpu::GLUtils::DataType::Float, offsetof(VertexData, texcoord), 2, sizeof(VertexData)); // texcoords
 
     m_vao.Unbind();
 }
@@ -50,16 +54,14 @@ void Mesh::Draw() const
     }
 }
 
-Mesh Mesh::GeneratePlane(float halfSize)
+std::vector<SubMesh> Mesh::GeneratePlane(float halfSize)
 {
-    Mesh m(DEFAULT_PLANE_NAME);
-
     std::vector<VertexData> vertices =
     {
-        {{-halfSize, 0, halfSize}, {0, 1, 0}, {0.0f, 1.0f}},
-        {{-halfSize, 0, -halfSize}, {0, 1, 0}, {0.0f, 0.0f}},
-        {{halfSize, 0, halfSize}, {0, 1, 0}, {1.0f, 1.0f}},
-        {{halfSize, 0, -halfSize}, {0, 1, 0}, {1.0f, 0.0f}}
+        {{-halfSize, halfSize, 0}, {0, 0, 1}, {1, 0, 0}, {0, 1, 0}, {0.0f, 1.0f}},
+        {{-halfSize, -halfSize, 0}, {0, 0, 1}, {1, 0, 0}, {0, 1, 0}, {0.0f, 0.0f}},
+        {{halfSize, halfSize, 0}, {0, 0, 1}, {1, 0, 0}, {0, 1, 0}, {1.0f, 1.0f}},
+        {{halfSize, -halfSize, 0}, {0, 0, 1}, {1, 0, 0}, {0, 1, 0}, {1.0f, 0.0f}}
     };
 
     std::vector<uint32_t> indices =
@@ -68,10 +70,9 @@ Mesh Mesh::GeneratePlane(float halfSize)
         1, 3, 2
     };
 
-    SubMesh plane = {vertices, indices, nullptr};
+    std::vector<SubMesh> subMeshes;
+    subMeshes.emplace_back(vertices, indices, nullptr);
 
-    m.AddSubMesh(plane);
-
-    return m;
+    return subMeshes;
 }
 } // mgl
