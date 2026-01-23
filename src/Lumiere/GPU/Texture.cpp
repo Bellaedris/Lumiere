@@ -115,6 +115,7 @@ namespace lum::gpu
     void Texture::Allocate(Texture::PixelFormat format, GLUtils::DataType dataType)
     {
         m_format = format;
+        m_dataType = dataType;
         Bind();
         glTexImage2D(
             GetTextureTarget(m_target),
@@ -132,6 +133,7 @@ namespace lum::gpu
     void Texture::Write(void *data, Texture::PixelFormat format, GLUtils::DataType dataType)
     {
         m_format = format;
+        m_dataType = dataType;
         Bind();
         glTexImage2D(
                 GetTextureTarget(m_target),
@@ -159,7 +161,16 @@ namespace lum::gpu
 
     void Texture::BindImage(uint32_t unit, uint32_t mipLevel, GLUtils::Access access)
     {
-        glBindImageTexture(unit, m_handle, mipLevel, GL_FALSE, 0, GLUtils::GetAccess(access), GetImageFormat(m_format));
+        glBindImageTexture
+        (
+            unit,
+            m_handle,
+            mipLevel,
+            GL_FALSE,
+            0,
+            GLUtils::GetAccess(access),
+            GetPixelInternalFormat(m_format, m_dataType)
+        );
     }
 
     #pragma region EnumAccessFunctions

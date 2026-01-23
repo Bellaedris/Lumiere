@@ -99,6 +99,7 @@ private:
     Filtering m_minFilter {Filtering::LinearMipMapLinear};
     Filtering m_magFilter {Filtering::Linear};
     PixelFormat m_format {};
+    GLUtils::DataType m_dataType {};
     #pragma endregion Members
 public:
     Texture(TextureTarget target);
