@@ -16,7 +16,10 @@ ResourcesManager::~ResourcesManager()
 ResourcesManager* ResourcesManager::Instance()
 {
     if (m_instance == nullptr)
+    {
         m_instance = new ResourcesManager();
+        m_instance->GenerateDefaultMeshes();
+    }
 
     return m_instance;
 }
@@ -103,5 +106,11 @@ gfx::MeshPtr ResourcesManager::CacheMesh(const std::string& path, std::vector<gf
     m_meshCache.emplace(hash, cached);
 
     return cached;
+}
+
+void ResourcesManager::GenerateDefaultMeshes()
+{
+    std::vector<gfx::SubMesh> plane = gfx::Mesh::GeneratePlane(1.f);
+    CacheMesh(DEFAULT_PLANE_NAME, plane);
 }
 } // lum
