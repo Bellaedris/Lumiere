@@ -70,6 +70,7 @@ namespace lum::gpu
         if(shaderData.has_value() == false)
         {
             std::cerr << "Couldn't open file " << shaderInfo.path << "\n";
+            m_valid = false;
             return;
         }
 
@@ -101,15 +102,15 @@ namespace lum::gpu
         glLinkProgram(m_program);
         int  success;
         char infoLog[512];
-        glGetShaderiv(m_program, GL_LINK_STATUS, &success);
+        glGetProgramiv(m_program, GL_LINK_STATUS, &success);
 
         if (!success)
         {
-            glGetShaderInfoLog(m_program, 512, nullptr, infoLog);
+            glGetProgramInfoLog(m_program, 512, nullptr, infoLog);
             std::cerr << "error linking program: " << infoLog << std::endl;
+            m_valid = false;
         }
-        else
-            m_created = true;
+        m_created = true;
     }
 
     void Shader::Reload()
@@ -131,6 +132,8 @@ namespace lum::gpu
     {
         if(m_created == false)
             Create();
+        if (m_valid == false)
+            return;
         glUseProgram(m_program);
     }
 
