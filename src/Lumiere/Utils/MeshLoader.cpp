@@ -26,7 +26,8 @@ gfx::MeshPtr MeshLoader::LoadMeshFromFile(const std::string &filename)
         aiProcess_JoinIdenticalVertices   |
         aiProcess_SortByPType             |
         aiProcess_GenNormals              | // create the normals if not already in the file
-        aiProcess_CalcTangentSpace          // create tan/bitan
+        aiProcess_CalcTangentSpace        | // create tan/bitan
+        aiProcess_FlipUVs
         );
 
     if (scene == nullptr)
@@ -74,6 +75,8 @@ gfx::SubMesh MeshLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
         vertex.texcoord = {mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y};
 
         // add Tan/Bitan
+        vertex.tangent = {mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z};
+        vertex.bitangent = {mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z};
 
         vertices.push_back(vertex);
     }
@@ -88,19 +91,30 @@ gfx::SubMesh MeshLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 
     // Material
     aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
-    gpu::TexturePtr albedo;
+    gpu::TexturePtr albedo, normals;
     // we assume that for PBR materials, we only use one texture per channel.
     aiString texPath;
+    std::string albedoPath;
     if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == aiReturn_SUCCESS)
     {
         // try to retrieve the texture, and create it if it was not cached
         const std::string fullPath = directory + "/" + texPath.C_Str();
         albedo = ResourcesManager::Instance()->GetTexture(fullPath);
+        albedoPath = fullPath;
         if (albedo == nullptr)
             albedo = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
     }
 
-    gfx::MaterialPtr pbrMat    = std::make_shared<gfx::MaterialPBR>(albedo, nullptr, nullptr, nullptr);
+    if (mat->GetTexture(aiTextureType_NORMALS, 0, &texPath) == aiReturn_SUCCESS)
+    {
+        // try to retrieve the texture, and create it if it was not cached
+        const std::string fullPath = directory + "/" + texPath.C_Str();
+        normals = ResourcesManager::Instance()->GetTexture(fullPath);
+        if (normals == nullptr)
+            normals = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
+    }
+
+    gfx::MaterialPtr pbrMat = std::make_shared<gfx::MaterialPBR>(albedo, normals, nullptr, nullptr);
 
     return {vertices, indices, pbrMat};
 }
