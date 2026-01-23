@@ -38,6 +38,7 @@ private:
     #pragma region Members
     uint32_t m_program;
     bool m_created {false};
+    bool m_valid {true};
     ShaderType m_type {ShaderType::None};
 
     std::vector<ShaderSource> m_shaderSources;
