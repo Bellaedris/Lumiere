@@ -23,5 +23,15 @@ namespace lum::gfx
     {
         m_albedoTexture->Bind(0);
         shader->UniformData("AlbedoTexture", 0);
+
+        if (m_normalTexture != nullptr)
+        {
+            m_normalTexture->Bind(1);
+            shader->UniformData("NormalsTexture", 1);
+        }
+        else
+        {
+            shader->UniformData("hasNormals", 1);
+        }
     }
 } // lum::gfx
