@@ -3,8 +3,6 @@
 //
 
 #pragma once
-#include "Lumiere/Actor.h"
-#include "Lumiere/Actor.h"
 #include "Lumiere/GPU/Buffer.h"
 
 namespace lum::rdr

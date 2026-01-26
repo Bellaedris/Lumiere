@@ -7,9 +7,6 @@
 #include <string>
 #include <optional>
 
-#include "assimp/scene.h"
-#include "Lumiere/Actor.h"
-
 namespace lum::utils
 {
     class FileUtils
