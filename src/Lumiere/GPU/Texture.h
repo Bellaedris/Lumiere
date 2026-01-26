@@ -124,6 +124,8 @@ public:
     void SetWrapMode(WrapMode mode);
     void SetBorderColor(const glm::vec4& color);
     void SetSize(int width, int height);
+
+    glm::ivec2 Size() { return {m_width, m_height}; };
 };
 
 using TexturePtr = std::shared_ptr<Texture>;
