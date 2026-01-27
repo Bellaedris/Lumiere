@@ -23,7 +23,7 @@ namespace lum
     {
     protected:
         #pragma region Members
-        Window m_window;
+        std::shared_ptr<Window> m_window;
 
         std::unique_ptr<rdr::Camera> m_camera {nullptr};
 
@@ -48,11 +48,6 @@ namespace lum
         virtual void Init() = 0;
 
         /**
-         * \brief Dear ImGui boilerplate
-         */
-        void InitUI();
-
-        /**
          * \brief Called each frame before rendering
          */
         void PreRender();
@@ -65,12 +60,7 @@ namespace lum
         /**
          * \brief Called each frame, draws ImGui UI to the screen
          */
-        void RenderUI();
-
-        /**
-         * \brief Called before quitting the application
-         */
-        void Cleanup();
+        virtual void RenderUI() = 0;
 
     public:
         App(int width, int height, int majorVersionHint = 4, int minorVersionHint = 6);
