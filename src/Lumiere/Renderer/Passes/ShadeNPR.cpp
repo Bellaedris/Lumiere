@@ -26,7 +26,7 @@ ShadeNPR::ShadeNPR(uint32_t width, uint32_t height)
         .wrapMode = gpu::Texture::WrapMode::ClampToBorder
     };
 
-    gpu::TexturePtr albedo = ResourcesManager::Instance()->CreateTexture(RenderPipeline::RENDERED_FRAME_NAME, rgbDesc);
+    gpu::TexturePtr albedo = ResourcesManager::Instance()->CreateTexture(SHADE_NPR_NAME, rgbDesc);
     m_framebuffer->Attach(gpu::Framebuffer::Color, albedo, 0);
 
     std::vector<gpu::Shader::ShaderSource> sources = {
@@ -82,7 +82,7 @@ void ShadeNPR::Render(const SceneDesc &scene)
 void ShadeNPR::Rebuild(uint32_t width, uint32_t height)
 {
     m_framebuffer->SetSize(width, height);
-    gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
+    gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(SHADE_NPR_NAME);
     frame->SetSize(static_cast<int>(width), static_cast<int>(height));
     frame->Reallocate();
 }
