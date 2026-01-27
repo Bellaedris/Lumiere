@@ -117,6 +117,12 @@ public:
     void Bind(uint32_t unit);
     void BindImage(uint32_t unit, uint32_t mipLevel, GLUtils::Access access);
     void Allocate(PixelFormat format, GLUtils::DataType dataType);
+
+    /**
+     * \brief Allocate the memory again, using the same formats and data types, but to take into account any change
+     * that could've happened in between.
+     */
+    void Reallocate();
     void Write(void* data, PixelFormat format, GLUtils::DataType dataType);
 
     void SetMinFilter(Filtering filter);

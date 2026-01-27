@@ -130,6 +130,11 @@ namespace lum::gpu
         );
     }
 
+    void Texture::Reallocate()
+    {
+        Allocate(m_format, m_dataType);
+    }
+
     void Texture::Write(void *data, Texture::PixelFormat format, GLUtils::DataType dataType)
     {
         m_format = format;
