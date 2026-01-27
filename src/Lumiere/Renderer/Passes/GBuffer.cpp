@@ -9,7 +9,7 @@
 namespace lum::rdr
 {
 GBuffer::GBuffer(uint32_t width, uint32_t height)
-    : IPass(width, height)
+    : m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height))
 {
     // attach to our framebuffer the textures we will render to
     gpu::Texture::TextureDesc albedoDesc
@@ -86,5 +86,29 @@ void GBuffer::Render(const SceneDesc &scene)
     });
 
     m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
+}
+
+void GBuffer::Rebuild(uint32_t width, uint32_t height)
+{
+    m_framebuffer->SetSize(width, height);
+    int iWidth = static_cast<int>(width);
+    int iHeight = static_cast<int>(height);
+
+    // recreate the textures
+    gpu::TexturePtr albedo = ResourcesManager::Instance()->GetTexture(GBUFFER_ALBEDO_NAME);
+    albedo->SetSize(iWidth, iHeight);
+    albedo->Reallocate();
+    // normals
+    gpu::TexturePtr normals = ResourcesManager::Instance()->GetTexture(GBUFFER_NORMALS_NAME);
+    normals->SetSize(iWidth, iHeight);
+    normals->Reallocate();
+    // positions
+    gpu::TexturePtr positions = ResourcesManager::Instance()->GetTexture(GBUFFER_POSITIONS_NAME);
+    positions->SetSize(iWidth, iHeight);
+    positions->Reallocate();
+    // depth
+    gpu::TexturePtr depth = ResourcesManager::Instance()->GetTexture(GBUFFER_DEPTH_NAME);
+    depth->SetSize(iWidth, iHeight);
+    depth->Reallocate();
 }
 } // lum::rdr

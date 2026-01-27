@@ -7,11 +7,28 @@
 #include "GBuffer.h"
 #include "Outline.h"
 #include "Lumiere/ResourcesManager.h"
+#include "Lumiere/Renderer/RenderPipeline.h"
 
 namespace lum::rdr
 {
-ShadeNPR::ShadeNPR()
+ShadeNPR::ShadeNPR(uint32_t width, uint32_t height)
+    : m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height))
 {
+    gpu::Texture::TextureDesc rgbDesc
+    {
+        .target = gpu::Texture::Target2D,
+        .width = static_cast<int>(width),
+        .height = static_cast<int>(height),
+        .format = gpu::Texture::RGBA,
+        .dataType = gpu::GLUtils::UnsignedByte,
+        .minFilter = gpu::Texture::LinearMipMapLinear,
+        .magFilter = gpu::Texture::Linear,
+        .wrapMode = gpu::Texture::WrapMode::ClampToBorder
+    };
+
+    gpu::TexturePtr albedo = ResourcesManager::Instance()->CreateTexture(RenderPipeline::RENDERED_FRAME_NAME, rgbDesc);
+    m_framebuffer->Attach(gpu::Framebuffer::Color, albedo, 0);
+
     std::vector<gpu::Shader::ShaderSource> sources = {
         {gpu::Shader::Vertex, "shaders/shadeNPR.vert"},
         {gpu::Shader::Fragment, "shaders/shadeNPR.frag"}
@@ -23,6 +40,7 @@ ShadeNPR::ShadeNPR()
 
 void ShadeNPR::Render(const SceneDesc &scene)
 {
+    m_framebuffer->Bind(gpu::Framebuffer::ReadWrite);
     gpu::GLUtils::Clear();
 
     gpu::ShaderPtr shader = ResourcesManager::Instance()->GetShader(SHADE_NPR_SHADER_NAME);
@@ -57,5 +75,15 @@ void ShadeNPR::Render(const SceneDesc &scene)
     shader->UniformData("Outlines", 5);
 
     ResourcesManager::Instance()->GetMesh(ResourcesManager::DEFAULT_PLANE_NAME)->Draw();
+
+    m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
+}
+
+void ShadeNPR::Rebuild(uint32_t width, uint32_t height)
+{
+    m_framebuffer->SetSize(width, height);
+    gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
+    frame->SetSize(static_cast<int>(width), static_cast<int>(height));
+    frame->Reallocate();
 }
 } // lum::rdr

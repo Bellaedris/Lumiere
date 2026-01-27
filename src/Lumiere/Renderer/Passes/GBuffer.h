@@ -12,6 +12,8 @@ namespace lum::rdr
  */
 class GBuffer : public IPass
 {
+private:
+    std::unique_ptr<gpu::Framebuffer> m_framebuffer {nullptr};
 public:
     #pragma region constants
     constexpr static const char* GBUFFER_ALBEDO_NAME = "GBUFFER_ALBEDO";
@@ -24,5 +26,7 @@ public:
 
     GBuffer(uint32_t width, uint32_t height);
     void Render(const SceneDesc &scene) override;
+
+    void Rebuild(uint32_t width, uint32_t height) override;
 };
 } // lum::rdr

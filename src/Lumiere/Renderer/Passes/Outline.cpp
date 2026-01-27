@@ -44,9 +44,17 @@ void Outline::Render(const SceneDesc &scene)
     gpu::TexturePtr outlineHorizontal = ResourcesManager::Instance()->GetTexture(OUTLINE_SOBEL_NAME);
     outlineHorizontal->BindImage(1, 0, gpu::GLUtils::Write);
 
-    // glm::vec3 val(1, 0, 0);
-    // glClearTexImage(outlineHorizontal->Handle(), 0, GL_RED, GL_FLOAT, glm::value_ptr(val));
     outlineCompute->Dispatch(std::ceil(m_width / 16), std::ceil(m_height / 16), 1);
     outlineCompute->Wait();
+}
+
+void Outline::Rebuild(uint32_t width, uint32_t height)
+{
+    m_width = width;
+    m_height = height;
+
+    gpu::TexturePtr outline = ResourcesManager::Instance()->GetTexture(OUTLINE_SOBEL_NAME);
+    outline->SetSize(static_cast<int>(width), static_cast<int>(height));
+    outline->Reallocate();
 }
 } // lum::rdr
