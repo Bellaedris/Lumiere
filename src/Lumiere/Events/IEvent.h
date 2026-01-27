@@ -9,6 +9,7 @@ namespace lum::evt
 enum EventType
 {
     FrameRendered,
+    FramebufferResized,
 };
 
 class IEvent

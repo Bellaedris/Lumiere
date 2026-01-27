@@ -4,9 +4,19 @@
 
 #pragma once
 #include "IEvent.h"
+#include "../GPU/Texture.h"
 
 namespace lum::evt
 {
+
+struct FramebufferResizedEvent : public IEvent
+{
+    glm::vec2 m_size;
+
+    FramebufferResizedEvent(const glm::vec2& size) : m_size(size) {}
+    EventType Type() const override { return EventType::FramebufferResized; };
+};
+
 struct FrameRenderedEvent : public IEvent
 {
     std::shared_ptr<gpu::Texture> m_frameData;
