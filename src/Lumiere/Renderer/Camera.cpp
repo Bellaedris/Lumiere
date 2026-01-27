@@ -56,6 +56,12 @@ namespace lum::rdr
         m_updateView = true;
     }
 
+    void Camera::SetAspect(float aspect)
+    {
+        m_aspectRatio = aspect;
+        UpdateProjection();
+    }
+
     void Camera::UpdateRotation()
     {
         float yawRad = glm::radians(m_yaw);

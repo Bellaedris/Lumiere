@@ -57,5 +57,7 @@ public:
 
     void ProcessMouseMovement(const glm::vec2& offset);
     void UpdatePosition(glm::vec3 dir, float dt);
+
+    void SetAspect(float aspect);
 };
 }
