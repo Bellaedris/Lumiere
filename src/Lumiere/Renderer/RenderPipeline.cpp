@@ -14,7 +14,7 @@ RenderPipeline::RenderPipeline(const std::shared_ptr<evt::EventHandler>& handler
     : m_eventHandler(handler)
 {
     m_cameraData = std::make_unique<lum::gpu::Buffer>(lum::gpu::Buffer::BufferType::Uniform);
-    m_eventHandler->Subscribe(evt::FramebufferResized, std::bind(&RenderPipeline::OnEvent, this, std::placeholders::_1));
+    LUM_SUB_TO_EVENT(m_eventHandler, evt::EventType::FramebufferResized, RenderPipeline::OnEvent);
 }
 
 void RenderPipeline::Render(const SceneDesc &scene) const
@@ -33,6 +33,12 @@ void RenderPipeline::Render(const SceneDesc &scene) const
 
     gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(RENDERED_FRAME_NAME);
     m_eventHandler->Emit(std::make_shared<evt::FrameRenderedEvent>(frame));
+}
+
+void RenderPipeline::RenderUI()
+{
+    for (IPass* pass : m_passes)
+        pass->RenderUI();
 }
 
 void RenderPipeline::AddPass(IPass *pass)

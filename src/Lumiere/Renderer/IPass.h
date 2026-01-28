@@ -5,6 +5,7 @@
 #pragma once
 #include "SceneDesc.h"
 #include "Lumiere/GPU/Framebuffer.h"
+#include <imgui/imgui.h>
 
 namespace lum::rdr
 {
@@ -18,6 +19,7 @@ public:
     virtual ~IPass() = default;
 
     virtual void Render(const SceneDesc &scene) = 0;
+    virtual void RenderUI() = 0;
     virtual void Rebuild(uint32_t width, uint32_t height) = 0;
 };
 } // lum::rdr

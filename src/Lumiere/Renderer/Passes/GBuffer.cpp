@@ -5,6 +5,7 @@
 #include "GBuffer.h"
 
 #include "Lumiere/ResourcesManager.h"
+#include "Lumiere/Renderer/RenderPipeline.h"
 
 namespace lum::rdr
 {
@@ -86,6 +87,28 @@ void GBuffer::Render(const SceneDesc &scene)
     });
 
     m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
+}
+
+void GBuffer::RenderUI()
+{
+    if (ImGui::TreeNode("GBuffer"))
+    {
+        if (ImGui::CollapsingHeader("Preview"))
+        {
+            ImGui::Text("GBuffer Albedo");
+            IMGUI_PASS_DEBUG_IMAGE_OPENGL(GBUFFER_ALBEDO_NAME);
+
+            ImGui::Text("GBuffer Normals");
+            IMGUI_PASS_DEBUG_IMAGE_OPENGL(GBUFFER_NORMALS_NAME);
+
+            ImGui::Text("GBuffer Positions");
+            IMGUI_PASS_DEBUG_IMAGE_OPENGL(GBUFFER_POSITIONS_NAME);
+
+            ImGui::Text("GBuffer Depth");
+            IMGUI_PASS_DEBUG_IMAGE_OPENGL(GBUFFER_DEPTH_NAME);
+        }
+        ImGui::TreePop();
+    }
 }
 
 void GBuffer::Rebuild(uint32_t width, uint32_t height)

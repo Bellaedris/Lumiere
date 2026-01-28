@@ -6,6 +6,7 @@
 
 #include "GBuffer.h"
 #include "Lumiere/ResourcesManager.h"
+#include "Lumiere/Renderer/RenderPipeline.h"
 
 namespace lum::rdr
 {
@@ -37,6 +38,7 @@ void Outline::Render(const SceneDesc &scene)
 {
     gpu::ShaderPtr outlineCompute = ResourcesManager::Instance()->GetShader(OUTLINE_SOBEL_SHADER_NAME);
     outlineCompute->Bind();
+    outlineCompute->UniformData("lineWidth", m_lineWidth);
 
     gpu::TexturePtr normals = ResourcesManager::Instance()->GetTexture(GBuffer::GBUFFER_NORMALS_NAME);
     normals->BindImage(0, 0, gpu::GLUtils::Read);
@@ -46,6 +48,19 @@ void Outline::Render(const SceneDesc &scene)
 
     outlineCompute->Dispatch(std::ceil(m_width / 16), std::ceil(m_height / 16), 1);
     outlineCompute->Wait();
+}
+
+void Outline::RenderUI()
+{
+    if (ImGui::TreeNode("Outline"))
+    {
+        ImGui::InputFloat("Line Width", &m_lineWidth);
+        if (ImGui::CollapsingHeader("Preview"))
+        {
+            IMGUI_PASS_DEBUG_IMAGE_OPENGL(OUTLINE_SOBEL_NAME);
+        }
+        ImGui::TreePop();
+    }
 }
 
 void Outline::Rebuild(uint32_t width, uint32_t height)

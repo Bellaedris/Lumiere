@@ -70,13 +70,22 @@ void ShadeNPR::Render(const SceneDesc &scene)
     pencilShadows->Bind(4);
     shader->UniformData("PencilShadows", 4);
 
-    gpu::TexturePtr outlines = ResourcesManager::Instance()->GetTexture(Outline::OUTLINE_SOBEL_NAME);
-    outlines->Bind(5);
-    shader->UniformData("Outlines", 5);
-
     ResourcesManager::Instance()->GetMesh(ResourcesManager::DEFAULT_PLANE_NAME)->Draw();
 
     m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
+}
+
+void ShadeNPR::RenderUI()
+{
+   if (ImGui::TreeNode("ShadeNPR"))
+   {
+       if (ImGui::CollapsingHeader("Preview"))
+       {
+           IMGUI_PASS_DEBUG_IMAGE_OPENGL(SHADE_NPR_NAME);
+       }
+       // Eventually add posterization options
+       ImGui::TreePop();
+   }
 }
 
 void ShadeNPR::Rebuild(uint32_t width, uint32_t height)

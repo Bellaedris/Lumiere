@@ -57,10 +57,15 @@ void CompositeNPR::Render(const SceneDesc &scene)
     m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
 }
 
+void CompositeNPR::RenderUI()
+{
+    // this is the final composition stage, nothing to change here.
+}
+
 void CompositeNPR::Rebuild(uint32_t width, uint32_t height)
 {
     m_framebuffer->SetSize(width, height);
-    gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(COMPOSITE_NPR_SHADER_NAME);
+    gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
     frame->SetSize(static_cast<int>(width), static_cast<int>(height));
     frame->Reallocate();
 }

@@ -10,6 +10,9 @@
 
 namespace lum::rdr
 {
+
+#define IMGUI_PASS_DEBUG_IMAGE_OPENGL(textureName) ImGui::Image(ResourcesManager::Instance()->GetTexture(textureName)->Handle(), RenderPipeline::DEBUG_DISPLAY_SIZE, ImVec2(0, 1), ImVec2(1, 0));
+
 class RenderPipeline
 {
 private:
@@ -23,10 +26,12 @@ private:
     std::unique_ptr<gpu::Buffer> m_cameraData;
     std::shared_ptr<evt::EventHandler> m_eventHandler;
 public:
-    constexpr static const char* RENDERED_FRAME_NAME = "RENDERED_FRAME_NAME";
+    constexpr static const char* RENDERED_FRAME_NAME = "RENDERED_FRAME";
+    constexpr static ImVec2 DEBUG_DISPLAY_SIZE = ImVec2(200.f, 200.f);
 
     RenderPipeline(const std::shared_ptr<evt::EventHandler>& handler);
     void Render(const SceneDesc &scene) const;
+    void RenderUI();
     void AddPass(IPass* pass);
 
     /**

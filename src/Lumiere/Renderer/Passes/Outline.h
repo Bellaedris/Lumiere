@@ -10,6 +10,8 @@ namespace lum::rdr
 class Outline : public IPass
 {
 private:
+    float m_lineWidth {1.f};
+
     uint32_t m_width;
     uint32_t m_height;
 public:
@@ -22,6 +24,7 @@ public:
     Outline(uint32_t width, uint32_t height);
 
     void Render(const SceneDesc &scene) override;
+    void RenderUI() override;
 
     void Rebuild(uint32_t width, uint32_t height) override;
 };
