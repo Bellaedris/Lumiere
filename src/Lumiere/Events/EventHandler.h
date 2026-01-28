@@ -12,6 +12,9 @@
 
 namespace lum::evt
 {
+
+#define LUM_SUB_TO_EVENT(handler, eventType, callback) handler->Subscribe(eventType, std::bind(&callback, this, std::placeholders::_1));
+
 class EventHandler
 {
 private:
