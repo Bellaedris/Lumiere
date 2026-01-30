@@ -30,7 +30,7 @@ GBuffer::GBuffer(uint32_t width, uint32_t height)
         .target = gpu::Texture::Target2D,
         .width = static_cast<int>(width),
         .height = static_cast<int>(height),
-        .format = gpu::Texture::RGBA,
+        .format = gpu::Texture::RGB,
         .dataType = gpu::GLUtils::Float,
         .minFilter = gpu::Texture::Linear,
         .magFilter = gpu::Texture::Linear,
@@ -57,6 +57,12 @@ GBuffer::GBuffer(uint32_t width, uint32_t height)
     // positions
     gpu::TexturePtr positions = ResourcesManager::Instance()->CreateTexture(GBUFFER_POSITIONS_NAME, floatingDesc);
     m_framebuffer->Attach(gpu::Framebuffer::Color, positions, 2);
+    // metal roughness
+    gpu::TexturePtr metalRough = ResourcesManager::Instance()->CreateTexture(GBUFFER_METAL_ROUGH_NAME, floatingDesc);
+    m_framebuffer->Attach(gpu::Framebuffer::Color, metalRough, 3);
+    // emissive
+    gpu::TexturePtr emissive = ResourcesManager::Instance()->CreateTexture(GBUFFER_EMISSIVE_NAME, floatingDesc);
+    m_framebuffer->Attach(gpu::Framebuffer::Color, emissive, 4);
     // depth
     gpu::TexturePtr depth = ResourcesManager::Instance()->CreateTexture(GBUFFER_DEPTH_NAME, depthDesc);
     m_framebuffer->Attach(gpu::Framebuffer::Depth, depth);
@@ -79,6 +85,11 @@ void GBuffer::Render(const SceneDesc &scene)
     gpu::GLUtils::Clear();
     gpu::ShaderPtr gbufferShader = ResourcesManager::Instance()->GetShader(GBUFFER_SHADER_NAME);
     gbufferShader->Bind();
+
+    glm::mat4 modelMatrix(1.f);
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(1, 0, 0));
+    gbufferShader->UniformData("modelMatrix", modelMatrix);
+    gbufferShader->UniformData("normalMatrix", glm::inverse(glm::transpose(modelMatrix)));
 
     scene.ForEach([&](const gfx::SubMesh& primitive, const gfx::MaterialPtr& material)
     {
@@ -103,6 +114,12 @@ void GBuffer::RenderUI()
 
             ImGui::Text("GBuffer Positions");
             IMGUI_PASS_DEBUG_IMAGE_OPENGL(GBUFFER_POSITIONS_NAME);
+
+            ImGui::Text("GBuffer MetalRough");
+            IMGUI_PASS_DEBUG_IMAGE_OPENGL(GBUFFER_METAL_ROUGH_NAME);
+
+            ImGui::Text("GBuffer Emissive");
+            IMGUI_PASS_DEBUG_IMAGE_OPENGL(GBUFFER_EMISSIVE_NAME);
 
             ImGui::Text("GBuffer Depth");
             IMGUI_PASS_DEBUG_IMAGE_OPENGL(GBUFFER_DEPTH_NAME);
@@ -129,6 +146,14 @@ void GBuffer::Rebuild(uint32_t width, uint32_t height)
     gpu::TexturePtr positions = ResourcesManager::Instance()->GetTexture(GBUFFER_POSITIONS_NAME);
     positions->SetSize(iWidth, iHeight);
     positions->Reallocate();
+    // metalRough
+    gpu::TexturePtr metalRough = ResourcesManager::Instance()->GetTexture(GBUFFER_METAL_ROUGH_NAME);
+    metalRough->SetSize(iWidth, iHeight);
+    metalRough->Reallocate();
+    // emissive
+    gpu::TexturePtr emissive = ResourcesManager::Instance()->GetTexture(GBUFFER_EMISSIVE_NAME);
+    emissive->SetSize(iWidth, iHeight);
+    emissive->Reallocate();
     // depth
     gpu::TexturePtr depth = ResourcesManager::Instance()->GetTexture(GBUFFER_DEPTH_NAME);
     depth->SetSize(iWidth, iHeight);

@@ -20,6 +20,8 @@ public:
     constexpr static const char* GBUFFER_NORMALS_NAME = "GBUFFER_NORMALS";
     constexpr static const char* GBUFFER_POSITIONS_NAME = "GBUFFER_POSITIONS";
     constexpr static const char* GBUFFER_DEPTH_NAME = "GBUFFER_DEPTH";
+    constexpr static const char* GBUFFER_METAL_ROUGH_NAME = "GBUFFER_METAL_ROUGH";
+    constexpr static const char* GBUFFER_EMISSIVE_NAME = "GBUFFER_EMISSIVE";
 
     constexpr static const char* GBUFFER_SHADER_NAME = "GBUFFER_SHADER";
     #pragma endregion constants

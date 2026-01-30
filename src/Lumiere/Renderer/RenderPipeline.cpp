@@ -20,7 +20,7 @@ RenderPipeline::RenderPipeline(const std::shared_ptr<evt::EventHandler>& handler
 void RenderPipeline::Render(const SceneDesc &scene) const
 {
     // upload camera data
-    CameraData cameraData = {scene.Camera()->View(), scene.Camera()->Projection()};
+    CameraData cameraData = {scene.Camera()->View(), scene.Camera()->Projection(), scene.Camera()->Position()};
     m_cameraData->Write(sizeof(CameraData), &cameraData, lum::gpu::Buffer::DynamicDraw);
     m_cameraData->Bind(0);
 
