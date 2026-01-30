@@ -4,6 +4,8 @@
 
 #include "MaterialPBR.h"
 
+#include "Lumiere/ResourcesManager.h"
+
 namespace lum::gfx
 {
     MaterialPBR::MaterialPBR
@@ -34,16 +36,18 @@ namespace lum::gfx
             shader->UniformData("hasNormals", 1);
         }
 
-        if (m_metalRoughTexture != nullptr)
-        {
-            m_metalRoughTexture->Bind(2);
-            shader->UniformData("MetalRoughTexture", 2);
-        }
+        gpu::TexturePtr metalRough = m_metalRoughTexture == nullptr
+                                       ? ResourcesManager::Instance()->GetTexture
+                                       (ResourcesManager::DEFAULT_TEXTURE_BLACK_NAME)
+                                       : m_metalRoughTexture;
+        metalRough->Bind(2);
+        shader->UniformData("MetalRoughTexture", 2);
 
-        if (m_emissiveTexture != nullptr)
-        {
-            m_emissiveTexture->Bind(3);
-            shader->UniformData("EmissiveTexture", 3);
-        }
+        gpu::TexturePtr emissive = m_emissiveTexture == nullptr
+                                       ? ResourcesManager::Instance()->GetTexture
+                                       (ResourcesManager::DEFAULT_TEXTURE_BLACK_NAME)
+                                       : m_emissiveTexture;
+        emissive->Bind(3);
+        shader->UniformData("EmissiveTexture", 3);
     }
 } // lum::gfx
