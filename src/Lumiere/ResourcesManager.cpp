@@ -19,6 +19,7 @@ ResourcesManager* ResourcesManager::Instance()
     {
         m_instance = new ResourcesManager();
         m_instance->GenerateDefaultMeshes();
+        m_instance->GenerateDefaultTextures();
     }
 
     return m_instance;
@@ -61,6 +62,31 @@ gpu::TexturePtr ResourcesManager::CreateTexture
     m_textureCache.emplace(hash, cached);
 
     return cached;
+}
+
+void ResourcesManager::GenerateDefaultTextures()
+{
+    gpu::Texture::TextureDesc desc =
+    {
+        .target = gpu::Texture::TextureTarget::Target2D,
+        .width = 1,
+        .height = 1,
+        .format = gpu::Texture::PixelFormat::RGBA,
+        .dataType = gpu::GLUtils::DataType::Float,
+        .minFilter = gpu::Texture::Filtering::Nearest,
+        .magFilter = gpu::Texture::Filtering::Nearest,
+        .wrapMode = gpu::Texture::WrapMode::ClampToEdge
+    };
+
+    gpu::TexturePtr white = std::make_shared<gpu::Texture>(gpu::Texture::Target2D);
+    float dataWhite[4] = {1.f, 1.f, 1.f, 1.f};
+    white->Write(dataWhite, gpu::Texture::RGBA, gpu::GLUtils::Float);
+    m_textureCache.emplace(std::hash<std::string>{}(DEFAULT_TEXTURE_WHITE_NAME), white);
+
+    gpu::TexturePtr black = std::make_shared<gpu::Texture>(gpu::Texture::Target2D);
+    float dataBlack[4] = {0.f, 0.f, 0.f, 0.f};
+    white->Write(dataBlack, gpu::Texture::RGBA, gpu::GLUtils::Float);
+    m_textureCache.emplace(std::hash<std::string>{}(DEFAULT_TEXTURE_BLACK_NAME), black);
 }
 
 gpu::ShaderPtr ResourcesManager::GetShader(const std::string &name)
