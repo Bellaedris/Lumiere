@@ -30,7 +30,7 @@ GBuffer::GBuffer(uint32_t width, uint32_t height)
         .target = gpu::Texture::Target2D,
         .width = static_cast<int>(width),
         .height = static_cast<int>(height),
-        .format = gpu::Texture::RGB,
+        .format = gpu::Texture::RGBA,
         .dataType = gpu::GLUtils::Float,
         .minFilter = gpu::Texture::Linear,
         .magFilter = gpu::Texture::Linear,
@@ -87,7 +87,7 @@ void GBuffer::Render(const SceneDesc &scene)
     gbufferShader->Bind();
 
     glm::mat4 modelMatrix(1.f);
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(1, 0, 0));
+    //modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(1, 0, 0));
     gbufferShader->UniformData("modelMatrix", modelMatrix);
     gbufferShader->UniformData("normalMatrix", glm::inverse(glm::transpose(modelMatrix)));
 
