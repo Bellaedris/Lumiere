@@ -34,6 +34,8 @@ private:
 public:
     #pragma region Default Names
     constexpr static const char* DEFAULT_PLANE_NAME = "Lumiere_default_plane";
+    constexpr static const char* DEFAULT_TEXTURE_WHITE_NAME = "Lumiere_default_texture_white";
+    constexpr static const char* DEFAULT_TEXTURE_BLACK_NAME = "Lumiere_default_texture_black";
     #pragma endregion Default Names
 
     // we can't copy the resource manager singleton
@@ -70,6 +72,11 @@ public:
      * \return A handle to the newly cached texture
      */
     gpu::TexturePtr CreateTexture(const std::string& name, const gpu::Texture::TextureDesc &);
+
+    /**
+     * \brief Create default all white and all black default textures as fallback when a material lacks a specific texture
+     */
+    void GenerateDefaultTextures();
     #pragma endregion Texture Cache
 
     #pragma region Shader cache
