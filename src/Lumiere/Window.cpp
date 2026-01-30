@@ -17,7 +17,7 @@ namespace lum
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-        m_window = glfwCreateWindow(width, height, "MiniGL", NULL, NULL);
+        m_window = glfwCreateWindow(width, height, "Lumiere", NULL, NULL);
         if (m_window == nullptr)
         {
             glfwTerminate();
