@@ -91,7 +91,7 @@ gfx::SubMesh MeshLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 
     // Material
     aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
-    gpu::TexturePtr albedo, normals;
+    gpu::TexturePtr albedo, normals, metalRough, emissive;
     // we assume that for PBR materials, we only use one texture per channel.
     aiString texPath;
     std::string albedoPath;
@@ -114,7 +114,23 @@ gfx::SubMesh MeshLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
             normals = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
     }
 
-    gfx::MaterialPtr pbrMat = std::make_shared<gfx::MaterialPBR>(albedo, normals, nullptr, nullptr);
+    if (mat->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &texPath) == aiReturn_SUCCESS)
+    {
+        const std::string fullPath = directory + "/" + texPath.C_Str();
+        metalRough = ResourcesManager::Instance()->GetTexture(fullPath);
+        if (metalRough == nullptr)
+            metalRough = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
+    }
+
+    if (mat->GetTexture(aiTextureType_EMISSIVE, 0, &texPath) == aiReturn_SUCCESS)
+    {
+        const std::string fullPath = directory + "/" + texPath.C_Str();
+        emissive = ResourcesManager::Instance()->GetTexture(fullPath);
+        if (emissive == nullptr)
+            emissive = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
+    }
+
+    gfx::MaterialPtr pbrMat = std::make_shared<gfx::MaterialPBR>(albedo, normals, metalRough, emissive);
 
     return {vertices, indices, pbrMat};
 }

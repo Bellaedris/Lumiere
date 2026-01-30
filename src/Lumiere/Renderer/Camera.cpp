@@ -46,6 +46,11 @@ namespace lum::rdr
         return m_view;
     }
 
+    const glm::vec3 & Camera::Position() const
+    {
+        return m_position;
+    }
+
     void Camera::UpdatePosition(glm::vec3 dir, float dt)
     {
         float vel = dt * m_speed;

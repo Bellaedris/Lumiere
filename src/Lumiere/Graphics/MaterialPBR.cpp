@@ -33,5 +33,17 @@ namespace lum::gfx
         {
             shader->UniformData("hasNormals", 1);
         }
+
+        if (m_metalRoughTexture != nullptr)
+        {
+            m_metalRoughTexture->Bind(2);
+            shader->UniformData("MetalRoughTexture", 2);
+        }
+
+        if (m_emissiveTexture != nullptr)
+        {
+            m_emissiveTexture->Bind(3);
+            shader->UniformData("EmissiveTexture", 3);
+        }
     }
 } // lum::gfx

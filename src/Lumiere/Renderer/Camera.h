@@ -54,6 +54,7 @@ public:
 
     const glm::mat4& Projection();
     const glm::mat4& View();
+    const glm::vec3& Position() const;
 
     void ProcessMouseMovement(const glm::vec2& offset);
     void UpdatePosition(glm::vec3 dir, float dt);

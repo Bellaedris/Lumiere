@@ -20,6 +20,7 @@ private:
     {
         glm::mat4 viewMatrix;
         glm::mat4 projectionMatrix;
+        glm::vec3 position;
     };
 
     std::vector<IPass*> m_passes;
