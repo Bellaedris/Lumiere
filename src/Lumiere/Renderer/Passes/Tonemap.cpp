@@ -4,6 +4,7 @@
 
 #include "Tonemap.h"
 
+#include "Bloom.h"
 #include "ShadePBR.h"
 #include "Lumiere/ResourcesManager.h"
 #include "Lumiere/Renderer/RenderPipeline.h"
@@ -40,6 +41,7 @@ void Tonemap::Render(const SceneDesc &scene)
     tonemapCompute->Bind();
     tonemapCompute->UniformData("technique", m_technique);
     tonemapCompute->UniformData("gamma", m_gamma);
+    tonemapCompute->UniformData("bloomIntensity", m_bloomIntensity);
 
     gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(ShadePBR::SHADE_PBR_NAME);
     frame->BindImage(0, 0, gpu::GLUtils::Read);
@@ -47,7 +49,10 @@ void Tonemap::Render(const SceneDesc &scene)
     gpu::TexturePtr out = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
     out->BindImage(1, 0, gpu::GLUtils::Write);
 
-    tonemapCompute->Dispatch(std::ceil(m_width / 16), std::ceil(m_height / 16), 1);
+    gpu::TexturePtr bloomInput = ResourcesManager::Instance()->GetTexture(Bloom::BLOOM_NAME);
+    bloomInput->Bind(2);
+
+    tonemapCompute->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
     tonemapCompute->Wait();
 }
 
@@ -69,6 +74,7 @@ void Tonemap::RenderUI()
             ImGui::EndCombo();
         }
         ImGui::InputFloat("Gamma", &m_gamma);
+        ImGui::SliderFloat("Bloom Intensity", &m_bloomIntensity, .0f, 1.f);
         ImGui::TreePop();
     }
 }
