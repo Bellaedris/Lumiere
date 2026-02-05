@@ -12,6 +12,7 @@ class Tonemap : public IPass
 private:
     int m_technique {1};
     float m_gamma {2.2f};
+    float m_bloomIntensity {.04f};
 
     std::array<const char*, 3> m_techniques = {"Reinhard", "ACES", "Uncharted 2 Filmic"};
 
