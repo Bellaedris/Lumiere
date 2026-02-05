@@ -65,6 +65,7 @@ public:
 
     /**
      * \brief Create an empty texture in place and caches it. Used to create the textures we render to, for instance.
+     * Calling this method with a name that is already cached will delete the original texture and create a new one.
      * \param name Name of the texture used to identify. For instance, "GBUFFER_ALBEDO"
      * \param target What kind of texture we are creating
      * \param format Format of the created texture
