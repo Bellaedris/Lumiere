@@ -130,6 +130,13 @@ namespace lum::gpu
         );
     }
 
+    void Texture::AllocateMipmapsStorage(int levels)
+    {
+        // ensure we don't generate too many mip level, as having a mip of size < 1 will probably crash the app
+        int maxLevel = static_cast<int>(std::floor(std::log2(std::max(m_width, m_height)))) + 1;
+        glTextureStorage2D(m_handle, std::min(levels, maxLevel), GetPixelInternalFormat(m_format, m_dataType), m_width, m_height);
+    }
+
     void Texture::Reallocate()
     {
         Allocate(m_format, m_dataType);
