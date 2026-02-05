@@ -144,6 +144,12 @@ namespace lum::gpu
             std::cerr << "Cannot dispatch a non-compute shader\n";
             return;
         }
+
+        if (x < 1) x = 1;
+        if (y < 1) y = 1;
+        if (z < 1) z = 1;
+
+        // ensure we do not dispatch < 1 on all dimensions
         glDispatchCompute(x, y ,z);
     }
 
