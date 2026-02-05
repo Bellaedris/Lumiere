@@ -52,6 +52,10 @@ gpu::TexturePtr ResourcesManager::CreateTexture
 )
 {
     size_t hash = std::hash<std::string>{}(name);
+    if (m_textureCache.contains(hash))
+    {
+        m_textureCache.erase(hash);
+    }
 
     gpu::TexturePtr cached = std::make_shared<gpu::Texture>(desc.target);
     cached->SetSize(desc.width, desc.height);
