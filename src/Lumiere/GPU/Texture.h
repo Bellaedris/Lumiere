@@ -119,6 +119,15 @@ public:
     void Allocate(PixelFormat format, GLUtils::DataType dataType);
 
     /**
+     * \brief Allocate storage for a number of mipmaps. This should be done on allocated textures. Once the mips have been
+     * allocated, the texture will be considered final and CANNOT be resized.
+     * Useful to build a mip chain.
+     * \param levels number of mip levels that we want to allocate. When requesting a level n, it is possible that some mips
+     * will have a size < 1. In that case, the function will allocate the maximal number of integer size mips.
+     */
+    void AllocateMipmapsStorage(int levels);
+
+    /**
      * \brief Allocate the memory again, using the same formats and data types, but to take into account any change
      * that could've happened in between.
      */
