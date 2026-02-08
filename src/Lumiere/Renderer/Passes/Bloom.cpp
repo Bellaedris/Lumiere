@@ -28,8 +28,22 @@ Bloom::Bloom(uint32_t width, uint32_t height)
         .wrapMode = gpu::Texture::RepeatMirror
     };
 
-    gpu::TexturePtr upsample = ResourcesManager::Instance()->CreateTexture(BLOOM_NAME, mipChainDesc);
+    gpu::Texture::TextureDesc compositeDesc
+    {
+        .target = gpu::Texture::Target2D,
+        .width = static_cast<int>(m_width * 2),
+        .height = static_cast<int>(m_height * 2),
+        .format = gpu::Texture::PixelFormat::RGBA,
+        .dataType = gpu::GLUtils::Float,
+        .minFilter = gpu::Texture::Nearest,
+        .magFilter = gpu::Texture::Nearest,
+        .wrapMode = gpu::Texture::ClampToEdge
+    };
+
+    gpu::TexturePtr upsample = ResourcesManager::Instance()->CreateTexture(BLOOM_MASK_NAME, mipChainDesc);
     upsample->AllocateMipmapsStorage(6);
+
+    ResourcesManager::Instance()->CreateTexture(BLOOM_NAME, compositeDesc);
 
     std::vector<gpu::Shader::ShaderSource> downsampleSources =
     {
@@ -42,6 +56,12 @@ Bloom::Bloom(uint32_t width, uint32_t height)
         {gpu::Shader::ShaderType::Compute, "shaders/bloom_upsample.comp"}
     };
     ResourcesManager::Instance()->CacheShader(BLOOM_UPSAMPLE_SHADER_NAME, upsampleSources);
+
+    std::vector<gpu::Shader::ShaderSource> compositeSources =
+    {
+        {gpu::Shader::ShaderType::Compute, "shaders/bloom_composite.comp"}
+    };
+    ResourcesManager::Instance()->CacheShader(BLOOM_COMPOSITE_SHADER_NAME, compositeSources);
 }
 
 void Bloom::Render(const SceneDesc &scene)
@@ -54,7 +74,7 @@ void Bloom::Render(const SceneDesc &scene)
     gpu::TexturePtr shaded = ResourcesManager::Instance()->GetTexture(ShadePBR::SHADE_PBR_NAME);
     shaded->Bind(0);
 
-    gpu::TexturePtr mipChain = ResourcesManager::Instance()->GetTexture(BLOOM_NAME);
+    gpu::TexturePtr mipChain = ResourcesManager::Instance()->GetTexture(BLOOM_MASK_NAME);
     mipChain->BindImage(1, 0, gpu::GLUtils::Access::Write);
 
     downsampleShader->UniformData("mipLevel", 1);
@@ -91,6 +111,21 @@ void Bloom::Render(const SceneDesc &scene)
 
         divider *= 2.f;
     }
+
+    // compose
+    gpu::ShaderPtr compositeShader = ResourcesManager::Instance()->GetShader(BLOOM_COMPOSITE_SHADER_NAME);
+    compositeShader->Bind();
+    compositeShader->UniformData("intensity", m_intensity);
+
+    shaded->Bind(0);
+    compositeShader->UniformData("source", 0);
+    mipChain->Bind(1);
+    compositeShader->UniformData("bloomInput", 1);
+    gpu::TexturePtr result = ResourcesManager::Instance()->GetTexture(BLOOM_NAME);
+    result->BindImage(3, 0, gpu::GLUtils::Write);
+
+    compositeShader->Dispatch(std::ceil(m_width * 2 / 16) + 1, std::ceil(m_height * 2 / 16) + 1, 1);
+    compositeShader->Wait();
 }
 
 void Bloom::RenderUI()
@@ -98,14 +133,6 @@ void Bloom::RenderUI()
     if (ImGui::TreeNode("Bloom"))
     {
         ImGui::SliderFloat("Intensity", &m_intensity, .0f, 1.f);
-        if (ImGui::CollapsingHeader("Preview"))
-        {
-            ImGui::Text("Bloom downsample");
-            IMGUI_PASS_DEBUG_IMAGE_OPENGL(BLOOM_NAME);
-
-            ImGui::Text("Bloom upsample");
-            IMGUI_PASS_DEBUG_IMAGE_OPENGL(BLOOM_NAME);
-        }
         ImGui::TreePop();
     }
 }
@@ -117,12 +144,14 @@ void Bloom::Rebuild(uint32_t width, uint32_t height)
 
     // once we assigned the texture storage with Texture::AllocateMipmapsStorage, the texture becomes immutable. We
     // cannot reallocate its size, we have to recreate a new texture.
+    int iWidth = static_cast<int>(m_width);
+    int iHeight = static_cast<int>(m_height);
 
     gpu::Texture::TextureDesc mipChainDesc
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(m_width),
-        .height = static_cast<int>(m_height),
+        .width = iWidth,
+        .height = iHeight,
         .format = gpu::Texture::PixelFormat::RGBA,
         .dataType = gpu::GLUtils::Float,
         .minFilter = gpu::Texture::LinearMipMapLinear,
@@ -130,10 +159,11 @@ void Bloom::Rebuild(uint32_t width, uint32_t height)
         .wrapMode = gpu::Texture::RepeatMirror
     };
 
-    gpu::TexturePtr downsample = ResourcesManager::Instance()->CreateTexture(BLOOM_NAME, mipChainDesc);
+    gpu::TexturePtr downsample = ResourcesManager::Instance()->CreateTexture(BLOOM_MASK_NAME, mipChainDesc);
     downsample->AllocateMipmapsStorage(6);
 
-    gpu::TexturePtr upsample = ResourcesManager::Instance()->CreateTexture(BLOOM_NAME, mipChainDesc);
-    upsample->AllocateMipmapsStorage(6);
+    gpu::TexturePtr composite = ResourcesManager::Instance()->GetTexture(BLOOM_NAME);
+    composite->SetSize(static_cast<int>(width), static_cast<int>(height));
+    composite->Reallocate();
 }
 }

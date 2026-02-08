@@ -6,6 +6,7 @@
 
 #include "Bloom.h"
 #include "ShadePBR.h"
+#include "Vignette.h"
 #include "Lumiere/ResourcesManager.h"
 #include "Lumiere/Renderer/RenderPipeline.h"
 
@@ -32,7 +33,7 @@ Tonemap::Tonemap(uint32_t width, uint32_t height)
         .magFilter = gpu::Texture::Nearest,
         .wrapMode = gpu::Texture::WrapMode::ClampToBorder
     };
-    ResourcesManager::Instance()->CreateTexture(RenderPipeline::RENDERED_FRAME_NAME, output);
+    ResourcesManager::Instance()->CreateTexture(TONEMAP_NAME, output);
 }
 
 void Tonemap::Render(const SceneDesc &scene)
@@ -41,16 +42,12 @@ void Tonemap::Render(const SceneDesc &scene)
     tonemapCompute->Bind();
     tonemapCompute->UniformData("technique", m_technique);
     tonemapCompute->UniformData("gamma", m_gamma);
-    tonemapCompute->UniformData("bloomIntensity", m_bloomIntensity);
 
-    gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(ShadePBR::SHADE_PBR_NAME);
+    gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(Bloom::BLOOM_NAME);
     frame->BindImage(0, 0, gpu::GLUtils::Read);
 
-    gpu::TexturePtr out = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
+    gpu::TexturePtr out = ResourcesManager::Instance()->GetTexture(TONEMAP_NAME);
     out->BindImage(1, 0, gpu::GLUtils::Write);
-
-    gpu::TexturePtr bloomInput = ResourcesManager::Instance()->GetTexture(Bloom::BLOOM_NAME);
-    bloomInput->Bind(2);
 
     tonemapCompute->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
     tonemapCompute->Wait();
@@ -74,7 +71,6 @@ void Tonemap::RenderUI()
             ImGui::EndCombo();
         }
         ImGui::InputFloat("Gamma", &m_gamma);
-        ImGui::SliderFloat("Bloom Intensity", &m_bloomIntensity, .0f, 1.f);
         ImGui::TreePop();
     }
 }
@@ -84,7 +80,7 @@ void Tonemap::Rebuild(uint32_t width, uint32_t height)
     m_width = width;
     m_height = height;
 
-    gpu::TexturePtr outline = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
+    gpu::TexturePtr outline = ResourcesManager::Instance()->GetTexture(TONEMAP_NAME);
     outline->SetSize(static_cast<int>(width), static_cast<int>(height));
     outline->Reallocate();
 }
