@@ -23,7 +23,11 @@ namespace lum::gfx
 
     void MaterialPBR::Bind(const gpu::ShaderPtr& shader)
     {
-        m_albedoTexture->Bind(0);
+        gpu::TexturePtr albedo = m_albedoTexture == nullptr
+                                       ? ResourcesManager::Instance()->GetTexture
+                                       (ResourcesManager::DEFAULT_TEXTURE_WHITE_NAME)
+                                       : m_albedoTexture;
+        albedo->Bind(0);
         shader->UniformData("AlbedoTexture", 0);
 
         if (m_normalTexture != nullptr)
