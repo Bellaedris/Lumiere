@@ -60,5 +60,8 @@ public:
     void UpdatePosition(glm::vec3 dir, float dt);
 
     void SetAspect(float aspect);
+
+    float ZNear() const { return m_znear; };
+    float ZFar() const { return m_zfar; };
 };
 }
