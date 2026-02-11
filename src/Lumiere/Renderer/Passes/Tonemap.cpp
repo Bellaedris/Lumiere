@@ -5,6 +5,7 @@
 #include "Tonemap.h"
 
 #include "Bloom.h"
+#include "DepthOfField.h"
 #include "ShadePBR.h"
 #include "Vignette.h"
 #include "Lumiere/ResourcesManager.h"
@@ -43,7 +44,7 @@ void Tonemap::Render(const SceneDesc &scene)
     tonemapCompute->UniformData("technique", m_technique);
     tonemapCompute->UniformData("gamma", m_gamma);
 
-    gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(Bloom::BLOOM_NAME);
+    gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(DepthOfField::DOF_NAME);
     frame->BindImage(0, 0, gpu::GLUtils::Read);
 
     gpu::TexturePtr out = ResourcesManager::Instance()->GetTexture(TONEMAP_NAME);
