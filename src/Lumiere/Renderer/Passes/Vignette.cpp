@@ -6,6 +6,7 @@
 
 #include "Bloom.h"
 #include "ChromaticAberration.h"
+#include "ColorAdjustments.h"
 #include "Lumiere/ResourcesManager.h"
 #include "Lumiere/Renderer/RenderPipeline.h"
 
@@ -41,7 +42,7 @@ void Vignette::Render(const SceneDesc &scene)
     vignetteShader->Bind();
     vignetteShader->UniformData("radius", m_radius);
 
-    gpu::TexturePtr in = ResourcesManager::Instance()->GetTexture(ChromaticAberration::CHROMATIC_ABERRATION_NAME);
+    gpu::TexturePtr in = ResourcesManager::Instance()->GetTexture(ColorAdjustments::COLOR_ADJUSTMENTS_NAME);
     in->Bind(0);
 
     gpu::TexturePtr output = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
