@@ -6,11 +6,11 @@
 #include <vector>
 
 #include "IPass.h"
+#include "Lumiere/ProfilerGPU.h"
 #include "Lumiere/Events/EventHandler.h"
 
 namespace lum::rdr
 {
-
 #define IMGUI_PASS_DEBUG_IMAGE_OPENGL(textureName) ImGui::Image(ResourcesManager::Instance()->GetTexture(textureName)->Handle(), RenderPipeline::DEBUG_DISPLAY_SIZE, ImVec2(0, 1), ImVec2(1, 0));
 
 class RenderPipeline
@@ -23,7 +23,7 @@ private:
         glm::vec3 position;
     };
 
-    std::vector<IPass*> m_passes;
+    std::vector<std::shared_ptr<IPass>> m_passes;
     std::unique_ptr<gpu::Buffer> m_cameraData;
     std::shared_ptr<evt::EventHandler> m_eventHandler;
 public:
@@ -31,9 +31,9 @@ public:
     constexpr static ImVec2 DEBUG_DISPLAY_SIZE = ImVec2(200.f, 200.f);
 
     RenderPipeline(const std::shared_ptr<evt::EventHandler>& handler);
-    void Render(const SceneDesc &scene) const;
+    void Render(const FrameData &frameData) const;
     void RenderUI();
-    void AddPass(IPass* pass);
+    void AddPass(const std::shared_ptr<IPass>& pass);
 
     /**
      * \brief Rebuild the pipeline to account for a new final resolution size

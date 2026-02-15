@@ -17,19 +17,19 @@ RenderPipeline::RenderPipeline(const std::shared_ptr<evt::EventHandler>& handler
     LUM_SUB_TO_EVENT(m_eventHandler, evt::EventType::FramebufferResized, RenderPipeline::OnEvent);
 }
 
-void RenderPipeline::Render(const SceneDesc &scene) const
+void RenderPipeline::Render(const FrameData &frameData) const
 {
     // upload camera data
-    CameraData cameraData = {scene.Camera()->View(), scene.Camera()->Projection(), scene.Camera()->Position()};
+    CameraData cameraData = {frameData.scene->Camera()->View(), frameData.scene->Camera()->Projection(), frameData.scene->Camera()->Position()};
     m_cameraData->Write(sizeof(CameraData), &cameraData, lum::gpu::Buffer::DynamicDraw);
     m_cameraData->Bind(0);
 
     // upload light datas so the passes can use them
-    scene.Lights()->Update();
-    scene.Lights()->Bind(1, 2, 3);
+    frameData.scene->Lights()->Update();
+    frameData.scene->Lights()->Bind(1, 2, 3);
 
     for (const auto& pass : m_passes)
-        pass->Render(scene);
+        pass->Render(frameData);
 
     gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(RENDERED_FRAME_NAME);
     m_eventHandler->Emit(std::make_shared<evt::FrameRenderedEvent>(frame));
@@ -37,11 +37,11 @@ void RenderPipeline::Render(const SceneDesc &scene) const
 
 void RenderPipeline::RenderUI()
 {
-    for (IPass* pass : m_passes)
+    for (const std::shared_ptr<IPass>& pass : m_passes)
         pass->RenderUI();
 }
 
-void RenderPipeline::AddPass(IPass *pass)
+void RenderPipeline::AddPass(const std::shared_ptr<IPass>& pass)
 {
     m_passes.push_back(pass);
 }
