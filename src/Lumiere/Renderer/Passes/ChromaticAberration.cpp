@@ -34,8 +34,11 @@ ChromaticAberration::ChromaticAberration(uint32_t width, uint32_t height)
     ResourcesManager::Instance()->CreateTexture(CHROMATIC_ABERRATION_NAME, output);
 }
 
-void ChromaticAberration::Render(const SceneDesc &scene)
+void ChromaticAberration::Render(const FrameData &frameData)
 {
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->BeginScope("Chromatic Aberration");
+
     gpu::ShaderPtr aberrationShader = ResourcesManager::Instance()->GetShader(CHROMATIC_ABERRATION_SHADER_NAME);
     aberrationShader->Bind();
     aberrationShader->UniformData("samples", m_samples);
@@ -50,6 +53,9 @@ void ChromaticAberration::Render(const SceneDesc &scene)
 
     aberrationShader->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
     aberrationShader->Wait();
+
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->EndScope("Chromatic Aberration");
 }
 
 void ChromaticAberration::RenderUI()

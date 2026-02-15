@@ -36,8 +36,11 @@ CompositeNPR::CompositeNPR(uint32_t width, uint32_t height)
     ResourcesManager::Instance()->CacheShader(COMPOSITE_NPR_SHADER_NAME, sources);
 }
 
-void CompositeNPR::Render(const SceneDesc &scene)
+void CompositeNPR::Render(const FrameData &frameData)
 {
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->BeginScope("CompositeNPR");
+
     m_framebuffer->Bind(gpu::Framebuffer::ReadWrite);
     gpu::GLUtils::Clear();
 
@@ -55,6 +58,9 @@ void CompositeNPR::Render(const SceneDesc &scene)
     ResourcesManager::Instance()->GetMesh(ResourcesManager::DEFAULT_PLANE_NAME)->Draw();
 
     m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
+
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->EndScope("CompositeNPR");
 }
 
 void CompositeNPR::RenderUI()

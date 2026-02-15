@@ -98,14 +98,17 @@ DepthOfField::DepthOfField(uint32_t width, uint32_t height)
     ResourcesManager::Instance()->CacheShader(DOF_COMPOSITE_SHADER_NAME, compositeSources);
 }
 
-void DepthOfField::Render(const SceneDesc &scene)
+void DepthOfField::Render(const FrameData &frameData)
 {
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->BeginScope("DoF");
+
     gpu::ShaderPtr separationShader = ResourcesManager::Instance()->GetShader(DOF_PLANE_SEPARATION_SHADER_NAME);
     separationShader->Bind();
     separationShader->UniformData("focusDistance", m_focusDistance);
     separationShader->UniformData("focusRange", m_focusRange);
-    separationShader->UniformData("zNear", scene.Camera()->ZNear());
-    separationShader->UniformData("zFar", scene.Camera()->ZFar());
+    separationShader->UniformData("zNear", frameData.scene->Camera()->ZNear());
+    separationShader->UniformData("zFar", frameData.scene->Camera()->ZFar());
 
     gpu::TexturePtr depth = ResourcesManager::Instance()->GetTexture(GBuffer::GBUFFER_DEPTH_NAME);
     gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(Bloom::BLOOM_NAME);
@@ -174,32 +177,6 @@ void DepthOfField::Render(const SceneDesc &scene)
     bokehFillShader->Dispatch(std::ceil(m_intermediateWidth / 16) + 1, std::ceil(m_intermediateHeight / 16) + 1, 1);
     bokehFillShader->Wait();
 
-    // blurNearShader->UniformData("direction", 1);
-    // tempBlur->Bind(0);
-    // nearBlur->BindImage(2, 0, gpu::GLUtils::ReadWrite);
-    // blurNearShader->Dispatch(std::ceil(m_intermediateWidth / 16) + 1, std::ceil(m_intermediateHeight / 16) + 1, 1);
-    // blurNearShader->Wait();
-
-    // blur the far field in the 2 axis
-    // gpu::ShaderPtr blurFarShader = ResourcesManager::Instance()->GetShader(DOF_FAR_BLUR_SHADER_NAME);
-    // blurFarShader->Bind();
-    // blurFarShader->UniformData("direction", 0);
-    //
-    // frame->Bind(0);
-    // blurFarShader->UniformData("frame", 0);
-    // separation->Bind(1);
-    // blurFarShader->UniformData("coc", 1);
-    // tempBlur->BindImage(2, 0, gpu::GLUtils::Write);
-    //
-    // blurFarShader->Dispatch(std::ceil(m_intermediateWidth / 16) + 1, std::ceil(m_intermediateHeight / 16) + 1, 1);
-    // blurFarShader->Wait();
-    //
-    // blurFarShader->UniformData("direction", 1);
-    // tempBlur->Bind(0);
-    // farBlur->BindImage(2, 0, gpu::GLUtils::ReadWrite);
-    // blurFarShader->Dispatch(std::ceil(m_intermediateWidth / 16) + 1, std::ceil(m_intermediateHeight / 16) + 1, 1);
-    // blurFarShader->Wait();
-
     // composite into the final result
     gpu::ShaderPtr compositeShader = ResourcesManager::Instance()->GetShader(DOF_COMPOSITE_SHADER_NAME);
     compositeShader->Bind();
@@ -218,6 +195,9 @@ void DepthOfField::Render(const SceneDesc &scene)
 
     compositeShader->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
     compositeShader->Wait();
+
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->EndScope("DoF");
 }
 
 void DepthOfField::RenderUI()

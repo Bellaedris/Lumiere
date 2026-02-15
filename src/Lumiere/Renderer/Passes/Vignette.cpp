@@ -36,8 +36,11 @@ Vignette::Vignette(uint32_t width, uint32_t height)
     ResourcesManager::Instance()->CreateTexture(RenderPipeline::RENDERED_FRAME_NAME, output);
 }
 
-void Vignette::Render(const SceneDesc &scene)
+void Vignette::Render(const FrameData &frameData)
 {
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->BeginScope("Vignette");
+
     gpu::ShaderPtr vignetteShader = ResourcesManager::Instance()->GetShader(VIGNETTE_SHADER_NAME);
     vignetteShader->Bind();
     vignetteShader->UniformData("radius", m_radius);
@@ -50,6 +53,9 @@ void Vignette::Render(const SceneDesc &scene)
 
     vignetteShader->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
     vignetteShader->Wait();
+
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->EndScope("Vignette");
 }
 
 void Vignette::RenderUI()

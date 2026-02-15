@@ -79,8 +79,11 @@ GBuffer::GBuffer(uint32_t width, uint32_t height)
     m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
 }
 
-void GBuffer::Render(const SceneDesc &scene)
+void GBuffer::Render(const FrameData &frameData)
 {
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->BeginScope("GBuffer");
+
     m_framebuffer->Bind(gpu::Framebuffer::ReadWrite);
     gpu::GLUtils::Clear();
     gpu::ShaderPtr gbufferShader = ResourcesManager::Instance()->GetShader(GBUFFER_SHADER_NAME);
@@ -88,16 +91,20 @@ void GBuffer::Render(const SceneDesc &scene)
 
     glm::mat4 modelMatrix(1.f);
     //modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(1, 0, 0));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(.01, .01, .01));
     gbufferShader->UniformData("modelMatrix", modelMatrix);
     gbufferShader->UniformData("normalMatrix", glm::inverse(glm::transpose(modelMatrix)));
 
-    scene.ForEach([&](const gfx::SubMesh& primitive, const gfx::MaterialPtr& material)
+    frameData.scene->ForEach([&](const gfx::SubMesh& primitive, const gfx::MaterialPtr& material)
     {
         material->Bind(gbufferShader);
         primitive.Draw();
     });
 
     m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
+
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->EndScope("GBuffer");
 }
 
 void GBuffer::RenderUI()

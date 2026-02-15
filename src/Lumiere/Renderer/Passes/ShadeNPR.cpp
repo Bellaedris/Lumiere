@@ -38,8 +38,11 @@ ShadeNPR::ShadeNPR(uint32_t width, uint32_t height)
     ResourcesManager::Instance()->CacheTexture(gpu::Texture::Target2D, SHADE_NPR_PENCIL_SHADOW_TEXTURE_PATH, true);
 }
 
-void ShadeNPR::Render(const SceneDesc &scene)
+void ShadeNPR::Render(const FrameData &frameData)
 {
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->BeginScope("ShadeNPR");
+
     m_framebuffer->Bind(gpu::Framebuffer::ReadWrite);
     gpu::GLUtils::Clear();
 
@@ -47,8 +50,8 @@ void ShadeNPR::Render(const SceneDesc &scene)
     shader->Bind();
 
     // send light counts, as we will actively need them
-    shader->UniformData("pointLightCount", scene.Lights()->PointLightCount());
-    shader->UniformData("dirLightCount", scene.Lights()->DirectionalLightCount());
+    shader->UniformData("pointLightCount", frameData.scene->Lights()->PointLightCount());
+    shader->UniformData("dirLightCount", frameData.scene->Lights()->DirectionalLightCount());
 
     gpu::TexturePtr gbufferAlbedo = ResourcesManager::Instance()->GetTexture(GBuffer::GBUFFER_ALBEDO_NAME);
     gbufferAlbedo->Bind(0);
@@ -73,6 +76,9 @@ void ShadeNPR::Render(const SceneDesc &scene)
     ResourcesManager::Instance()->GetMesh(ResourcesManager::DEFAULT_PLANE_NAME)->Draw();
 
     m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
+
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->EndScope("ShadeNPR");
 }
 
 void ShadeNPR::RenderUI()

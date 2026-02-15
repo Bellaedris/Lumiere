@@ -34,8 +34,11 @@ Outline::Outline(uint32_t width, uint32_t height)
     ResourcesManager::Instance()->CreateTexture(OUTLINE_SOBEL_NAME, greyscale);
 }
 
-void Outline::Render(const SceneDesc &scene)
+void Outline::Render(const FrameData &frameData)
 {
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->BeginScope("Outline");
+
     gpu::ShaderPtr outlineCompute = ResourcesManager::Instance()->GetShader(OUTLINE_SOBEL_SHADER_NAME);
     outlineCompute->Bind();
     outlineCompute->UniformData("lineWidth", m_lineWidth);
@@ -48,6 +51,9 @@ void Outline::Render(const SceneDesc &scene)
 
     outlineCompute->Dispatch(std::ceil(m_width / 16), std::ceil(m_height / 16), 1);
     outlineCompute->Wait();
+
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->EndScope("Outline");
 }
 
 void Outline::RenderUI()

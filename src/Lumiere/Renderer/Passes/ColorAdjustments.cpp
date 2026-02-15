@@ -33,8 +33,11 @@ ColorAdjustments::ColorAdjustments(uint32_t width, uint32_t height)
     ResourcesManager::Instance()->CreateTexture(COLOR_ADJUSTMENTS_NAME, output);
 }
 
-void ColorAdjustments::Render(const SceneDesc &scene)
+void ColorAdjustments::Render(const FrameData &frameData)
 {
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->BeginScope("Color Adjustments");
+
     gpu::ShaderPtr colorShader = ResourcesManager::Instance()->GetShader(COLOR_ADJUSTMENTS_SHADER_NAME);
     colorShader->Bind();
     colorShader->UniformData("brightness", m_postExposure);
@@ -49,6 +52,9 @@ void ColorAdjustments::Render(const SceneDesc &scene)
 
     colorShader->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
     colorShader->Wait();
+
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->EndScope("Color Adjustments");
 }
 
 void ColorAdjustments::RenderUI()

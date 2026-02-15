@@ -27,8 +27,8 @@ namespace lum
 
         std::unique_ptr<rdr::Camera> m_camera {nullptr};
 
+        int m_frameIndex;
         gpu::Timer<std::chrono::seconds> m_deltaTimer;
-        gpu::GPUTimer m_gpuDeltaTime;
         float m_deltaTime;
 
         // analytics, debug only

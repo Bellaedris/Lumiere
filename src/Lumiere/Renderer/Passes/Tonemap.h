@@ -26,7 +26,7 @@ public:
 
     Tonemap(uint32_t width, uint32_t height);
 
-    void Render(const SceneDesc &scene) override;
+    void Render(const FrameData &frameData) override;
     void RenderUI() override;
 
     void Rebuild(uint32_t width, uint32_t height) override;

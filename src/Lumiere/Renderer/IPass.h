@@ -7,8 +7,18 @@
 #include "Lumiere/GPU/Framebuffer.h"
 #include <imgui/imgui.h>
 
+#include "Lumiere/ProfilerGPU.h"
+
 namespace lum::rdr
 {
+
+struct FrameData
+{
+    const std::shared_ptr<SceneDesc>& scene;
+    int frameIndex;
+    const std::shared_ptr<ProfilerGPU>& profilerGPU;
+};
+
 /**
  * \brief A pass is a framebuffer that will be drawn by reading a scene and its parameters
  */
@@ -18,7 +28,7 @@ class IPass
 public:
     virtual ~IPass() = default;
 
-    virtual void Render(const SceneDesc &scene) = 0;
+    virtual void Render(const FrameData &frameData) = 0;
     virtual void RenderUI() = 0;
     virtual void Rebuild(uint32_t width, uint32_t height) = 0;
 };

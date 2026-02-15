@@ -27,9 +27,9 @@ void LightList::AddDirLight(const glm::vec3 &direction, float intensity, const g
 
 void LightList::Update()
 {
-    float t = std::chrono::duration<float>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-    m_directionalLights[0].m_direction.x = std::sin(t);
-    m_directionalLights[0].m_direction.z = std::cosf(t);
+    // float t = std::chrono::duration<float>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    // m_directionalLights[0].m_direction.x = std::sin(t);
+    // m_directionalLights[0].m_direction.z = std::cosf(t);
 
     m_pointLightsBuffer->Write(sizeof(PointLight) * m_pointLights.size(), m_pointLights.data(), gpu::Buffer::DynamicDraw);
     m_dirLightBuffer->Write(sizeof(DirectionalLight) * m_directionalLights.size(), m_directionalLights.data(), gpu::Buffer::DynamicDraw);

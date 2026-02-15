@@ -26,13 +26,12 @@ namespace lum
         {
             PreRender();
 
-            m_gpuDeltaTime.Begin();
             Render();
-            m_gpuDeltaTime.End();
             RenderUI();
 
             m_window->SwapBuffers();
             m_window->PollEvents();
+            m_frameIndex++;
         }
     }
 

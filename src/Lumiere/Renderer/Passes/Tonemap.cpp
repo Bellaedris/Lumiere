@@ -37,8 +37,11 @@ Tonemap::Tonemap(uint32_t width, uint32_t height)
     ResourcesManager::Instance()->CreateTexture(TONEMAP_NAME, output);
 }
 
-void Tonemap::Render(const SceneDesc &scene)
+void Tonemap::Render(const FrameData &frameData)
 {
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->BeginScope("Tonemap");
+
     gpu::ShaderPtr tonemapCompute = ResourcesManager::Instance()->GetShader(TONEMAP_SHADER_NAME);
     tonemapCompute->Bind();
     tonemapCompute->UniformData("technique", m_technique);
@@ -52,6 +55,9 @@ void Tonemap::Render(const SceneDesc &scene)
 
     tonemapCompute->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
     tonemapCompute->Wait();
+
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->EndScope("Tonemap");
 }
 
 void Tonemap::RenderUI()

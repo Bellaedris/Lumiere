@@ -64,8 +64,11 @@ Bloom::Bloom(uint32_t width, uint32_t height)
     ResourcesManager::Instance()->CacheShader(BLOOM_COMPOSITE_SHADER_NAME, compositeSources);
 }
 
-void Bloom::Render(const SceneDesc &scene)
+void Bloom::Render(const FrameData &frameData)
 {
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->BeginScope("Bloom");
+
     // downsample using the latest render
     gpu::ShaderPtr downsampleShader = ResourcesManager::Instance()->GetShader(BLOOM_DOWNSAMPLE_SHADER_NAME);
     downsampleShader->Bind();
@@ -126,6 +129,9 @@ void Bloom::Render(const SceneDesc &scene)
 
     compositeShader->Dispatch(std::ceil(m_width * 2 / 16) + 1, std::ceil(m_height * 2 / 16) + 1, 1);
     compositeShader->Wait();
+
+    if (frameData.profilerGPU)
+        frameData.profilerGPU->EndScope("Bloom");
 }
 
 void Bloom::RenderUI()
