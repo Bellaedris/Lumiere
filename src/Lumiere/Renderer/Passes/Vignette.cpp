@@ -7,6 +7,7 @@
 #include "Bloom.h"
 #include "ChromaticAberration.h"
 #include "ColorAdjustments.h"
+#include "LensDistortion.h"
 #include "Lumiere/ResourcesManager.h"
 #include "Lumiere/Renderer/RenderPipeline.h"
 
@@ -44,8 +45,9 @@ void Vignette::Render(const FrameData &frameData)
     gpu::ShaderPtr vignetteShader = ResourcesManager::Instance()->GetShader(VIGNETTE_SHADER_NAME);
     vignetteShader->Bind();
     vignetteShader->UniformData("radius", m_radius);
+    vignetteShader->UniformData("tightness", m_tightness);
 
-    gpu::TexturePtr in = ResourcesManager::Instance()->GetTexture(ColorAdjustments::COLOR_ADJUSTMENTS_NAME);
+    gpu::TexturePtr in = ResourcesManager::Instance()->GetTexture(LensDistortion::LENS_DISTORTION_NAME);
     in->Bind(0);
 
     gpu::TexturePtr output = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
@@ -63,6 +65,7 @@ void Vignette::RenderUI()
     if (ImGui::TreeNode("Vignette"))
     {
         ImGui::SliderFloat("Radius", &m_radius, 0.0f, 2.0f);
+        ImGui::InputFloat("Tightness", &m_tightness);
         ImGui::TreePop();
     }
 }

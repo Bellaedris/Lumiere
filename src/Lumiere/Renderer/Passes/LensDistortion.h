@@ -7,23 +7,22 @@
 
 namespace lum::rdr
 {
-class Vignette : public IPass
+class LensDistortion : public IPass
 {
 protected:
     uint32_t m_width;
     uint32_t m_height;
 
-    float m_radius    {.5f};
-    float m_tightness {1.f};
-
+    float m_distortionIntensity {1.f};
+    float m_distortionTightness {8.f};
 public:
     #pragma region Constants
-    constexpr static const char* VIGNETTE_SHADER_NAME = "VIGNETTE_SHADER";
+    constexpr static const char* LENS_DISTORTION_SHADER_NAME = "LENS_DISTORTION_SHADER";
 
-    constexpr static const char* VIGNETTE_NAME = "VIGNETTE_MASK";
+    constexpr static const char* LENS_DISTORTION_NAME = "LENS_DISTORTION";
     #pragma endregion Constants
 
-    Vignette(uint32_t width, uint32_t height);
+    LensDistortion(uint32_t width, uint32_t height);
     void Render(const FrameData &frameData) override;
 
     void RenderUI() override;
