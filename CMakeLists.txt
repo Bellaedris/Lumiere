@@ -9,7 +9,7 @@ set(CMAKE_CXX_EXTENSIONS ON)
 
 set(glm_DIR "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 # fix for a weird bug that caused windows.h to expand "max" and "min" keywords into macros.
 add_definitions(-DNOMINMAX)
@@ -74,4 +74,10 @@ target_link_libraries(Lumiere
         ${CMAKE_DL_LIBS}
         STB_IMAGE
         ${ASSIMP_LIBRARY}
+)
+
+add_custom_command(TARGET Lumiere POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_LIST_DIR}/dlls"
+        "${CMAKE_SOURCE_DIR}/bin"
 )
