@@ -16,8 +16,8 @@ private:
     uint32_t m_intermediateWidth;
     uint32_t m_intermediateHeight;
 
-    float m_focusDistance = 2;
-    float m_focusRange = 5;
+    float m_focusDistance = 0;
+    float m_focusRange = 100;
     int m_expansionSize = 5;
     int m_expansionBlur = 5;
 public:

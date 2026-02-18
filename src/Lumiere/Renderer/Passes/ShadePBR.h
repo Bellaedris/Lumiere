@@ -11,6 +11,8 @@ class ShadePBR : public IPass
 {
 private:
     std::unique_ptr<gpu::Framebuffer> m_framebuffer {nullptr};
+
+    bool m_accumulate {false};
 public:
     #pragma region Constants
     constexpr static const char* SHADE_PBR_NAME = "SHADE_PBR";

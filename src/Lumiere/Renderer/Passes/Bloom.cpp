@@ -4,6 +4,7 @@
 
 #include "Bloom.h"
 
+#include "CameraSensor.h"
 #include "ShadePBR.h"
 #include "Lumiere/ResourcesManager.h"
 #include "Lumiere/GPU/Shader.h"
@@ -74,7 +75,7 @@ void Bloom::Render(const FrameData &frameData)
     downsampleShader->Bind();
 
     // first invocation uses the shaded image as input
-    gpu::TexturePtr shaded = ResourcesManager::Instance()->GetTexture(ShadePBR::SHADE_PBR_NAME);
+    gpu::TexturePtr shaded = ResourcesManager::Instance()->GetTexture(CameraSensor::CAMERA_SENSOR_NAME);
     shaded->Bind(0);
 
     gpu::TexturePtr mipChain = ResourcesManager::Instance()->GetTexture(BLOOM_MASK_NAME);

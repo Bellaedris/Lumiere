@@ -41,7 +41,16 @@ void ShadePBR::Render(const FrameData &frameData)
         frameData.profilerGPU->BeginScope("ShadePBR");
 
     m_framebuffer->Bind(gpu::Framebuffer::ReadWrite);
-    gpu::GLUtils::Clear();
+    if (m_accumulate)
+    {
+        glEnable(GL_BLEND);
+        glBlendEquation(GL_FUNC_ADD);
+        glBlendFunc(GL_ONE, GL_ONE);
+    }
+    else
+    {
+        gpu::GLUtils::Clear();
+    }
 
     gpu::ShaderPtr shader = ResourcesManager::Instance()->GetShader(SHADE_PBR_SHADER_NAME);
     shader->Bind();
@@ -78,14 +87,17 @@ void ShadePBR::Render(const FrameData &frameData)
 
     m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
 
+    glDisable(GL_BLEND);
+
     if (frameData.profilerGPU)
         frameData.profilerGPU->EndScope("ShadePBR");
 }
 
 void ShadePBR::RenderUI()
 {
-   if (ImGui::TreeNode("ShadeNPR"))
+   if (ImGui::TreeNode("ShadePBR"))
    {
+       ImGui::Checkbox("Accumulate", &m_accumulate);
        if (ImGui::CollapsingHeader("Preview"))
        {
            IMGUI_PASS_DEBUG_IMAGE_OPENGL(SHADE_PBR_NAME);
