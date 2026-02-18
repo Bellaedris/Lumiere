@@ -7,14 +7,24 @@
 
 namespace lum::rdr
 {
+/**
+ * \brief Heavily inspired by Unity's work here
+ * https://github.com/Unity-Technologies/PostProcessing/blob/v2/PostProcessing/Runtime/Effects/LensDistortion.cs
+ * and here
+ * https://github.com/Unity-Technologies/PostProcessing/blob/v2/PostProcessing/Shaders/Builtins/Distortion.hlsl
+ */
 class LensDistortion : public IPass
 {
 protected:
     uint32_t m_width;
     uint32_t m_height;
 
+    float m_intensityX {1.f};
+    float m_intensityY {1.f};
+    float m_centerX {.0f};
+    float m_centerY {.0f};
     float m_distortionIntensity {1.f};
-    float m_distortionTightness {8.f};
+    float m_screenScale {1.f};
 public:
     #pragma region Constants
     constexpr static const char* LENS_DISTORTION_SHADER_NAME = "LENS_DISTORTION_SHADER";

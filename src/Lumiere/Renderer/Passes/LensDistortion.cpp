@@ -42,8 +42,21 @@ void LensDistortion::Render(const FrameData &frameData)
 
     gpu::ShaderPtr distortionShader = ResourcesManager::Instance()->GetShader(LENS_DISTORTION_SHADER_NAME);
     distortionShader->Bind();
-    distortionShader->UniformData("distortionTightness", m_distortionTightness);
-    distortionShader->UniformData("distortionIntensity", m_distortionIntensity);
+
+    float amount = 1.6f * std::max(abs(m_distortionIntensity), 1.f);
+    float theta = glm::radians(std::min(160.f, amount));
+    float sigma = 2.f * std::tan(theta * .5f);
+
+    distortionShader->UniformData
+    (
+        "distortionCenterScale",
+        glm::vec4(m_centerX, m_centerY, std::max(m_intensityX, 1e-4f), std::max(m_intensityY, 1e-4f))
+    );
+    distortionShader->UniformData
+    (
+        "distortionAmount",
+        glm::vec4(m_distortionIntensity >= .0f ? theta : 1.f / theta, sigma, 1.f / m_screenScale, m_distortionIntensity)
+    );
 
     gpu::TexturePtr input = ResourcesManager::Instance()->GetTexture(ColorAdjustments::COLOR_ADJUSTMENTS_NAME);
     input->Bind(0);
@@ -62,8 +75,15 @@ void LensDistortion::RenderUI()
 {
     if (ImGui::TreeNode("Lens Distortion"))
     {
-        ImGui::SliderFloat("Tightness", &m_distortionTightness, 1.f, 16.f);
-        ImGui::SliderFloat("Intensity", &m_distortionIntensity, 0.f, 10.f);
+        ImGui::SliderFloat("Center X", &m_centerX, -1.f, 1.f);
+        ImGui::SliderFloat("Center Y", &m_centerY, -1.f, 1.f);
+        ImGui::SliderFloat("Intensity X", &m_intensityX, .0f, 1.f);
+        ImGui::SliderFloat("Intensity Y", &m_intensityY, .0f, 1.f);
+
+        ImGui::SetItemTooltip("Global scale factor, zoom in or out so the distortion doesn't leave spilling borders on the corners");
+        ImGui::SliderFloat("Screen scaling", &m_screenScale, .01f, 5.f);
+        ImGui::SetItemTooltip("Amount of distortion");
+        ImGui::SliderFloat("Intensity", &m_distortionIntensity, -100.f, 100.f);
         ImGui::TreePop();
     }
 }
