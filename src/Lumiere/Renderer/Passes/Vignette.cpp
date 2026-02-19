@@ -13,9 +13,16 @@
 
 namespace  lum::rdr
 {
+REGISTER_TO_PASS_FACTORY(Vignette, Vignette::VIGNETTE_NAME)
+
 Vignette::Vignette(uint32_t width, uint32_t height)
     : m_width(width)
     , m_height(height)
+{
+    Vignette::Init();
+}
+
+void Vignette::Init()
 {
     std::vector<gpu::Shader::ShaderSource> shaderSources =
     {
@@ -26,8 +33,8 @@ Vignette::Vignette(uint32_t width, uint32_t height)
     gpu::Texture::TextureDesc output
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(width),
-        .height = static_cast<int>(height),
+        .width = static_cast<int>(m_width),
+        .height = static_cast<int>(m_height),
         .format = gpu::Texture::RGBA,
         .dataType = gpu::GLUtils::UnsignedByte,
         .minFilter = gpu::Texture::Nearest,
@@ -78,5 +85,25 @@ void Vignette::Rebuild(uint32_t width, uint32_t height)
     gpu::TexturePtr output = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
     output->SetSize(static_cast<int>(width), static_cast<int>(height));
     output->Reallocate();
+}
+
+void Vignette::Serialize(YAML::Node passes)
+{
+    YAML::Node vignette;
+    vignette["name"] = VIGNETTE_NAME;
+    vignette["width"] = m_width;
+    vignette["height"] = m_height;
+    vignette["radius"] = m_radius;
+    vignette["tightness"] = m_tightness;
+    passes.push_back(vignette);
+}
+
+void Vignette::Deserialize(YAML::Node pass)
+{
+    m_width = pass["width"].as<uint32_t>();
+    m_height = pass["height"].as<uint32_t>();
+    m_radius = pass["radius"].as<float>();
+    m_tightness = pass["tightness"].as<float>();
+    Init();
 }
 }

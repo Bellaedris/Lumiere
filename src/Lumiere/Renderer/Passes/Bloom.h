@@ -11,9 +11,12 @@ class Bloom : public IPass
 {
     uint32_t m_width;
     uint32_t m_height;
+    uint32_t m_mipWidth;
+    uint32_t m_mipHeight;
 
     float m_intensity { .0f };
 public:
+    static bool m_registered;
     #pragma region Constants
     constexpr static int MIP_CHAIN_SIZE = 6;
     constexpr static const char* BLOOM_MASK_NAME = "BLOOM_MASK";
@@ -23,12 +26,18 @@ public:
     constexpr static const char* BLOOM_COMPOSITE_SHADER_NAME = "BLOOM_COMPOSITE_SHADER";
     #pragma endregion Constants
 
+    Bloom() = default;
     Bloom(uint32_t width, uint32_t height);
+
+    void Init() override;
 
     void Render(const FrameData &frameData) override;
 
     void RenderUI() override;
 
     void Rebuild(uint32_t width, uint32_t height) override;
+
+    void Serialize(YAML::Node passes) override;
+    void Deserialize(YAML::Node pass) override;
 };
 }

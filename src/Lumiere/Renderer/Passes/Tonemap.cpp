@@ -13,9 +13,16 @@
 
 namespace lum::rdr
 {
+REGISTER_TO_PASS_FACTORY(Tonemap, Tonemap::TONEMAP_NAME)
+
 Tonemap::Tonemap(uint32_t width, uint32_t height)
     : m_width(width)
     , m_height(height)
+{
+    Tonemap::Init();
+}
+
+void Tonemap::Init()
 {
     std::vector<gpu::Shader::ShaderSource> shaderSources =
     {
@@ -26,8 +33,8 @@ Tonemap::Tonemap(uint32_t width, uint32_t height)
     gpu::Texture::TextureDesc output
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(width),
-        .height = static_cast<int>(height),
+        .width = static_cast<int>(m_width),
+        .height = static_cast<int>(m_height),
         .format = gpu::Texture::RGBA,
         .dataType = gpu::GLUtils::UnsignedByte,
         .minFilter = gpu::Texture::Nearest,
@@ -90,5 +97,25 @@ void Tonemap::Rebuild(uint32_t width, uint32_t height)
     gpu::TexturePtr outline = ResourcesManager::Instance()->GetTexture(TONEMAP_NAME);
     outline->SetSize(static_cast<int>(width), static_cast<int>(height));
     outline->Reallocate();
+}
+
+void Tonemap::Serialize(YAML::Node passes)
+{
+    YAML::Node tonemap;
+    tonemap["name"] = TONEMAP_NAME;
+    tonemap["width"] = m_width;
+    tonemap["height"] = m_height;
+    tonemap["technique"] = m_technique;
+    tonemap["gamma"] = m_gamma;
+    passes.push_back(tonemap);
+}
+
+void Tonemap::Deserialize(YAML::Node pass)
+{
+    m_width = pass["width"].as<uint32_t>();
+    m_height = pass["height"].as<uint32_t>();
+    m_technique = pass["technique"].as<int>();
+    m_gamma = pass["gamma"].as<float>();
+    Init();
 }
 } // lum::rdr

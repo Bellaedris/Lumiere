@@ -16,11 +16,12 @@ private:
     uint32_t m_intermediateWidth;
     uint32_t m_intermediateHeight;
 
-    float m_focusDistance = 0;
-    float m_focusRange = 100;
-    int m_expansionSize = 5;
-    int m_expansionBlur = 5;
+    float m_focusDistance {0};
+    float m_focusRange {100};
+    int m_expansionSize {5};
+    int m_expansionBlur {5};
 public:
+    static bool m_registered;
     #pragma region Constants
     constexpr static const char* DOF_SEPARATION_NAME = "DOF_SEPARATION";
     constexpr static const char* DOF_TEMP_BLUR_NAME = "DOF_TEMP_BLUR";
@@ -38,12 +39,18 @@ public:
     constexpr static const char* DOF_COMPOSITE_SHADER_NAME = "DOF_COMPOSITE_SHADER";
     #pragma endregion Constants
 
+    DepthOfField() = default;
     DepthOfField(uint32_t width, uint32_t height);
+
+    void Init() override;
 
     void Render(const FrameData &frameData) override;
 
     void RenderUI() override;
 
     void Rebuild(uint32_t width, uint32_t height) override;
+
+    void Serialize(YAML::Node passes) override;
+    void Deserialize(YAML::Node pass) override;
 };
 } // lum::rdr

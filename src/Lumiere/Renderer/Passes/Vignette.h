@@ -17,17 +17,23 @@ protected:
     float m_tightness {1.f};
 
 public:
+    static bool m_registered;
     #pragma region Constants
     constexpr static const char* VIGNETTE_SHADER_NAME = "VIGNETTE_SHADER";
 
     constexpr static const char* VIGNETTE_NAME = "VIGNETTE_MASK";
     #pragma endregion Constants
 
+    Vignette() = default;
     Vignette(uint32_t width, uint32_t height);
-    void Render(const FrameData &frameData) override;
 
+    void Init() override;
+    void Render(const FrameData &frameData) override;
     void RenderUI() override;
 
     void Rebuild(uint32_t width, uint32_t height) override;
+
+    void Serialize(YAML::Node passes) override;
+    void Deserialize(YAML::Node pass) override;
 };
 }

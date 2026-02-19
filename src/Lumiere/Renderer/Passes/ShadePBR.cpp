@@ -10,14 +10,23 @@
 
 namespace lum::rdr
 {
+REGISTER_TO_PASS_FACTORY(ShadePBR, ShadePBR::SHADE_PBR_NAME);
+
 ShadePBR::ShadePBR(uint32_t width, uint32_t height)
-    : m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height))
+    : m_width(width)
+    , m_height(height)
+    , m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height))
+{
+    ShadePBR::Init();
+}
+
+void ShadePBR::Init()
 {
     gpu::Texture::TextureDesc floatDesc
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(width),
-        .height = static_cast<int>(height),
+        .width = static_cast<int>(m_width),
+        .height = static_cast<int>(m_height),
         .format = gpu::Texture::RGBA,
         .dataType = gpu::GLUtils::Float,
         .minFilter = gpu::Texture::LinearMipMapLinear,
@@ -109,9 +118,28 @@ void ShadePBR::RenderUI()
 
 void ShadePBR::Rebuild(uint32_t width, uint32_t height)
 {
+    m_width = width;
+    m_height = height;
     m_framebuffer->SetSize(width, height);
     gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(SHADE_PBR_NAME);
     frame->SetSize(static_cast<int>(width), static_cast<int>(height));
     frame->Reallocate();
+}
+
+void ShadePBR::Serialize(YAML::Node passes)
+{
+    YAML::Node shade;
+    shade["name"] = SHADE_PBR_NAME;
+    shade["width"] = m_width;
+    shade["height"] = m_height;
+    passes.push_back(shade);
+}
+
+void ShadePBR::Deserialize(YAML::Node pass)
+{
+    m_width = pass["width"].as<uint32_t>();
+    m_height = pass["height"].as<uint32_t>();
+    m_framebuffer = std::make_unique<gpu::Framebuffer>(m_width, m_height);
+    Init();
 }
 } // lum::rdr

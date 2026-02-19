@@ -11,9 +11,16 @@
 
 namespace  lum::rdr
 {
+REGISTER_TO_PASS_FACTORY(LensDistortion, LensDistortion::LENS_DISTORTION_NAME)
+
 LensDistortion::LensDistortion(uint32_t width, uint32_t height)
     : m_width(width)
     , m_height(height)
+{
+    LensDistortion::Init();
+}
+
+void LensDistortion::Init()
 {
     std::vector<gpu::Shader::ShaderSource> shaderSources =
     {
@@ -24,8 +31,8 @@ LensDistortion::LensDistortion(uint32_t width, uint32_t height)
     gpu::Texture::TextureDesc output
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(width),
-        .height = static_cast<int>(height),
+        .width = static_cast<int>(m_width),
+        .height = static_cast<int>(m_height),
         .format = gpu::Texture::RGBA,
         .dataType = gpu::GLUtils::UnsignedByte,
         .minFilter = gpu::Texture::Nearest,
@@ -96,5 +103,33 @@ void LensDistortion::Rebuild(uint32_t width, uint32_t height)
     gpu::TexturePtr output = ResourcesManager::Instance()->GetTexture(LENS_DISTORTION_NAME);
     output->SetSize(static_cast<int>(width), static_cast<int>(height));
     output->Reallocate();
+}
+
+void LensDistortion::Serialize(YAML::Node passes)
+{
+    YAML::Node distortion;
+    distortion["name"] = LENS_DISTORTION_NAME;
+    distortion["width"] = m_width;
+    distortion["height"] = m_height;
+    distortion["intensityX"] = m_intensityX;
+    distortion["intensityY"] = m_intensityY;
+    distortion["centerX"] = m_centerX;
+    distortion["centerY"] = m_centerY;
+    distortion["distortionIntensity"] = m_distortionIntensity;
+    distortion["screenScale"] = m_screenScale;
+    passes.push_back(distortion);
+}
+
+void LensDistortion::Deserialize(YAML::Node pass)
+{
+    m_width = pass["width"].as<uint32_t>();
+    m_height = pass["height"].as<uint32_t>();
+    m_intensityX = pass["intensityX"].as<float>();
+    m_intensityY = pass["intensityY"].as<float>();
+    m_centerX = pass["centerX"].as<float>();
+    m_centerY = pass["centerY"].as<float>();
+    m_distortionIntensity = pass["distortionIntensity"].as<float>();
+    m_screenScale = pass["screenScale"].as<float>();
+    Init();
 }
 }

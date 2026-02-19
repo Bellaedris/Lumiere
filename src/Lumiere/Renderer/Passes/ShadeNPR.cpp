@@ -11,14 +11,23 @@
 
 namespace lum::rdr
 {
+REGISTER_TO_PASS_FACTORY(ShadeNPR, ShadeNPR::SHADE_NPR_NAME)
+
 ShadeNPR::ShadeNPR(uint32_t width, uint32_t height)
-    : m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height))
+    : m_width(width)
+    , m_height(height)
+    , m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height))
+{
+    ShadeNPR::Init();
+}
+
+void ShadeNPR::Init()
 {
     gpu::Texture::TextureDesc rgbDesc
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(width),
-        .height = static_cast<int>(height),
+        .width = static_cast<int>(m_width),
+        .height = static_cast<int>(m_height),
         .format = gpu::Texture::RGBA,
         .dataType = gpu::GLUtils::UnsignedByte,
         .minFilter = gpu::Texture::LinearMipMapLinear,
@@ -35,7 +44,7 @@ ShadeNPR::ShadeNPR(uint32_t width, uint32_t height)
     };
     ResourcesManager::Instance()->CacheShader(SHADE_NPR_SHADER_NAME, sources);
 
-    ResourcesManager::Instance()->CacheTexture(gpu::Texture::Target2D, SHADE_NPR_PENCIL_SHADOW_TEXTURE_PATH, true);
+    ResourcesManager::Instance()->CacheTexture(gpu::Texture::Target2D, SHADE_NPR_PENCIL_SHADOW_TEXTURE_PATH, false);
 }
 
 void ShadeNPR::Render(const FrameData &frameData)
@@ -96,9 +105,28 @@ void ShadeNPR::RenderUI()
 
 void ShadeNPR::Rebuild(uint32_t width, uint32_t height)
 {
+    m_width = width;
+    m_height = height;
     m_framebuffer->SetSize(width, height);
     gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(SHADE_NPR_NAME);
     frame->SetSize(static_cast<int>(width), static_cast<int>(height));
     frame->Reallocate();
+}
+
+void ShadeNPR::Serialize(YAML::Node passes)
+{
+    YAML::Node shade;
+    shade["name"] = SHADE_NPR_NAME;
+    shade["width"] = m_width;
+    shade["height"] = m_height;
+    passes.push_back(shade);
+}
+
+void ShadeNPR::Deserialize(YAML::Node pass)
+{
+    m_width = pass["width"].as<uint32_t>();
+    m_height = pass["height"].as<uint32_t>();
+    m_framebuffer = std::make_unique<gpu::Framebuffer>(m_width, m_height);
+    Init();
 }
 } // lum::rdr

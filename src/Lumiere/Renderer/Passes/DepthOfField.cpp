@@ -11,11 +11,18 @@
 
 namespace lum::rdr
 {
+REGISTER_TO_PASS_FACTORY(DepthOfField, DepthOfField::DOF_NAME);
+
 DepthOfField::DepthOfField(uint32_t width, uint32_t height)
     : m_width(width)
     , m_height(height)
     , m_intermediateWidth(width / 2)
     , m_intermediateHeight(height / 2)
+{
+    DepthOfField::Init();
+}
+
+void DepthOfField::Init()
 {
     gpu::Texture::TextureDesc nearFarDesc =
     {
@@ -257,5 +264,31 @@ void DepthOfField::Rebuild(uint32_t width, uint32_t height)
     gpu::TexturePtr dof = ResourcesManager::Instance()->GetTexture(DOF_NAME);
     dof->SetSize(static_cast<int>(m_width), static_cast<int>(m_height));
     dof->Reallocate();
+}
+
+void DepthOfField::Serialize(YAML::Node passes)
+{
+    YAML::Node dof;
+    dof["name"] = DOF_NAME;
+    dof["width"] = m_width;
+    dof["height"] = m_height;
+    dof["focusDistance"] = m_focusDistance;
+    dof["focusRange"] = m_focusRange;
+    dof["expansionSize"] = m_expansionSize;
+    dof["expansionBlur"] = m_expansionBlur;
+    passes.push_back(dof);
+}
+
+void DepthOfField::Deserialize(YAML::Node pass)
+{
+    m_width = pass["width"].as<uint32_t>();
+    m_height = pass["height"].as<uint32_t>();
+    m_intermediateWidth = m_width / 2;
+    m_intermediateHeight = m_height / 2;
+    m_focusDistance = pass["focusDistance"].as<float>();
+    m_focusRange = pass["focusRange"].as<float>();
+    m_expansionSize = pass["expansionSize"].as<int>();
+    m_expansionBlur = pass["expansionBlur"].as<int>();
+    Init();
 }
 } // lum::rdr

@@ -4,20 +4,30 @@
 
 #include "GBuffer.h"
 
+#include "PassFactory.h"
 #include "Lumiere/ResourcesManager.h"
 #include "Lumiere/Renderer/RenderPipeline.h"
 
 namespace lum::rdr
 {
+REGISTER_TO_PASS_FACTORY(GBuffer, GBuffer::GBUFFER_NAME)
+
 GBuffer::GBuffer(uint32_t width, uint32_t height)
-    : m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height))
+    : m_width(width)
+    , m_height(height)
+    , m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height))
+{
+    GBuffer::Init();
+}
+
+void GBuffer::Init()
 {
     // attach to our framebuffer the textures we will render to
     gpu::Texture::TextureDesc albedoDesc
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(width),
-        .height = static_cast<int>(height),
+        .width = static_cast<int>(m_width),
+        .height = static_cast<int>(m_height),
         .format = gpu::Texture::RGBA,
         .dataType = gpu::GLUtils::UnsignedByte,
         .minFilter = gpu::Texture::LinearMipMapLinear,
@@ -28,8 +38,8 @@ GBuffer::GBuffer(uint32_t width, uint32_t height)
     gpu::Texture::TextureDesc floatingDesc
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(width),
-        .height = static_cast<int>(height),
+        .width = static_cast<int>(m_width),
+        .height = static_cast<int>(m_height),
         .format = gpu::Texture::RGBA,
         .dataType = gpu::GLUtils::Float,
         .minFilter = gpu::Texture::Linear,
@@ -40,8 +50,8 @@ GBuffer::GBuffer(uint32_t width, uint32_t height)
     gpu::Texture::TextureDesc depthDesc
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(width),
-        .height = static_cast<int>(height),
+        .width = static_cast<int>(m_width),
+        .height = static_cast<int>(m_height),
         .format = gpu::Texture::DepthComponent,
         .dataType = gpu::GLUtils::Float,
         .minFilter = gpu::Texture::Linear,
@@ -137,6 +147,8 @@ void GBuffer::RenderUI()
 
 void GBuffer::Rebuild(uint32_t width, uint32_t height)
 {
+    m_width = width;
+    m_height = width;
     m_framebuffer->SetSize(width, height);
     int iWidth = static_cast<int>(width);
     int iHeight = static_cast<int>(height);
@@ -165,5 +177,22 @@ void GBuffer::Rebuild(uint32_t width, uint32_t height)
     gpu::TexturePtr depth = ResourcesManager::Instance()->GetTexture(GBUFFER_DEPTH_NAME);
     depth->SetSize(iWidth, iHeight);
     depth->Reallocate();
+}
+
+void GBuffer::Serialize(YAML::Node passes)
+{
+    YAML::Node gbuffer;
+    gbuffer["name"] = GBUFFER_NAME;
+    gbuffer["width"] = m_width;
+    gbuffer["height"] = m_height;
+    passes.push_back(gbuffer);
+}
+
+void GBuffer::Deserialize(YAML::Node pass)
+{
+    m_width = pass["width"].as<uint32_t>();
+    m_height = pass["height"].as<uint32_t>();
+    m_framebuffer = std::make_unique<gpu::Framebuffer>(m_width, m_height);
+    Init();
 }
 } // lum::rdr

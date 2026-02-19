@@ -11,14 +11,23 @@
 
 namespace lum::rdr
 {
+REGISTER_TO_PASS_FACTORY(CompositeNPR, CompositeNPR::COMPOSITE_NPR_NAME);
+
 CompositeNPR::CompositeNPR(uint32_t width, uint32_t height)
-    : m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height))
+    : m_width(width)
+    , m_height(height)
+    , m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height))
+{
+    CompositeNPR::Init();
+}
+
+void CompositeNPR::Init()
 {
     gpu::Texture::TextureDesc rgbDesc
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(width),
-        .height = static_cast<int>(height),
+        .width = static_cast<int>(m_width),
+        .height = static_cast<int>(m_height),
         .format = gpu::Texture::RGBA,
         .dataType = gpu::GLUtils::UnsignedByte,
         .minFilter = gpu::Texture::LinearMipMapLinear,
@@ -70,9 +79,28 @@ void CompositeNPR::RenderUI()
 
 void CompositeNPR::Rebuild(uint32_t width, uint32_t height)
 {
+    m_width = width;
+    m_height = height;
     m_framebuffer->SetSize(width, height);
     gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
     frame->SetSize(static_cast<int>(width), static_cast<int>(height));
     frame->Reallocate();
+}
+
+void CompositeNPR::Serialize(YAML::Node passes)
+{
+    YAML::Node composite;
+    composite["name"] = COMPOSITE_NPR_NAME;
+    composite["width"] = m_width;
+    composite["height"] = m_height;
+    passes.push_back(composite);
+}
+
+void CompositeNPR::Deserialize(YAML::Node pass)
+{
+    m_width = pass["width"].as<uint32_t>();
+    m_height = pass["height"].as<uint32_t>();
+    m_framebuffer = std::make_unique<gpu::Framebuffer>(m_width, m_height);
+    Init();
 }
 } // lum::rdr

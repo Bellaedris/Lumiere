@@ -15,19 +15,27 @@ protected:
 
     int m_samples {3};
     float m_intensity {.5f};
-    int m_exponent {4};
+    float m_exponent {4};
 public:
+    static bool m_registered;
     #pragma region Constants
     constexpr static const char* CHROMATIC_ABERRATION_SHADER_NAME = "CHROMATIC_ABERRATION_SHADER";
 
     constexpr static const char* CHROMATIC_ABERRATION_NAME = "CHROMATIC_ABERRATION";
     #pragma endregion Constants
 
+    ChromaticAberration() = default;
     ChromaticAberration(uint32_t width, uint32_t height);
+
+    void Init() override;
+
     void Render(const FrameData &frameData) override;
 
     void RenderUI() override;
 
     void Rebuild(uint32_t width, uint32_t height) override;
+
+    void Serialize(YAML::Node passes) override;
+    void Deserialize(YAML::Node pass) override;
 };
 }

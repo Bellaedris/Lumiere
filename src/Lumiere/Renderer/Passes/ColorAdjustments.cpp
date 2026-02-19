@@ -9,9 +9,16 @@
 
 namespace lum::rdr
 {
+REGISTER_TO_PASS_FACTORY(ColorAdjustments, ColorAdjustments::COLOR_ADJUSTMENTS_NAME);
+
 ColorAdjustments::ColorAdjustments(uint32_t width, uint32_t height)
     : m_width(width)
     , m_height(height)
+{
+    ColorAdjustments::Init();
+}
+
+void ColorAdjustments::Init()
 {
     std::vector<gpu::Shader::ShaderSource> shaderSources =
     {
@@ -22,8 +29,8 @@ ColorAdjustments::ColorAdjustments(uint32_t width, uint32_t height)
     gpu::Texture::TextureDesc output
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(width),
-        .height = static_cast<int>(height),
+        .width = static_cast<int>(m_width),
+        .height = static_cast<int>(m_height),
         .format = gpu::Texture::RGBA,
         .dataType = gpu::GLUtils::UnsignedByte,
         .minFilter = gpu::Texture::Nearest,
@@ -76,5 +83,27 @@ void ColorAdjustments::Rebuild(uint32_t width, uint32_t height)
     gpu::TexturePtr output = ResourcesManager::Instance()->GetTexture(COLOR_ADJUSTMENTS_NAME);
     output->SetSize(static_cast<int>(width), static_cast<int>(height));
     output->Reallocate();
+}
+
+void ColorAdjustments::Serialize(YAML::Node passes)
+{
+    YAML::Node adjustments;
+    adjustments["name"] = COLOR_ADJUSTMENTS_NAME;
+    adjustments["width"] = m_width;
+    adjustments["height"] = m_height;
+    adjustments["postExposure"] = m_postExposure;
+    adjustments["contrast"] = m_contrast;
+    adjustments["saturation"] = m_saturation;
+    passes.push_back(adjustments);
+}
+
+void ColorAdjustments::Deserialize(YAML::Node pass)
+{
+    m_width = pass["width"].as<uint32_t>();
+    m_height = pass["height"].as<uint32_t>();
+    m_postExposure = pass["postExposure"].as<float>();
+    m_contrast = pass["contrast"].as<float>();
+    m_saturation = pass["saturation"].as<float>();
+    Init();
 }
 }

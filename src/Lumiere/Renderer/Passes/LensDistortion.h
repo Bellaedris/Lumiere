@@ -26,17 +26,25 @@ protected:
     float m_distortionIntensity {1.f};
     float m_screenScale {1.f};
 public:
+    static bool m_registered;
     #pragma region Constants
     constexpr static const char* LENS_DISTORTION_SHADER_NAME = "LENS_DISTORTION_SHADER";
 
     constexpr static const char* LENS_DISTORTION_NAME = "LENS_DISTORTION";
     #pragma endregion Constants
 
+    LensDistortion() = default;
     LensDistortion(uint32_t width, uint32_t height);
+
+    void Init() override;
+
     void Render(const FrameData &frameData) override;
 
     void RenderUI() override;
 
     void Rebuild(uint32_t width, uint32_t height) override;
+
+    void Serialize(YAML::Node passes) override;
+    void Deserialize(YAML::Node pass) override;
 };
 }

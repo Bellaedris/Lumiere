@@ -5,6 +5,7 @@
 #include "Bloom.h"
 
 #include "CameraSensor.h"
+#include "PassFactory.h"
 #include "ShadePBR.h"
 #include "Lumiere/ResourcesManager.h"
 #include "Lumiere/GPU/Shader.h"
@@ -13,15 +14,25 @@
 
 namespace lum::rdr
 {
+
+REGISTER_TO_PASS_FACTORY(Bloom, Bloom::BLOOM_NAME);
+
 Bloom::Bloom(uint32_t width, uint32_t height)
-    : m_width(width / 2)
-    , m_height(height / 2)
+    : m_width(width)
+    , m_height(height)
+    , m_mipWidth(width / 2)
+    , m_mipHeight(height / 2)
+{
+    Bloom::Init();
+}
+
+void Bloom::Init()
 {
     gpu::Texture::TextureDesc mipChainDesc
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(m_width),
-        .height = static_cast<int>(m_height),
+        .width = static_cast<int>(m_mipWidth),
+        .height = static_cast<int>(m_mipHeight),
         .format = gpu::Texture::PixelFormat::RGBA,
         .dataType = gpu::GLUtils::Float,
         .minFilter = gpu::Texture::LinearMipMapLinear,
@@ -32,8 +43,8 @@ Bloom::Bloom(uint32_t width, uint32_t height)
     gpu::Texture::TextureDesc compositeDesc
     {
         .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(m_width * 2),
-        .height = static_cast<int>(m_height * 2),
+        .width = static_cast<int>(m_width),
+        .height = static_cast<int>(m_height),
         .format = gpu::Texture::PixelFormat::RGBA,
         .dataType = gpu::GLUtils::Float,
         .minFilter = gpu::Texture::Nearest,
@@ -82,7 +93,7 @@ void Bloom::Render(const FrameData &frameData)
     mipChain->BindImage(1, 0, gpu::GLUtils::Access::Write);
 
     downsampleShader->UniformData("mipLevel", 1);
-    downsampleShader->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
+    downsampleShader->Dispatch(std::ceil(m_mipWidth / 16) + 1, std::ceil(m_mipHeight / 16) + 1, 1);
     downsampleShader->Wait();
 
     // subsequent invocations will read the above mip level
@@ -94,7 +105,7 @@ void Bloom::Render(const FrameData &frameData)
         mipChain->BindImage(1, i, gpu::GLUtils::Access::Read);
 
         downsampleShader->UniformData("mipLevel", i);
-        downsampleShader->Dispatch(std::ceil(m_width * divider / 16) + 1, std::ceil(m_height * divider / 16) + 1, 1);
+        downsampleShader->Dispatch(std::ceil(m_mipWidth * divider / 16) + 1, std::ceil(m_mipHeight * divider / 16) + 1, 1);
         downsampleShader->Wait();
     }
 
@@ -110,7 +121,7 @@ void Bloom::Render(const FrameData &frameData)
         mipChain->BindImage(1, i, gpu::GLUtils::Access::ReadWrite);
 
         upsampleShader->UniformData("mipLevel", i);
-        upsampleShader->Dispatch(std::ceil(m_width * divider / 16) + 1, std::ceil(m_height * divider / 16) + 1, 1);
+        upsampleShader->Dispatch(std::ceil(m_mipWidth * divider / 16) + 1, std::ceil(m_mipHeight * divider / 16) + 1, 1);
         upsampleShader->Wait();
 
         divider *= 2.f;
@@ -128,7 +139,7 @@ void Bloom::Render(const FrameData &frameData)
     gpu::TexturePtr result = ResourcesManager::Instance()->GetTexture(BLOOM_NAME);
     result->BindImage(3, 0, gpu::GLUtils::Write);
 
-    compositeShader->Dispatch(std::ceil(m_width * 2 / 16) + 1, std::ceil(m_height * 2 / 16) + 1, 1);
+    compositeShader->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
     compositeShader->Wait();
 
     if (frameData.profilerGPU)
@@ -146,13 +157,15 @@ void Bloom::RenderUI()
 
 void Bloom::Rebuild(uint32_t width, uint32_t height)
 {
-    m_width = width / 2;
-    m_height = height / 2;
+    m_width = width;
+    m_height = height;
+    m_mipWidth = width / 2;
+    m_mipHeight = height / 2;
 
     // once we assigned the texture storage with Texture::AllocateMipmapsStorage, the texture becomes immutable. We
     // cannot reallocate its size, we have to recreate a new texture.
-    int iWidth = static_cast<int>(m_width);
-    int iHeight = static_cast<int>(m_height);
+    int iWidth = static_cast<int>(m_mipWidth);
+    int iHeight = static_cast<int>(m_mipHeight);
 
     gpu::Texture::TextureDesc mipChainDesc
     {
@@ -172,5 +185,25 @@ void Bloom::Rebuild(uint32_t width, uint32_t height)
     gpu::TexturePtr composite = ResourcesManager::Instance()->GetTexture(BLOOM_NAME);
     composite->SetSize(static_cast<int>(width), static_cast<int>(height));
     composite->Reallocate();
+}
+
+void Bloom::Serialize(YAML::Node passes)
+{
+    YAML::Node bloom;
+    bloom["name"] = BLOOM_NAME;
+    bloom["width"] = m_width;
+    bloom["height"] = m_height;
+    bloom["intensity"] = m_intensity;
+    passes.push_back(bloom);
+}
+
+void Bloom::Deserialize(YAML::Node pass)
+{
+    m_width = pass["width"].as<uint32_t>();
+    m_height = pass["height"].as<uint32_t>();
+    m_mipWidth = m_width / 2;
+    m_mipHeight = m_height / 2;
+    m_intensity = pass["intensity"].as<float>();
+    Init();
 }
 }
