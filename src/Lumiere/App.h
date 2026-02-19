@@ -62,6 +62,11 @@ namespace lum
          */
         virtual void RenderUI() = 0;
 
+        /**
+         * \brief Called before app closure
+         */
+        virtual void Cleanup() = 0;
+
     public:
         App(int width, int height, int majorVersionHint = 4, int minorVersionHint = 6);
 

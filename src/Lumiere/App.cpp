@@ -33,6 +33,8 @@ namespace lum
             m_window->PollEvents();
             m_frameIndex++;
         }
+
+        Cleanup();
     }
 
     void App::PreRender()
