@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <map>
+#include <memory>
 
 namespace lum::gpu
 {

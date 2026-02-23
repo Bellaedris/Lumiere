@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <glad/glad.h>
 
 #include <stb/stb_image.h>

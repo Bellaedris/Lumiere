@@ -3,6 +3,8 @@
 //
 
 #pragma once
+#include <memory>
+
 #include "Lumiere/GPU/Buffer.h"
 
 namespace lum::rdr

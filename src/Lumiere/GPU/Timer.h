@@ -32,7 +32,7 @@ namespace lum::gpu
     public:
         Timer() { Reset(); };
         void Reset() { m_start = std::chrono::high_resolution_clock::now(); }
-        float Elapsed() { return std::chrono::duration<float, T::period>(std::chrono::high_resolution_clock::now() - m_start).count(); }
+        float Elapsed() { return std::chrono::duration<float, typename T::period>(std::chrono::high_resolution_clock::now() - m_start).count(); }
     };
 
     /**
