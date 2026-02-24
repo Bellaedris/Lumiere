@@ -6,6 +6,8 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include "InputManager.h"
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 
@@ -16,6 +18,11 @@ namespace lum
     private:
         static void framebuffer_size_callback(GLFWwindow *w, int width, int height);
         static void mouse_callback(GLFWwindow *w, double xpos, double ypos);
+        static void mouse_button_callback(GLFWwindow *w, int button, int action, int mods);
+        static void key_callback(GLFWwindow *w, int key, int scancode, int action, int mods);
+
+        static KeyCode GLFWKeyToKeyCode(int key);
+        static MouseButton GLFWMouseButtonToMouseButton(int button);
 
         GLFWwindow *m_window;
 

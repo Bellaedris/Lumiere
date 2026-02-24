@@ -3,6 +3,9 @@
 //
 
 #include "Window.h"
+
+#include <ranges>
+
 #include "VectorUtils.h"
 #include <stdexcept>
 
@@ -32,6 +35,8 @@ namespace lum
 
         glfwSetFramebufferSizeCallback(m_window, Window::framebuffer_size_callback);
         glfwSetCursorPosCallback(m_window, Window::mouse_callback);
+        glfwSetMouseButtonCallback(m_window, Window::mouse_button_callback);
+        glfwSetKeyCallback(m_window, Window::key_callback);
 
         glfwSetWindowUserPointer(m_window, this);
     }
@@ -43,6 +48,13 @@ namespace lum
 
     void Window::PollEvents()
     {
+        // update the input manager
+        for (auto &[isDown, downLastFrame] : InputManager::keyStates | std::views::values)
+            downLastFrame = isDown;
+
+        for (auto& [isDown, downLastFrame] : InputManager::mouseButtonStates | std::views::values)
+            downLastFrame = isDown;
+
         glfwPollEvents();
     }
 
@@ -71,6 +83,52 @@ namespace lum
         }
         else
             instance->UpdateMouseOffset(instance->m_lastX, instance->m_lastY);
+    }
+
+    void Window::mouse_button_callback(GLFWwindow *w, int button, int action, int mods)
+    {
+        MouseButton lButton = GLFWMouseButtonToMouseButton(button);
+        InputManager::mouseButtonStates[lButton].isDown = action == GLFW_PRESS;
+    }
+
+    void Window::key_callback(GLFWwindow *w, int key, int scancode, int action, int mods)
+    {
+        KeyCode lKey = GLFWKeyToKeyCode(key);
+
+        // here, we can have PRESS, RELEASE or REPEAT, so I can't just go the ternary path.
+        if (action == GLFW_PRESS)
+            InputManager::keyStates[lKey].isDown = true;
+        if (action == GLFW_RELEASE)
+            InputManager::keyStates[lKey].isDown = false;
+    }
+
+    KeyCode Window::GLFWKeyToKeyCode(int key)
+    {
+        switch (key)
+        {
+            case GLFW_KEY_W:            return KeyCode::lKeyW;
+            case GLFW_KEY_A:            return KeyCode::lKeyA;
+            case GLFW_KEY_S:            return KeyCode::lKeyS;
+            case GLFW_KEY_D:            return KeyCode::lKeyD;
+            case GLFW_KEY_Q:            return KeyCode::lKeyQ;
+            case GLFW_KEY_E:            return KeyCode::lKeyE;
+            case GLFW_KEY_LEFT_ALT:     return KeyCode::lKeyAlt;
+            case GLFW_KEY_LEFT_CONTROL: return KeyCode::lKeyCtrl;
+            case GLFW_KEY_LEFT_SHIFT:   return KeyCode::lKeyShift;
+            case GLFW_KEY_SPACE:        return KeyCode::lKeySpace;
+            default:                    return KeyCode::lKeyUnknown;
+        }
+    }
+
+    MouseButton Window::GLFWMouseButtonToMouseButton(int button)
+    {
+        switch (button)
+        {
+            case GLFW_MOUSE_BUTTON_LEFT:   return MouseButton::lLeftClick;
+            case GLFW_MOUSE_BUTTON_RIGHT:  return MouseButton::lRightClick;
+            case GLFW_MOUSE_BUTTON_MIDDLE: return MouseButton::lMiddleClick;
+            default:                       return MouseButton::lUnknownButton;
+        }
     }
 
     void Window::UpdateMouseOffset(double x, double y)
