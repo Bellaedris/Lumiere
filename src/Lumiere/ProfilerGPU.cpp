@@ -10,6 +10,11 @@ ProfilerGPU::ProfilerGPU()
     : m_frameStats(MAX_FRAMES_STORAGE)
 {}
 
+void ProfilerGPU::Reset()
+{
+    m_frameStats = std::vector<FrameStats>(MAX_FRAMES_STORAGE);
+}
+
 void ProfilerGPU::BeginScope(const std::string &handle)
 {
     // if the query does not exist, create it
