@@ -14,30 +14,16 @@
 #include "Passes/PassFactory.h"
 
 namespace lum::rdr {
-RenderPipeline::RenderPipeline(const std::string& name, const std::shared_ptr<evt::EventHandler>& handler)
+RenderPipeline::RenderPipeline(const std::string& name)
     : m_name(name)
-    , m_eventHandler(handler)
 {
-    m_cameraData = std::make_unique<lum::gpu::Buffer>(lum::gpu::Buffer::BufferType::Uniform);
-    LUM_SUB_TO_EVENT(m_eventHandler, evt::EventType::FramebufferResized, RenderPipeline::OnEvent);
+
 }
 
 void RenderPipeline::Render(const FrameData &frameData) const
 {
-    // upload camera data
-    CameraData cameraData = {frameData.scene->Camera()->View(), frameData.scene->Camera()->Projection(), frameData.scene->Camera()->Position()};
-    m_cameraData->Write(sizeof(CameraData), &cameraData, lum::gpu::Buffer::DynamicDraw);
-    m_cameraData->Bind(0);
-
-    // upload light datas so the passes can use them
-    frameData.scene->Lights()->Update();
-    frameData.scene->Lights()->Bind(1, 2, 3);
-
     for (const auto& pass : m_passes)
         pass->Render(frameData);
-
-    gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(RENDERED_FRAME_NAME);
-    m_eventHandler->Emit(std::make_shared<evt::FrameRenderedEvent>(frame));
 }
 
 void RenderPipeline::RenderUI()
