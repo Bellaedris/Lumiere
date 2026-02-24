@@ -24,13 +24,13 @@ namespace lum
 
         while(m_window->ShouldClose() == false)
         {
+            m_window->PollEvents();
             PreRender();
 
             Render();
             RenderUI();
 
             m_window->SwapBuffers();
-            m_window->PollEvents();
             m_frameIndex++;
         }
 
