@@ -56,7 +56,7 @@ void Outline::Render(const FrameData &frameData)
     gpu::TexturePtr outlineHorizontal = ResourcesManager::Instance()->GetTexture(OUTLINE_SOBEL_NAME);
     outlineHorizontal->BindImage(1, 0, gpu::GLUtils::Write);
 
-    outlineCompute->Dispatch(std::ceil(m_width / 16), std::ceil(m_height / 16), 1);
+    outlineCompute->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
     outlineCompute->Wait();
 
     if (frameData.profilerGPU)

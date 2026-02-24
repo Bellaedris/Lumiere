@@ -6,6 +6,7 @@
 
 #include "Outline.h"
 #include "ShadeNPR.h"
+#include "Lumiere/RendererManager.h"
 #include "Lumiere/ResourcesManager.h"
 #include "Lumiere/Renderer/RenderPipeline.h"
 
@@ -16,31 +17,14 @@ REGISTER_TO_PASS_FACTORY(CompositeNPR, CompositeNPR::COMPOSITE_NPR_NAME);
 CompositeNPR::CompositeNPR(uint32_t width, uint32_t height)
     : m_width(width)
     , m_height(height)
-    , m_framebuffer(std::make_unique<gpu::Framebuffer>(width, height))
 {
     CompositeNPR::Init();
 }
 
 void CompositeNPR::Init()
 {
-    gpu::Texture::TextureDesc rgbDesc
-    {
-        .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(m_width),
-        .height = static_cast<int>(m_height),
-        .format = gpu::Texture::RGBA,
-        .dataType = gpu::GLUtils::UnsignedByte,
-        .minFilter = gpu::Texture::LinearMipMapLinear,
-        .magFilter = gpu::Texture::Linear,
-        .wrapMode = gpu::Texture::WrapMode::ClampToBorder
-    };
-
-    gpu::TexturePtr albedo = ResourcesManager::Instance()->CreateTexture(RenderPipeline::RENDERED_FRAME_NAME, rgbDesc);
-    m_framebuffer->Attach(gpu::Framebuffer::Color, albedo, 0);
-
     std::vector<gpu::Shader::ShaderSource> sources = {
-        {gpu::Shader::Vertex, "shaders/compositeNPR.vert"},
-        {gpu::Shader::Fragment, "shaders/compositeNPR.frag"}
+        {gpu::Shader::Compute, "shaders/compositeNPR.comp"}
     };
     ResourcesManager::Instance()->CacheShader(COMPOSITE_NPR_SHADER_NAME, sources);
 }
@@ -50,9 +34,6 @@ void CompositeNPR::Render(const FrameData &frameData)
     if (frameData.profilerGPU)
         frameData.profilerGPU->BeginScope("CompositeNPR");
 
-    m_framebuffer->Bind(gpu::Framebuffer::ReadWrite);
-    gpu::GLUtils::Clear();
-
     gpu::ShaderPtr shader = ResourcesManager::Instance()->GetShader(COMPOSITE_NPR_SHADER_NAME);
     shader->Bind();
 
@@ -61,12 +42,14 @@ void CompositeNPR::Render(const FrameData &frameData)
     shader->UniformData("ShadedNPR", 0);
 
     gpu::TexturePtr outlines = ResourcesManager::Instance()->GetTexture(Outline::OUTLINE_SOBEL_NAME);
-    outlines->Bind(5);
-    shader->UniformData("Outlines", 5);
+    outlines->Bind(1);
+    shader->UniformData("Outlines", 1);
 
-    ResourcesManager::Instance()->GetMesh(ResourcesManager::DEFAULT_PLANE_NAME)->Draw();
+    gpu::TexturePtr result = ResourcesManager::Instance()->GetTexture(RendererManager::RENDERED_FRAME_NAME);
+    result->BindImage(2, 0, gpu::GLUtils::Write);
 
-    m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
+    shader->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
+    shader->Wait();
 
     if (frameData.profilerGPU)
         frameData.profilerGPU->EndScope("CompositeNPR");
@@ -81,10 +64,6 @@ void CompositeNPR::Rebuild(uint32_t width, uint32_t height)
 {
     m_width = width;
     m_height = height;
-    m_framebuffer->SetSize(width, height);
-    gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
-    frame->SetSize(static_cast<int>(width), static_cast<int>(height));
-    frame->Reallocate();
 }
 
 void CompositeNPR::Serialize(YAML::Node passes)
@@ -100,7 +79,6 @@ void CompositeNPR::Deserialize(YAML::Node pass)
 {
     m_width = pass["width"].as<uint32_t>();
     m_height = pass["height"].as<uint32_t>();
-    m_framebuffer = std::make_unique<gpu::Framebuffer>(m_width, m_height);
     Init();
 }
 } // lum::rdr
