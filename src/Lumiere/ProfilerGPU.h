@@ -30,6 +30,7 @@ public:
     constexpr static int MAX_FRAMES_STORAGE = 100;
 
     ProfilerGPU();
+    void Reset();
 
     void BeginScope(const std::string& handle);
     void EndScope(const std::string& handle);
