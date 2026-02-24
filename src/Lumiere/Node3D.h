@@ -1,0 +1,57 @@
+//
+// Created by belle on 23/02/2026.
+//
+
+#pragma once
+#include <memory>
+
+#include "Transform.h"
+#include "stduuid/uuid.h"
+
+namespace lum
+{
+class Node3D
+{
+private:
+    // eventually use an std list if we want easy reordering of childs
+    std::vector<std::unique_ptr<Node3D>> m_children;
+    Node3D* m_parent {nullptr};
+    Transform m_transform {};
+
+    std::string m_name {"Node3D"};
+    uuids::uuid m_uuid;
+    /**
+     * \brief We track the depth of each node for utility. Root node has 0, root childs have 1, and so on
+     */
+    int         m_depth {0};
+
+public:
+    Node3D();
+    Node3D(std::string name);
+
+    void AddChild();
+    void AddChild(std::unique_ptr<Node3D>& child);
+    void RemoveChild(const std::unique_ptr<Node3D>& child);
+    void TransferChild(Node3D* child, Node3D* destination);
+    void Update();
+    void UpdateSelfAndChildren();
+
+    /**
+     * \brief Checks if a node has another node as one of its upper level parent. Can be used to avoid moving a node into
+     * a node who is part of the hierarchy of the moved node
+     * \param node Node to check for parentality
+     * \return true if the node is an upper level parent, false otherwise
+     */
+    bool HasAncestor(Node3D* node) const;
+    [[nodiscard]] bool HasChild() const { return m_children.empty() == false; }
+
+    void SetName(const std::string& name) { m_name = name; }
+
+    [[nodiscard]] const std::vector<std::unique_ptr<Node3D>>& Children() const { return m_children; }
+    [[nodiscard]] const Transform& Transform() const { return m_transform; }
+    [[nodiscard]] Node3D* Parent() const { return m_parent; }
+    [[nodiscard]] const std::string& Name() const { return m_name; }
+    [[nodiscard]] const uuids::uuid UUID() const { return m_uuid; }
+    [[nodiscard]] int Depth() const { return m_depth; }
+};
+} // lum
