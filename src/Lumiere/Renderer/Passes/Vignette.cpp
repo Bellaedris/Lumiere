@@ -5,9 +5,8 @@
 #include "Vignette.h"
 
 #include "Bloom.h"
-#include "ChromaticAberration.h"
-#include "ColorAdjustments.h"
 #include "LensDistortion.h"
+#include "Lumiere/RendererManager.h"
 #include "Lumiere/ResourcesManager.h"
 #include "Lumiere/Renderer/RenderPipeline.h"
 
@@ -29,19 +28,6 @@ void Vignette::Init()
         {gpu::Shader::ShaderType::Compute, "shaders/vignette.comp"}
     };
     ResourcesManager::Instance()->CacheShader(VIGNETTE_SHADER_NAME, shaderSources);
-
-    gpu::Texture::TextureDesc output
-    {
-        .target = gpu::Texture::Target2D,
-        .width = static_cast<int>(m_width),
-        .height = static_cast<int>(m_height),
-        .format = gpu::Texture::RGBA,
-        .dataType = gpu::GLUtils::UnsignedByte,
-        .minFilter = gpu::Texture::Nearest,
-        .magFilter = gpu::Texture::Nearest,
-        .wrapMode = gpu::Texture::WrapMode::ClampToEdge
-    };
-    ResourcesManager::Instance()->CreateTexture(RenderPipeline::RENDERED_FRAME_NAME, output);
 }
 
 void Vignette::Render(const FrameData &frameData)
@@ -57,7 +43,7 @@ void Vignette::Render(const FrameData &frameData)
     gpu::TexturePtr in = ResourcesManager::Instance()->GetTexture(LensDistortion::LENS_DISTORTION_NAME);
     in->Bind(0);
 
-    gpu::TexturePtr output = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
+    gpu::TexturePtr output = ResourcesManager::Instance()->GetTexture(RendererManager::RENDERED_FRAME_NAME);
     output->BindImage(1, 0, gpu::GLUtils::Write);
 
     vignetteShader->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
@@ -81,10 +67,6 @@ void Vignette::Rebuild(uint32_t width, uint32_t height)
 {
     m_width = width;
     m_height = height;
-
-    gpu::TexturePtr output = ResourcesManager::Instance()->GetTexture(RenderPipeline::RENDERED_FRAME_NAME);
-    output->SetSize(static_cast<int>(width), static_cast<int>(height));
-    output->Reallocate();
 }
 
 void Vignette::Serialize(YAML::Node passes)
