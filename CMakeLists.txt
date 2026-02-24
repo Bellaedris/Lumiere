@@ -13,6 +13,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 # fix for a weird bug that caused windows.h to expand "max" and "min" keywords into macros.
 add_definitions(-DNOMINMAX)
+add_definitions(-DUUID_SYSTEM_GENERATOR )
 
 link_directories(${CMAKE_CURRENT_LIST_DIR}/lib)
 
@@ -62,19 +63,37 @@ add_library(IMGUI STATIC ${IMGUI_SOURCES})
 
 include_directories("${CMAKE_CURRENT_LIST_DIR}/includes")
 
-target_link_libraries(Lumiere
-    PUBLIC
-        glm::glm
-        IMGUI
-        yaml-cpp::yaml-cpp
-    PRIVATE
-        ${GLFW3_LIBRARY}
-        ${OPENGL_LIBRARY}
-        GLAD
-        ${CMAKE_DL_LIBS}
-        STB_IMAGE
-        ${ASSIMP_LIBRARY}
-)
+# On linux, we need to link against UUID to use system uuid generation
+IF (WIN32)
+    target_link_libraries(Lumiere
+        PUBLIC
+            glm::glm
+            IMGUI
+            yaml-cpp::yaml-cpp
+        PRIVATE
+            ${GLFW3_LIBRARY}
+            ${OPENGL_LIBRARY}
+            GLAD
+            ${CMAKE_DL_LIBS}
+            STB_IMAGE
+            ${ASSIMP_LIBRARY}
+    )
+ELSEIF (LINUX)
+    target_link_libraries(Lumiere
+        PUBLIC
+            glm::glm
+            IMGUI
+            yaml-cpp::yaml-cpp
+        PRIVATE
+            uuid
+            ${GLFW3_LIBRARY}
+            ${OPENGL_LIBRARY}
+            GLAD
+            ${CMAKE_DL_LIBS}
+            STB_IMAGE
+            ${ASSIMP_LIBRARY}
+    )
+ENDIF ()
 
 add_custom_command(TARGET Lumiere POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
