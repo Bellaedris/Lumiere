@@ -33,8 +33,6 @@ namespace lum
             m_window->SwapBuffers();
             m_frameIndex++;
         }
-
-        Cleanup();
     }
 
     void App::PreRender()
