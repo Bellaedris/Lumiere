@@ -18,23 +18,14 @@ class RenderPipeline
 private:
     constexpr static int SERIALIZER_VERSION = 1;
 
-    struct CameraData
-    {
-        glm::mat4 viewMatrix;
-        glm::mat4 projectionMatrix;
-        glm::vec3 position;
-    };
-
     std::string m_name;
 
     std::vector<std::shared_ptr<IPass>> m_passes;
-    std::unique_ptr<gpu::Buffer> m_cameraData;
-    std::shared_ptr<evt::EventHandler> m_eventHandler;
 public:
     constexpr static const char* RENDERED_FRAME_NAME = "RENDERED_FRAME";
     constexpr static ImVec2 DEBUG_DISPLAY_SIZE = ImVec2(200.f, 200.f);
 
-    RenderPipeline(const std::string& name, const std::shared_ptr<evt::EventHandler>& handler);
+    RenderPipeline(const std::string& name);
     void Render(const FrameData &frameData) const;
     void RenderUI();
     void AddPass(const std::shared_ptr<IPass>& pass);
@@ -57,5 +48,7 @@ public:
     void Rebuild(const glm::vec2& newSize);
 
     void OnEvent(const std::shared_ptr<evt::IEvent>& e);
+
+    const std::string& Name() { return m_name; };
 };
 } // lum::rdr
