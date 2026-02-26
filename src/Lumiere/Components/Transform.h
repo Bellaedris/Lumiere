@@ -3,12 +3,13 @@
 //
 
 #pragma once
+#include "IComponent.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-namespace lum
+namespace lum::comp
 {
-class Transform
+class Transform : public IComponent
 {
 private:
     /** \brief World space datas */
@@ -29,12 +30,14 @@ public:
     void SetLocalRotation(const glm::vec3& newRotation);
     void SetLocalScale(const glm::vec3& newScale);
 
-    [[nodiscard]] const glm::mat4& Model() const {return m_model;}
-    [[nodiscard]] glm::vec3 Position() const { return m_model[3]; }
-    [[nodiscard]] glm::vec3 Right() const { return m_model[0]; };
-    [[nodiscard]] glm::vec3 Up() const { return m_model[1]; }
-    [[nodiscard]] glm::vec3 Forward() const { return -m_model[2]; };
-    [[nodiscard]] glm::vec3 Scale() const { return {glm::length(Right()), glm::length(Up()), glm::length(Forward())}; }
-    [[nodiscard]] bool IsDirty() const { return m_isDirty; }
+    [[nodiscard]] const glm::mat4&Model() const {return m_model;}
+    [[nodiscard]] glm::vec3       Position() const { return m_model[3]; }
+    [[nodiscard]] glm::vec3       Right() const { return m_model[0]; };
+    [[nodiscard]] glm::vec3       Up() const { return m_model[1]; }
+    [[nodiscard]] glm::vec3       Forward() const { return -m_model[2]; };
+    [[nodiscard]] glm::vec3       Scale() const { return {glm::length(Right()), glm::length(Up()), glm::length(Forward())}; }
+    [[nodiscard]] bool            IsDirty() const { return m_isDirty; }
+
+    void DrawInspector() override;
 };
 } // lum

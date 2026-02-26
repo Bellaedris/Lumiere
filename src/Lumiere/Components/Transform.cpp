@@ -4,7 +4,10 @@
 
 #include "Transform.h"
 
-namespace lum
+#include "glm/gtc/type_ptr.hpp"
+#include "imgui/imgui.h"
+
+namespace lum::comp
 {
 glm::mat4 Transform::LocalModelMatrix() const
 {
@@ -47,5 +50,22 @@ void Transform::SetLocalScale(const glm::vec3 &newScale)
 {
     m_scale = newScale;
     m_isDirty = true;
+}
+
+void Transform::DrawInspector()
+{
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth;
+    if (ImGui::TreeNodeEx("Transform", flags))
+    {
+        bool shouldUpdate = false;
+        shouldUpdate |= ImGui::InputFloat3("Position", glm::value_ptr(m_position));
+        shouldUpdate |= ImGui::InputFloat3("Rotation", glm::value_ptr(m_rotationEuler));
+        shouldUpdate |= ImGui::InputFloat3("Scale", glm::value_ptr(m_scale));
+
+        if (shouldUpdate)
+            UpdateModelMatrix();
+
+        ImGui::TreePop();
+    }
 }
 } // lum

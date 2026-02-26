@@ -80,7 +80,7 @@ void Node3D::UpdateSelfAndChildren()
     if (m_parent == nullptr)
         m_transform.UpdateModelMatrix();
     else
-        m_transform.UpdateModelMatrix(m_parent->Transform().Model());
+        m_transform.UpdateModelMatrix(m_parent->GetTransform().Model());
 
     for (auto&& child : m_children)
         child->UpdateSelfAndChildren();
