@@ -41,10 +41,10 @@ std::vector<SceneDesc::RenderInstance> SceneDesc::RenderInstances()
         current = stack.top();
         stack.pop();
 
-        std::optional<comp::MeshRenderer> comp = current->GetComponent<comp::MeshRenderer>();
-        if (comp && comp->Mesh() != nullptr)
+        std::optional<comp::MeshRenderer*> comp = current->GetComponent<comp::MeshRenderer>();
+        if (comp.has_value() && comp.value()->Mesh() != nullptr)
         {
-            renderInstances.emplace_back(comp->Mesh(), current->GetTransform().Model());
+            renderInstances.emplace_back(comp.value()->Mesh(), current->GetTransform().Model());
         }
 
         for (auto&& child : current->Children())

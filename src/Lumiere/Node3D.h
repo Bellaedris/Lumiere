@@ -41,9 +41,11 @@ public:
     void UpdateSelfAndChildren();
 
     template<typename T>
-    void AddComponent() { m_components.push_back(std::make_unique<T>()); };
+    void AddComponent();
     template<typename T>
-    std::optional<T> GetComponent();
+    bool HasComponent() const;
+    template<typename T>
+    std::optional<T*> GetComponent();
 
     /**
      * \brief Checks if a node has another node as one of its upper level parent. Can be used to avoid moving a node into
@@ -68,14 +70,36 @@ public:
 };
 
 template<typename T>
-std::optional<T> Node3D::GetComponent()
+void Node3D::AddComponent()
+{
+    if (HasComponent<T>() == false)
+        m_components.push_back(std::make_unique<T>());
+}
+
+template<typename T>
+bool Node3D::HasComponent() const
 {
     for (auto&& component : m_components)
     {
         T* res = dynamic_cast<T*>(component.get());
         if (res != nullptr)
         {
-            return *res;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+template<typename T>
+std::optional<T*> Node3D::GetComponent()
+{
+    for (auto&& component : m_components)
+    {
+        T* res = dynamic_cast<T*>(component.get());
+        if (res != nullptr)
+        {
+            return res;
         }
     }
 
