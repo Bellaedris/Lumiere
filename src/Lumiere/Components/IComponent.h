@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <imgui/imgui.h>
-
 namespace lum::comp
 {
 class IComponent
@@ -13,6 +11,5 @@ class IComponent
 public:
     virtual      ~IComponent() = default;
     virtual void Update() {  };
-    virtual void DrawInspector() = 0;
 };
 }

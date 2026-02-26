@@ -36,8 +36,9 @@ public:
     [[nodiscard]] glm::vec3       Up() const { return m_model[1]; }
     [[nodiscard]] glm::vec3       Forward() const { return -m_model[2]; };
     [[nodiscard]] glm::vec3       Scale() const { return {glm::length(Right()), glm::length(Up()), glm::length(Forward())}; }
+    [[nodiscard]] glm::vec3       LocalPosition() const { return m_position; }
+    [[nodiscard]] glm::vec3       LocalRotation() const { return m_rotationEuler; }
+    [[nodiscard]] glm::vec3       LocalScale() const { return m_scale; }
     [[nodiscard]] bool            IsDirty() const { return m_isDirty; }
-
-    void DrawInspector() override;
 };
 } // lum
