@@ -111,6 +111,17 @@ void GBuffer::Render(const FrameData &frameData)
         primitive.Draw();
     });
 
+    for (const auto& instance : frameData.scene->RenderInstances())
+    {
+        modelMatrix = instance.model;
+        gbufferShader->UniformData("modelMatrix", modelMatrix);
+        for (const gfx::SubMesh& submesh : instance.mesh->Primitives())
+        {
+            submesh.Material()->Bind(gbufferShader);
+            submesh.Draw();
+        }
+    }
+
     m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
 
     if (frameData.profilerGPU)
