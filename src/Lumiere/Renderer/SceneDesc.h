@@ -5,6 +5,7 @@
 #pragma once
 #include "Camera.h"
 #include "Lights.h"
+#include "Lumiere/Node3D.h"
 #include "Lumiere/Graphics/Mesh.h"
 
 namespace lum::rdr
@@ -16,17 +17,35 @@ namespace lum::rdr
 class SceneDesc
 {
 protected:
+    std::unique_ptr<Node3D> m_rootNode;
     std::vector<gfx::MeshPtr> m_meshes {};
     std::unique_ptr<LightList> m_lights {std::make_unique<LightList>()};
 
     Camera* m_mainCamera {nullptr};
 public:
+    struct RenderInstance
+    {
+        gfx::MeshPtr mesh;
+        glm::mat4 model;
+    };
+
+    SceneDesc();
+
+    void AddNode();
     void AddMesh(const std::string &path);
     void SetMainCamera(Camera* camera) {m_mainCamera = camera;};
 
     Camera* Camera() const {return m_mainCamera;};
     const std::vector<gfx::MeshPtr>& Meshes() const { return m_meshes; };
     const std::unique_ptr<LightList>& Lights() const { return m_lights; };
+
+    /**
+     * \brief Gathers all renderable components from the scene and returns them in an array
+     * \return An array containing a description of all renderable components in the scene
+     */
+    std::vector<RenderInstance> RenderInstances();
+
+    Node3D& RootNode() {return *m_rootNode;};
 
     /**
      * \brief Just a lambda to do things on all submeshes of a scene. Saves me a few double for loops,
