@@ -64,9 +64,8 @@ public:
     Mesh(std::string path) : m_path {std::move(path)} {};
     Mesh(std::string path, std::vector<SubMesh>& subMeshes) : m_path(std::move(path)), m_subMeshes(std::move(subMeshes)) {}
 
-    void AddSubMesh(SubMesh& submesh) { m_subMeshes.push_back(std::move(submesh)); };
-    const SubMesh& GetSubMesh(uint32_t subMeshIndex) const { return m_subMeshes[subMeshIndex]; };
-    const std::vector<SubMesh>& Primitives() const { return m_subMeshes; };
+    [[nodiscard]] const std::vector<SubMesh>& Primitives() const { return m_subMeshes; };
+    [[nodiscard]] std::string Name() const;
 
     void Draw() const;
 

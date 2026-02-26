@@ -46,6 +46,14 @@ void SubMesh::DrawUnindexed()
 
 }
 
+std::string Mesh::Name() const
+{
+    size_t name = m_path.find_last_of('/');
+    size_t extension = m_path.find_last_of('.');
+
+    return m_path.substr(name + 1, extension - 1);
+}
+
 void Mesh::Draw() const
 {
     for (const SubMesh& submesh: m_subMeshes)
