@@ -22,12 +22,13 @@ Node3D::Node3D(std::string name)
 
 }
 
-void Node3D::AddChild()
+Node3D *Node3D::AddChild()
 {
     auto child = std::make_unique<Node3D>();
     child->m_parent = this;
     child->m_depth = m_depth + 1;
     m_children.push_back(std::move(child));
+    return m_children.back().get();
 }
 
 void Node3D::AddChild(std::unique_ptr<Node3D>& child)
@@ -37,16 +38,16 @@ void Node3D::AddChild(std::unique_ptr<Node3D>& child)
     m_children.push_back(std::move(child));
 }
 
-void Node3D::RemoveChild(const std::unique_ptr<Node3D>& child)
+void Node3D::RemoveChild(Node3D* child)
 {
-    // auto iter = std::find_if(m_children.begin(), m_children.end(), [&child](const std::unique_ptr<Node3D>& node)
-    // {
-    //     return node.get() == child;
-    // });
-    // if (iter != m_children.end())
-    // {
-    //     m_children.erase(iter);
-    // }
+    auto iter = std::find_if(m_children.begin(), m_children.end(), [&child](const std::unique_ptr<Node3D>& node)
+    {
+        return node.get() == child;
+    });
+    if (iter != m_children.end())
+    {
+        m_children.erase(iter);
+    }
 }
 
 void Node3D::TransferChild(Node3D *child, Node3D* destination)

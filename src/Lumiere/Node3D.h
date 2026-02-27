@@ -33,9 +33,9 @@ public:
     Node3D();
     Node3D(std::string name);
 
-    void AddChild();
+    Node3D *AddChild();
     void AddChild(std::unique_ptr<Node3D>& child);
-    void RemoveChild(const std::unique_ptr<Node3D>& child);
+    void RemoveChild(Node3D* child);
     void TransferChild(Node3D* child, Node3D* destination);
     void Update();
     void UpdateSelfAndChildren();
