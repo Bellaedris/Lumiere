@@ -27,7 +27,7 @@ private:
 
     constexpr static int MAX_FRAME_IN_FLIGHT = 3;
 public:
-    constexpr static int MAX_FRAMES_STORAGE = 100;
+    constexpr static int MAX_FRAMES_STORAGE = 30;
 
     ProfilerGPU();
     void Reset();
