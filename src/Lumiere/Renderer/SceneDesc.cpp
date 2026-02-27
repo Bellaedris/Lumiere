@@ -17,9 +17,9 @@ SceneDesc::SceneDesc()
 {
 }
 
-void SceneDesc::AddNode()
+Node3D *SceneDesc::AddNode()
 {
-    m_rootNode->AddChild();
+    return m_rootNode->AddChild();
 }
 
 void SceneDesc::AddMesh(const std::string &path)

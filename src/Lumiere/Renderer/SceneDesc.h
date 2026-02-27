@@ -31,7 +31,7 @@ public:
 
     SceneDesc();
 
-    void AddNode();
+    Node3D *AddNode();
     void AddMesh(const std::string &path);
     void SetMainCamera(Camera* camera) {m_mainCamera = camera;};
 
@@ -45,7 +45,7 @@ public:
      */
     std::vector<RenderInstance> RenderInstances();
 
-    Node3D& RootNode() {return *m_rootNode;};
+    Node3D* RootNode() {return m_rootNode.get();};
 
     /**
      * \brief Just a lambda to do things on all submeshes of a scene. Saves me a few double for loops,
