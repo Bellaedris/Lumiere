@@ -4,12 +4,21 @@
 
 #pragma once
 
+namespace lum
+{
+class Node3D;
+}
+
 namespace lum::comp
 {
 class IComponent
 {
+protected:
+    Node3D* m_node{nullptr};
+
 public:
+    IComponent(Node3D* node) : m_node(node) {};
     virtual      ~IComponent() = default;
-    virtual void Update() {  };
+    virtual void Update(float dt) {  };
 };
 }
