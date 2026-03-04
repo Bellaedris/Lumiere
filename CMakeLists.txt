@@ -18,9 +18,9 @@ add_definitions(-DUUID_SYSTEM_GENERATOR )
 link_directories(${CMAKE_CURRENT_LIST_DIR}/lib)
 
 file(GLOB_RECURSE LUMIERE_SOURCES
-        ${CMAKE_CURRENT_LIST_DIR}/src/*.h
-        ${CMAKE_CURRENT_LIST_DIR}/src/*.hpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/*.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/*.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
 )
 
 add_library(Lumiere STATIC ${LUMIERE_SOURCES})
@@ -29,6 +29,8 @@ target_include_directories(Lumiere PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src)
 
 configure_file(LumiereConfig.h.in ${CMAKE_CURRENT_LIST_DIR}/src/LumiereConfig.h)
 target_include_directories(Lumiere PUBLIC ${CMAKE_CURRENT_LIST_DIR}/includes)
+
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/ext/lua)
 
 find_package(ASSIMP REQUIRED)
 message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
@@ -60,7 +62,16 @@ add_library(STB_IMAGE thirdparty/stb_image.cpp)
 file(GLOB_RECURSE IMGUI_SOURCES includes/imgui/*.cpp)
 add_library(IMGUI STATIC ${IMGUI_SOURCES})
 
+add_library(sol2 INTERFACE)
+target_include_directories(sol2
+        INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/includes/sol
+)
 
+target_link_libraries(sol2
+        INTERFACE
+        lua
+)
 include_directories("${CMAKE_CURRENT_LIST_DIR}/includes")
 
 # On linux, we need to link against UUID to use system uuid generation
@@ -71,6 +82,7 @@ IF (WIN32)
             IMGUI
             yaml-cpp::yaml-cpp
         PRIVATE
+            sol2
             ${GLFW3_LIBRARY}
             ${OPENGL_LIBRARY}
             GLAD
@@ -84,7 +96,9 @@ ELSEIF (LINUX)
             glm::glm
             IMGUI
             yaml-cpp::yaml-cpp
+            sol2
         PRIVATE
+
             uuid
             ${GLFW3_LIBRARY}
             ${OPENGL_LIBRARY}
