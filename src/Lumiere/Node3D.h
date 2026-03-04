@@ -5,6 +5,7 @@
 #pragma once
 #include <memory>
 
+#include "sol.hpp"
 #include "Components/Transform.h"
 #include "stduuid/uuid.h"
 
@@ -13,10 +14,12 @@ namespace lum
 class Node3D
 {
 private:
+    static bool m_registered;
+
     // eventually use an std list if we want easy reordering of childs
     std::vector<std::unique_ptr<Node3D>> m_children;
     Node3D*                              m_parent {nullptr};
-    comp::Transform                      m_transform {};
+    comp::Transform                      m_transform;
 
     std::vector<std::unique_ptr<comp::IComponent>> m_components;
 
@@ -37,8 +40,11 @@ public:
     void AddChild(std::unique_ptr<Node3D>& child);
     void RemoveChild(Node3D* child);
     void TransferChild(Node3D* child, Node3D* destination);
-    void Update();
-    void UpdateSelfAndChildren();
+    void Update(float dt);
+    void UpdateSelfAndChildren(float dt);
+
+    // should probably be private, with IComponents being friend classes...
+    void SetScriptingContext(sol::environment& env) const;
 
     template<typename T>
     void AddComponent();
@@ -59,10 +65,9 @@ public:
     void SetName(const std::string& name) { m_name = name; }
 
     [[nodiscard]] const std::vector<std::unique_ptr<Node3D>>&Children() const { return m_children; }
-    [[nodiscard]] const comp::Transform&                     GetTransform() const { return m_transform; }
     [[nodiscard]] comp::Transform&                           GetTransform() { return m_transform; }
     [[nodiscard]] Node3D*                                    Parent() const { return m_parent; }
-    [[nodiscard]] const std::string&                         Name() const { return m_name; }
+    [[nodiscard]] const std::string&                         GetName() const { return m_name; }
     [[nodiscard]] std::string&                               Name() { return m_name; }
     [[nodiscard]] const uuids::uuid&                         UUID() const { return m_uuid; }
     [[nodiscard]] int                                        Depth() const { return m_depth; }
@@ -73,7 +78,7 @@ template<typename T>
 void Node3D::AddComponent()
 {
     if (HasComponent<T>() == false)
-        m_components.push_back(std::make_unique<T>());
+        m_components.push_back(std::make_unique<T>(this));
 }
 
 template<typename T>

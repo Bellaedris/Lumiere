@@ -22,13 +22,19 @@ private:
     bool m_isDirty {false};
 
     glm::mat4 LocalModelMatrix() const;
+
+    static bool registered;
 public:
+    Transform(Node3D* node);
+
     void UpdateModelMatrix();
     void UpdateModelMatrix(const glm::mat4& parent);
 
     void SetLocalPosition(const glm::vec3& newPosition);
     void SetLocalRotation(const glm::vec3& newRotation);
     void SetLocalScale(const glm::vec3& newScale);
+
+    void Translate(const glm::vec3& t);
 
     [[nodiscard]] const glm::mat4&Model() const {return m_model;}
     [[nodiscard]] glm::vec3       Position() const { return m_model[3]; }

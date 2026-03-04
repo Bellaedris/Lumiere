@@ -8,10 +8,6 @@
 
 namespace lum::comp
 {
-MeshRenderer::MeshRenderer()
-{
-
-}
 
 void MeshRenderer::SetMesh(const std::string &path)
 {
