@@ -30,7 +30,12 @@ public:
 
     void Update(float dt) override;
 
-    void SetScriptPath(const std::string& path) { m_path = path; };
+    void        SetScriptPath(const std::string& path) { m_path = path; };
     std::string Path() const { return m_path; }
+    /**
+     * \brief A readable, path-free identifier of the attached script
+     * \return The name of the script, i.e. the name of the file, without the whole path but with the extension
+     */
+    std::string Name() const;
 };
 } // lum::comp

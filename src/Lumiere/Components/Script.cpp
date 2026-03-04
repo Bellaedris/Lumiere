@@ -63,4 +63,11 @@ void Script::Update(float dt)
         }
     }
 }
+
+std::string Script::Name() const
+{
+    size_t name = m_path.find_last_of('/');
+
+    return m_path.substr(name + 1, m_path.length() - 1);
+}
 } // lum::comp
