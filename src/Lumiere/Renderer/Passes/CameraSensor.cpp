@@ -68,7 +68,7 @@ void CameraSensor::RenderUI()
 {
     if (ImGui::TreeNode("Camera sensor"))
     {
-        ImGui::SliderFloat("ISO value", &m_iso, 0.0f, 10.f);
+        ImGui::DragFloat("ISO value", &m_iso, .01f, 0.0f, 10.f);
         ImGui::TreePop();
     }
 }

@@ -44,7 +44,7 @@ void ShadeNPR::Init()
     };
     ResourcesManager::Instance()->CacheShader(SHADE_NPR_SHADER_NAME, sources);
 
-    ResourcesManager::Instance()->CacheTexture(gpu::Texture::Target2D, SHADE_NPR_PENCIL_SHADOW_TEXTURE_PATH, false);
+    ResourcesManager::Instance()->CacheTexture(gpu::Texture::Target2D, SHADE_NPR_PENCIL_SHADOW_TEXTURE_PATH, true);
 }
 
 void ShadeNPR::Render(const FrameData &frameData)
