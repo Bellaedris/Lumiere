@@ -39,6 +39,8 @@ namespace lum
         glfwSetKeyCallback(m_window, Window::key_callback);
 
         glfwSetWindowUserPointer(m_window, this);
+
+        glfwMaximizeWindow(m_window);
     }
 
     bool Window::ShouldClose()
