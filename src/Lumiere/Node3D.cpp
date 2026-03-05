@@ -9,6 +9,7 @@
 
 #include "ScriptEngine.h"
 #include "sol.hpp"
+#include "Components/MeshRenderer.h"
 
 namespace lum
 {
@@ -28,6 +29,7 @@ Node3D::Node3D()
         // there is no templated functions in lua so we have to bind all the possible get/add components functions by hand :(
         // LAMBDAS MUST RETURN REFERENCES
         type["transform"] = sol::property([](Node3D& node) -> comp::Transform& { return node.m_transform; });
+        type["GetMeshComponent"] = &Node3D::GetComponent<comp::MeshRenderer>;
 
         type["name"] = &Node3D::GetName;
     }

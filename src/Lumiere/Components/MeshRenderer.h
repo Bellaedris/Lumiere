@@ -12,9 +12,16 @@ namespace lum::comp
 class MeshRenderer : public IComponent
 {
 private:
+    static bool m_registered;
+
     gfx::MeshPtr m_mesh;
+
+    /**
+     * \brief Registers this component to the Lua scriping backend
+     */
+    void RegisterType();
 public:
-    MeshRenderer(Node3D* node) : IComponent(node) {};
+    MeshRenderer(Node3D* node);
 
     gfx::MeshPtr Mesh() const { return m_mesh; }
 
