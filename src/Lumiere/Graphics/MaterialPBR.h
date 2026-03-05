@@ -6,7 +6,7 @@
 
 #include "IMaterial.h"
 #include <Lumiere/GPU/Texture.h>
-#include <array>
+#include <imgui/imgui.h>
 
 namespace lum::gfx
 {
@@ -19,6 +19,8 @@ private:
     gpu::TexturePtr m_normalTexture;
     gpu::TexturePtr m_metalRoughTexture;
     gpu::TexturePtr m_emissiveTexture;
+
+    float m_emissionStrength {1.f};
     #pragma endregion Members
 public:
     MaterialPBR
@@ -29,5 +31,6 @@ public:
         const gpu::TexturePtr &emissive
     );
     void Bind(const gpu::ShaderPtr& shader) override;
+    void DrawEditor() override;
 };
 } // lum::gfx

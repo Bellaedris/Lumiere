@@ -10,6 +10,9 @@ namespace lum::gfx
 {
 class MaterialNPR : public IMaterial
 {
+public:
+    void Bind(const gpu::ShaderPtr &shader) override;
+    void DrawEditor() override;
 
 };
 } // lum

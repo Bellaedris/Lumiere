@@ -21,6 +21,8 @@ public:
      * \brief Activates the shader associated with this material and send all the required datas referenced
      */
     virtual void Bind(const gpu::ShaderPtr& shader) = 0;
+
+    virtual void DrawEditor() = 0;
 };
 using MaterialPtr = std::shared_ptr<IMaterial>;
 }

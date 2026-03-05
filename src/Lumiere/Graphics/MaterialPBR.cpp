@@ -5,6 +5,7 @@
 #include "MaterialPBR.h"
 
 #include "Lumiere/ResourcesManager.h"
+#include "Lumiere/Utils/FileUtils.h"
 
 namespace lum::gfx
 {
@@ -53,5 +54,12 @@ namespace lum::gfx
                                        : m_emissiveTexture;
         emissive->Bind(3);
         shader->UniformData("EmissiveTexture", 3);
+
+        shader->UniformData("emissionStrength", m_emissionStrength);
+    }
+
+    void MaterialPBR::DrawEditor()
+    {
+        ImGui::DragFloat("Emission Strength", &m_emissionStrength, 1.f);
     }
 } // lum::gfx
