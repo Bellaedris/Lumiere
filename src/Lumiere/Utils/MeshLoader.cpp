@@ -48,7 +48,7 @@ void MeshLoader::ProcessNode(aiNode *node, const aiScene *scene, std::vector<gfx
 {
     for (uint32_t i = 0; i < node->mNumMeshes; i++)
     {
-         subMeshes.push_back(ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene));
+         subMeshes.push_back(ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene, i));
     }
     for (uint32_t i = 0; i < node->mNumChildren; i++)
     {
@@ -56,8 +56,9 @@ void MeshLoader::ProcessNode(aiNode *node, const aiScene *scene, std::vector<gfx
     }
 }
 
-gfx::SubMesh MeshLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
+gfx::SubMesh MeshLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene, int index)
 {
+    std::string name = mesh->mName.length == 0 ? std::to_string(index) : mesh->mName.C_Str();
     std::vector<gfx::VertexData> vertices;
     std::vector<uint32_t> indices;
 
@@ -132,6 +133,6 @@ gfx::SubMesh MeshLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 
     gfx::MaterialPtr pbrMat = std::make_shared<gfx::MaterialPBR>(albedo, normals, metalRough, emissive);
 
-    return {vertices, indices, pbrMat};
+    return {vertices, indices, pbrMat, name};
 }
 } // lum

@@ -13,5 +13,6 @@ namespace lum::utils
     {
     public:
         static std::optional<std::string> read_file(const char* filename);
+        static std::string PathToName(const std::string& path);
     };
 } // mgl::utils

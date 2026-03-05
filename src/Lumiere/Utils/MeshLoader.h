@@ -17,7 +17,7 @@ private:
 
     void         ProcessNode(aiNode* node, const aiScene* scene, std::vector<gfx::SubMesh> &subMeshes);
 
-    gfx::SubMesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
+    gfx::SubMesh ProcessMesh(aiMesh *mesh, const aiScene *scene, int index);
 public:
     MeshLoader() = default;
 
