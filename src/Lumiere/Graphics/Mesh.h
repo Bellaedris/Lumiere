@@ -45,11 +45,14 @@ private:
     gpu::Buffer m_buffer, m_indexBuffer;
     gpu::Vao m_vao;
     MaterialPtr m_material;
+
+    std::string m_name;
     #pragma endregion Members
 public:
-    SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material);
+    SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material, const std::string& name);
 
     const MaterialPtr& Material() const { return m_material; };
+    const std::string Name() const { return m_name; }
 
     void Draw() const;
     void DrawUnindexed();
@@ -65,6 +68,7 @@ public:
     Mesh(std::string path, std::vector<SubMesh>& subMeshes) : m_path(std::move(path)), m_subMeshes(std::move(subMeshes)) {}
 
     [[nodiscard]] const std::vector<SubMesh>& Primitives() const { return m_subMeshes; };
+    [[nodiscard]] std::vector<SubMesh>& Primitives() { return m_subMeshes; };
     [[nodiscard]] std::string Name() const;
 
     void Draw() const;
