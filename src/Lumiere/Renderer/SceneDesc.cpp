@@ -7,6 +7,7 @@
 #include <queue>
 #include <stack>
 
+#include "Lumiere/Components/Light.h"
 #include "Lumiere/Components/MeshRenderer.h"
 #include "Lumiere/Utils/MeshLoader.h"
 
@@ -54,6 +55,46 @@ std::vector<SceneDesc::RenderInstance> SceneDesc::RenderInstances()
     }
 
     return renderInstances;
+}
+
+void SceneDesc::GatherAndUploadLights()
+{
+    m_lights->Clear();
+
+    std::stack<Node3D*> stack;
+    stack.push(m_rootNode.get());
+    // iterate through the scene to find MeshRenderers
+    Node3D* current;
+    while (stack.empty() == false)
+    {
+        current = stack.top();
+        stack.pop();
+
+        std::optional<comp::Light*> l = current->GetComponent<comp::Light>();
+        if (l.has_value())
+        {
+            comp::Light* light = l.value();
+            switch (light->Type())
+            {
+                case 0:
+                    m_lights->AddDirLight(current->GetTransform().Forward(), light->Intensity(), light->Color());
+                    break;
+                case 1:
+                    m_lights->AddPointLight(current->GetTransform().Position(), light->Intensity(), light->Color(), light->PointRange());
+                    break;
+                    case 2:
+                    // not implemented
+                    break;
+                default:
+                    std::cerr << "Unknown light type\n";
+            }
+        }
+
+        for (auto&& child : current->Children())
+        {
+            stack.push(child.get());
+        }
+    }
 }
 
 void SceneDesc::ForEach(const std::function<void(const gfx::SubMesh &primitive, const gfx::MaterialPtr &material)> &callback) const

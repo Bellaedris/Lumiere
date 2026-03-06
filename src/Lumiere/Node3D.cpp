@@ -9,6 +9,7 @@
 
 #include "ScriptEngine.h"
 #include "sol.hpp"
+#include "Components/Light.h"
 #include "Components/MeshRenderer.h"
 
 namespace lum
@@ -30,6 +31,7 @@ Node3D::Node3D()
         // LAMBDAS MUST RETURN REFERENCES
         type["transform"] = sol::property([](Node3D& node) -> comp::Transform& { return node.m_transform; });
         type["GetMeshComponent"] = &Node3D::GetComponent<comp::MeshRenderer>;
+        type["GetLightComponent"] = &Node3D::GetComponent<comp::Light>;
 
         type["name"] = &Node3D::GetName;
     }

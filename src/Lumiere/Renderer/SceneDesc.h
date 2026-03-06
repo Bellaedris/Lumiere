@@ -45,6 +45,11 @@ public:
      */
     std::vector<RenderInstance> RenderInstances();
 
+    /**
+     * \brief Gathers all lights from scene hierarchy and upload their data to the GPU
+     */
+    void GatherAndUploadLights();
+
     Node3D* RootNode() {return m_rootNode.get();};
 
     /**

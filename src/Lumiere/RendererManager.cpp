@@ -56,6 +56,7 @@ void RendererManager::Render(const rdr::FrameData &frameData)
     m_cameraData->Bind(0);
 
     // upload light datas so the passes can use them
+    frameData.scene->GatherAndUploadLights();
     frameData.scene->Lights()->Update();
     frameData.scene->Lights()->Bind(1, 2, 3);
 

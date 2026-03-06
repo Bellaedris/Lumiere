@@ -57,7 +57,7 @@ public:
      * \param color color of the light
      * \param radius radius of the light, the range at which there is no more light
      */
-    void AddPointLight(glm::vec3& position, float intensity, glm::vec3& color, float radius);
+    void AddPointLight(const glm::vec3& position, float intensity, const glm::vec3& color, float radius);
 
     /**
      * \brief Add a new directional light
@@ -71,6 +71,12 @@ public:
      * \brief Updates all Uniform Buffers data with the current storage state
      */
     void Update();
+
+    /**
+     * \brief Clear the light list before filling it up again.
+     * TODO allow some kind of cache so we don't delete everything all the time
+     */
+    void Clear();
 
     /**
      * \brief Binds all light buffers to a uniform binding point. If a light type is empty, we skip that type.
