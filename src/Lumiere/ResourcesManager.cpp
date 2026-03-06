@@ -142,5 +142,8 @@ void ResourcesManager::GenerateDefaultMeshes()
 {
     std::vector<gfx::SubMesh> plane = gfx::Mesh::GeneratePlane(1.f);
     CacheMesh(DEFAULT_PLANE_NAME, plane);
+
+    std::vector<gfx::SubMesh> sphere = gfx::Mesh::GenerateSphere(1.f);
+    CacheMesh(DEFAULT_SPHERE_NAME, sphere);
 }
 } // lum

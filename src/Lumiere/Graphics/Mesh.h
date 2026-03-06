@@ -75,6 +75,7 @@ public:
 
     #pragma region Static helpers
     static std::vector<SubMesh> GeneratePlane(float halfSize);
+    static std::vector<SubMesh> GenerateSphere(float radius);
     #pragma endregion Static helpers
 };
 

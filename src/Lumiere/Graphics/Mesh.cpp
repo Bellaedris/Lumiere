@@ -84,4 +84,112 @@ std::vector<SubMesh> Mesh::GeneratePlane(float halfSize)
 
     return subMeshes;
 }
+
+std::vector<SubMesh> Mesh::GenerateSphere(float radius)
+{
+    int meridians = 16;
+    int parallels = 24;
+    std::vector<VertexData> vertices;
+    std::vector<uint32_t> indices;
+
+    // add top vertex
+    vertices.push_back({
+        {0, radius, 0},
+        {.0f, 1.f, .0f},
+        {1.f, .0f, .0f},
+        {.0f, .0f, 1.f},
+        {
+            (std::atan2(radius, 0) + glm::pi<float>()) * glm::one_over_two_pi<float>(),
+            std::acos(0) * glm::one_over_pi<float>()
+        }
+    });
+
+    float stepMeridian = glm::two_pi<float>() / static_cast<float>(meridians);
+    float stepParallel = glm::pi<float>() / static_cast<float>(parallels);
+    for (int i = 0; i < parallels - 1; i++)
+    {
+        float y = std::cos(i * stepParallel);
+        float sinPhi = std::sin(i * stepParallel);
+        for (int j = 0; j < meridians; j++)
+        {
+            // it's also a normal with norm = 1
+            glm::vec3 pos(sinPhi * std::cos(j * stepMeridian), y, sinPhi * std::sin(j * stepMeridian));
+            // compute norm/tan/bitan
+            glm::vec3 tan;
+            if (glm::all(glm::equal(pos, {0, 1, 0})))
+                tan = glm::cross(pos, {0, 0, 1});
+            else
+                tan = glm::cross(pos, {0, 1, 0});
+            glm::vec3 bitan = glm::cross(pos, tan);
+
+            // uvs
+            float theta = std::acos(pos.z / radius);
+            float phi = std::atan2(pos.y, pos.x);
+            float u = (phi + glm::pi<float>()) * glm::one_over_two_pi<float>();
+            float v = theta * glm::one_over_pi<float>();
+
+            vertices.push_back({
+                pos * radius,
+                pos,
+                tan,
+                bitan,
+                {u, v}
+            });
+        }
+    }
+
+    // bottom vertex
+    vertices.push_back({
+        {0, -radius, 0},
+        {.0f, -1.f, .0f},
+        {1.f, .0f, .0f},
+        {.0f, .0f, -1.f},
+        {
+            (std::atan2(-radius, 0) + glm::pi<float>()) * glm::one_over_two_pi<float>(),
+            std::acos(0) * glm::one_over_pi<float>()
+        }
+    });
+
+    // triangle indices
+    // top/bottom
+    for (int i = 0; i < meridians; ++i)
+    {
+        int i0 = i + 1;
+        int i1 = (i + 1) % meridians + 1;
+        indices.push_back(0);
+        indices.push_back(i1);
+        indices.push_back(i0);
+        i0 = i + meridians * (parallels - 2) + 1;
+        i1 = (i + 1) % meridians + meridians * (parallels - 2) + 1;
+        indices.push_back(vertices.size());
+        indices.push_back(i0);
+        indices.push_back(i1);
+    }
+
+    // all the others
+    for (int j = 0; j < parallels - 2; j++)
+    {
+        int j0 = j * meridians + 1;
+        int j1 = (j + 1) * meridians + 1;
+        for (int i = 0; i < meridians; i++)
+        {
+            int i0 = j0 + i;
+            int i1 = j0 + (i + 1) % meridians;
+            int i2 = j1 + (i + 1) % meridians;
+            int i3 = j1 + i;
+            indices.push_back(i0);
+            indices.push_back(i1);
+            indices.push_back(i2);
+
+            indices.push_back(i0);
+            indices.push_back(i2);
+            indices.push_back(i3);
+        }
+    }
+
+    std::vector<SubMesh> subMeshes;
+    subMeshes.emplace_back(vertices, indices, nullptr, "sphere");
+
+    return subMeshes;
+}
 } // mgl

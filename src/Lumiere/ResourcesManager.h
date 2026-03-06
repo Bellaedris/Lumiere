@@ -34,6 +34,7 @@ private:
 public:
     #pragma region Default Names
     constexpr static const char* DEFAULT_PLANE_NAME = "Lumiere_default_plane";
+    constexpr static const char* DEFAULT_SPHERE_NAME = "Lumiere_default_sphere";
     constexpr static const char* DEFAULT_TEXTURE_WHITE_NAME = "Lumiere_default_texture_white";
     constexpr static const char* DEFAULT_TEXTURE_BLACK_NAME = "Lumiere_default_texture_black";
     #pragma endregion Default Names
