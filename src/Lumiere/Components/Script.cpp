@@ -15,6 +15,9 @@ Script::Script(Node3D *node)
     m_env = sol::environment(lua, sol::create, lua.globals());
     m_env["print"] = lua["print"];
     m_node->SetScriptingContext(m_env);
+
+    m_fileBrowser.SetTitle("Script selection");
+    m_fileBrowser.SetTypeFilters({".lua"});
 }
 
 void Script::LoadScript()
@@ -70,4 +73,33 @@ std::string Script::Name() const
 
     return m_path.substr(name + 1, m_path.length() - 1);
 }
+
+void Script::DrawInspector()
+{
+    static ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen;
+    if (ImGui::TreeNodeEx(ICON_FA_FILE_CODE_O " Lua Script", flags))
+    {
+        if (Path().empty() == false)
+        {
+            ImGui::Text("Script : %s", Name().c_str());
+            if (ImGui::Button("Reload Script"))
+                LoadScript();
+        }
+        if (ImGui::Button("Select a script"))
+        {
+            // load a mesh from file/resourcesManager
+            m_fileBrowser.Open();
+        }
+        ImGui::TreePop();
+    }
+
+    m_fileBrowser.Display();
+    if (m_fileBrowser.HasSelected())
+    {
+        SetScriptPath(m_fileBrowser.GetSelected().string());
+        LoadScript();
+        m_fileBrowser.ClearSelected();
+    }
+}
+
 } // lum::comp

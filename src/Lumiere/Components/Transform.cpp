@@ -8,6 +8,7 @@
 #include "Lumiere/Node3D.h"
 #include "Lumiere/ScriptEngine.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "imgui/imgui_internal.h"
 
 namespace lum::comp
 {
@@ -109,5 +110,97 @@ void Transform::Translate(const glm::vec3 &t)
 {
     m_position += t;
     m_isDirty = true;
+}
+
+void Transform::DrawInspector()
+{
+    static ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen;
+    if (ImGui::TreeNodeEx(ICON_FA_ARROWS " Transform", flags))
+    {
+        ImGui::BeginTable("Transform", 2, ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_PadOuterX);
+
+        ImGui::TableNextRow();
+        TransformSlider("Position", LocalPosition(), .0f, [&](const glm::vec3& vector)
+        {
+            SetLocalPosition(vector);
+        });
+
+        ImGui::TableNextRow();
+        TransformSlider("Rotation", LocalRotation(), .0f, [&](const glm::vec3& vector)
+        {
+            SetLocalRotation(vector);
+        });
+
+        ImGui::TableNextRow();
+        TransformSlider("Scale", LocalScale(), 1.f, [&](const glm::vec3& vector)
+        {
+            SetLocalScale(vector);
+        });
+        ImGui::EndTable();
+        ImGui::TreePop();
+    }
+}
+
+void Transform::TransformSlider(const char* name, glm::vec3 vector, float defaultValue, std::function<void(const glm::vec3&)> updateVector)
+{
+    ImGui::AlignTextToFramePadding();
+
+    ImGui::TableNextColumn();
+    ImGui::Text("%s", name);
+
+    ImGui::TableNextColumn();
+    ImGui::PushMultiItemsWidths(3, ImGui::GetContentRegionAvail().x - 30);
+
+    ImGui::PushID(name);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+
+    //ImGui::PushStyleColor(ImGuiCol_ButtonActive, EditorCol_Secondary2);
+    {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 0, 0, 1));
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 0, 0, 1));
+        {
+            if (ImGui::Button("X")) {
+                updateVector(glm::vec3(defaultValue, vector.y, vector.z));
+            }
+            ImGui::SameLine();
+            if (ImGui::DragFloat("##X", &vector.x, 0.5f))
+            {
+                updateVector(vector);
+            }
+            ImGui::SameLine();
+        }
+        ImGui::PopStyleColor(2); // Button, ButtonHovered
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 1, 0, 1));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 1, 0, 1));
+        {
+            if (ImGui::Button("Y")) {
+                updateVector(glm::vec3(vector.x, defaultValue, vector.z));
+            }
+            ImGui::SameLine();
+            if (ImGui::DragFloat("##Y", &vector.y, 0.5f))
+            {
+                updateVector(vector);
+            }
+            ImGui::SameLine();
+        }
+        ImGui::PopStyleColor(2); // Button, ButtonHovered
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 1, 1));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 1, 1));
+        {
+            if (ImGui::Button("Z"))
+            {
+                updateVector(glm::vec3(vector.x, vector.y, defaultValue));
+            }
+            ImGui::SameLine();
+            if (ImGui::DragFloat("##Z", &vector.z, 0.5f))
+            {
+                updateVector(vector);
+            }
+        }
+        ImGui::PopStyleColor(2); // Button, ButtonHovered
+    }
+
+    ImGui::PopStyleVar();
+    ImGui::PopID();
 }
 } // lum

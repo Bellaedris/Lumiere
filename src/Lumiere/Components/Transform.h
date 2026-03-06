@@ -46,5 +46,8 @@ public:
     [[nodiscard]] glm::vec3       LocalRotation() const { return m_rotationEuler; }
     [[nodiscard]] glm::vec3       LocalScale() const { return m_scale; }
     [[nodiscard]] bool            IsDirty() const { return m_isDirty; }
+
+    void DrawInspector() override;
+    void TransformSlider(const char* name, glm::vec3 vector, float defaultValue, std::function<void(const glm::vec3&)> updateVector);
 };
 } // lum

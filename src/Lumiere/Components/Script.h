@@ -8,6 +8,7 @@
 #include "IComponent.h"
 #include "sol.hpp"
 #include "Lumiere/Node3D.h"
+#include "imgui/imfilebrowser.h"
 
 namespace lum::comp
 {
@@ -23,6 +24,8 @@ private:
 
     bool m_started;
 
+    ImGui::FileBrowser m_fileBrowser;
+
 public:
     Script(Node3D* node);
 
@@ -37,5 +40,6 @@ public:
      * \return The name of the script, i.e. the name of the file, without the whole path but with the extension
      */
     std::string Name() const;
+    void        DrawInspector() override;
 };
 } // lum::comp
