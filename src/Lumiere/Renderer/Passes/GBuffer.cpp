@@ -99,22 +99,10 @@ void GBuffer::Render(const FrameData &frameData)
     gpu::ShaderPtr gbufferShader = ResourcesManager::Instance()->GetShader(GBUFFER_SHADER_NAME);
     gbufferShader->Bind();
 
-    glm::mat4 modelMatrix(1.f);
-    //modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(1, 0, 0));
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(.01, .01, .01));
-    gbufferShader->UniformData("modelMatrix", modelMatrix);
-    gbufferShader->UniformData("normalMatrix", glm::inverse(glm::transpose(modelMatrix)));
-
-    frameData.scene->ForEach([&](const gfx::SubMesh& primitive, const gfx::MaterialPtr& material)
-    {
-        material->Bind(gbufferShader);
-        primitive.Draw();
-    });
-
     for (const auto& instance : frameData.scene->RenderInstances())
     {
-        modelMatrix = instance.model;
-        gbufferShader->UniformData("modelMatrix", modelMatrix);
+        gbufferShader->UniformData("modelMatrix", instance.model);
+        gbufferShader->UniformData("normalMatrix", glm::inverse(glm::transpose(instance.model)));
         for (const gfx::SubMesh& submesh : instance.mesh->Primitives())
         {
             submesh.Material()->Bind(gbufferShader);
