@@ -88,5 +88,7 @@ public:
     int PointLightCount() const { return m_pointLights.size(); };
     int DirectionalLightCount() const { return m_directionalLights.size(); };
     int SpotLightCount() const { return m_spotLights.size(); };
+
+    const std::vector<PointLight>& PointLights() const { return m_pointLights; };
 };
 } // lum::rdr

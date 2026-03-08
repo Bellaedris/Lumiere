@@ -21,6 +21,7 @@ public:
     constexpr static const char* SHADE_PBR_NAME = "SHADE_PBR";
 
     constexpr static const char* SHADE_PBR_SHADER_NAME = "SHADE_PBR_SHADER";
+    constexpr static const char* SHADE_PBR_POINT_LIGHT_SHADER_NAME = "SHADE_PBR_POINT_LIGHT_SHADER";
     #pragma endregion Constants
 
     ShadePBR() = default;

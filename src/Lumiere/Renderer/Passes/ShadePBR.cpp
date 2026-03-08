@@ -42,6 +42,12 @@ void ShadePBR::Init()
         {gpu::Shader::Fragment, "shaders/shadePBR.frag"}
     };
     ResourcesManager::Instance()->CacheShader(SHADE_PBR_SHADER_NAME, sources);
+
+    std::vector<gpu::Shader::ShaderSource> pointSources = {
+        {gpu::Shader::Vertex, "shaders/shadePBR_point.vert"},
+        {gpu::Shader::Fragment, "shaders/shadePBR_point.frag"}
+    };
+    ResourcesManager::Instance()->CacheShader(SHADE_PBR_POINT_LIGHT_SHADER_NAME, pointSources);
 }
 
 void ShadePBR::Render(const FrameData &frameData)
@@ -65,7 +71,7 @@ void ShadePBR::Render(const FrameData &frameData)
     shader->Bind();
 
     // send light counts, as we will actively need them
-    shader->UniformData("pointLightCount", frameData.scene->Lights()->PointLightCount());
+    //shader->UniformData("pointLightCount", frameData.scene->Lights()->PointLightCount());
     shader->UniformData("dirLightCount", frameData.scene->Lights()->DirectionalLightCount());
 
     gpu::TexturePtr gbufferAlbedo = ResourcesManager::Instance()->GetTexture(GBuffer::GBUFFER_ALBEDO_NAME);
@@ -94,9 +100,51 @@ void ShadePBR::Render(const FrameData &frameData)
 
     ResourcesManager::Instance()->GetMesh(ResourcesManager::DEFAULT_PLANE_NAME)->Draw();
 
-    m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
+    // TODO REMOVE THESE GL CALLS!!!!!!
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_ONE, GL_ONE);
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+
+    gpu::ShaderPtr pointShader = ResourcesManager::Instance()->GetShader(SHADE_PBR_POINT_LIGHT_SHADER_NAME);
+    pointShader->Bind();
+
+    gfx::MeshPtr sphere = ResourcesManager::Instance()->GetMesh(ResourcesManager::DEFAULT_SPHERE_NAME);
+
+    gbufferAlbedo->Bind(0);
+    pointShader->UniformData("GBufferAlbedo", 0);
+
+    gbufferNormals->Bind(1);
+    pointShader->UniformData("GBufferNormals", 1);
+
+    gbufferPositions->Bind(2);
+    pointShader->UniformData("GBufferPositions", 2);
+
+    gbufferMetalRough->Bind(3);
+    pointShader->UniformData("GBufferMetalRough", 3);
+
+    gbufferDepth->Bind(5);
+    pointShader->UniformData("GBufferDepth", 5);
+
+    for (int i = 0; i < frameData.scene->Lights()->PointLightCount(); i++)
+    {
+        glm::mat4 model(1.f);
+        model = glm::translate(model, frameData.scene->Lights()->PointLights()[i].m_position);
+        model = glm::scale(model, glm::vec3(frameData.scene->Lights()->PointLights()[i].m_radius));
+
+        pointShader->UniformData("lightIndex", i);
+        pointShader->UniformData("modelMatrix", model);
+
+        sphere->Draw();
+    }
+
+    glDisable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     glDisable(GL_BLEND);
+
+    m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
 
     if (frameData.profilerGPU)
         frameData.profilerGPU->EndScope("ShadePBR");
