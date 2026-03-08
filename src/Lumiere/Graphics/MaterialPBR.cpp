@@ -35,6 +35,7 @@ namespace lum::gfx
         {
             m_normalTexture->Bind(1);
             shader->UniformData("NormalsTexture", 1);
+            shader->UniformData("hasNormals", 0);
         }
         else
         {

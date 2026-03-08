@@ -108,8 +108,8 @@ std::vector<SubMesh> Mesh::GenerateSphere(float radius)
     float stepParallel = glm::pi<float>() / static_cast<float>(parallels);
     for (int i = 0; i < parallels - 1; i++)
     {
-        float y = std::cos(i * stepParallel);
-        float sinPhi = std::sin(i * stepParallel);
+        float y = std::cos((i + 1) * stepParallel);
+        float sinPhi = std::sin((i + 1) * stepParallel);
         for (int j = 0; j < meridians; j++)
         {
             // it's also a normal with norm = 1
@@ -123,8 +123,8 @@ std::vector<SubMesh> Mesh::GenerateSphere(float radius)
             glm::vec3 bitan = glm::cross(pos, tan);
 
             // uvs
-            float theta = std::acos(pos.z / radius);
-            float phi = std::atan2(pos.y, pos.x);
+            float theta = std::acos(pos.y / radius);
+            float phi = std::atan2(pos.z, pos.x);
             float u = (phi + glm::pi<float>()) * glm::one_over_two_pi<float>();
             float v = theta * glm::one_over_pi<float>();
 
@@ -161,7 +161,7 @@ std::vector<SubMesh> Mesh::GenerateSphere(float radius)
         indices.push_back(i0);
         i0 = i + meridians * (parallels - 2) + 1;
         i1 = (i + 1) % meridians + meridians * (parallels - 2) + 1;
-        indices.push_back(vertices.size());
+        indices.push_back(vertices.size() - 1);
         indices.push_back(i0);
         indices.push_back(i1);
     }
