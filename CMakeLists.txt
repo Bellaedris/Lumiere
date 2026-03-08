@@ -65,7 +65,7 @@ add_library(IMGUI STATIC ${IMGUI_SOURCES})
 add_library(sol2 INTERFACE)
 target_include_directories(sol2
         INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/includes/sol
+        ${CMAKE_CURRENT_LIST_DIR}/includes/sol
 )
 
 target_link_libraries(sol2
@@ -81,8 +81,8 @@ IF (WIN32)
             glm::glm
             IMGUI
             yaml-cpp::yaml-cpp
-        PRIVATE
             sol2
+        PRIVATE
             ${GLFW3_LIBRARY}
             ${OPENGL_LIBRARY}
             GLAD
@@ -98,7 +98,6 @@ ELSEIF (LINUX)
             yaml-cpp::yaml-cpp
             sol2
         PRIVATE
-
             uuid
             ${GLFW3_LIBRARY}
             ${OPENGL_LIBRARY}
