@@ -17,23 +17,23 @@ private:
     float m_pointRange {1.f};
 
     int m_selectedType {0};
-    static constexpr int LIGHT_TYPE_COUNT = 3;
-    static constexpr const char* LIGHT_TYPES[] = {"Directional", "Point", "Spot"};
 
     static bool m_registered;
     void RegisterType();
 public:
+    #pragma region Constants
+    static constexpr int LIGHT_TYPE_COUNT = 3;
+    static constexpr const char* LIGHT_TYPES[] = {"Directional", "Point", "Spot"};
+    #pragma endregion // Constants
     Light(Node3D* node);
-
-    void DrawInspector() override;
 
     /**
      * \brief Type of this light component
      * \return 0 for directional, 1 for point, 2 for spot
      */
-    int Type() const { return m_selectedType; };
-    glm::vec3 Color() const { return m_color; };
-    float Intensity() const { return m_intensity; };
-    float PointRange() const { return m_pointRange; };
+    int& Type() { return m_selectedType; };
+    glm::vec3& Color() { return m_color; };
+    float& Intensity() { return m_intensity; };
+    float& PointRange() { return m_pointRange; };
 };
 } // lum::comp

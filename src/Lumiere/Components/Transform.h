@@ -36,7 +36,8 @@ public:
 
     void Translate(const glm::vec3& t);
 
-    [[nodiscard]] const glm::mat4&Model() const {return m_model;}
+    [[nodiscard]] const glm::mat4& Model() const {return m_model;}
+    [[nodiscard]] glm::mat4& Model() {return m_model;}
     [[nodiscard]] glm::vec3       Position() const { return m_model[3]; }
     [[nodiscard]] glm::vec3       Right() const { return m_model[0]; };
     [[nodiscard]] glm::vec3       Up() const { return m_model[1]; }
@@ -47,7 +48,6 @@ public:
     [[nodiscard]] glm::vec3       LocalScale() const { return m_scale; }
     [[nodiscard]] bool            IsDirty() const { return m_isDirty; }
 
-    void DrawInspector() override;
     void TransformSlider(const char* name, glm::vec3 vector, float defaultValue, std::function<void(const glm::vec3&)> updateVector);
 };
 } // lum

@@ -42,23 +42,4 @@ Light::Light(Node3D *node)
     if (m_registered == false)
         RegisterType();
 }
-
-void Light::DrawInspector()
-{
-    static ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen;
-    if (ImGui::TreeNodeEx(ICON_FA_LIGHTBULB_O " Light", flags))
-    {
-        ImGui::Combo("Light type", &m_selectedType, LIGHT_TYPES, LIGHT_TYPE_COUNT);
-
-        ImGui::ColorPicker3("Tint", glm::value_ptr(m_color));
-        ImGui::DragFloat("Intensity", &m_intensity, 0.1f);
-
-        // type dependant editor: 0 is directional, 1 point, 2 spot
-        if (m_selectedType == 1)
-        {
-            ImGui::DragFloat("Range", &m_pointRange, 1.f);
-        }
-        ImGui::TreePop();
-    }
-}
 } // lum::comp

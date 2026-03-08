@@ -8,7 +8,6 @@
 #include "IComponent.h"
 #include "sol.hpp"
 #include "Lumiere/Node3D.h"
-#include "imgui/imfilebrowser.h"
 
 namespace lum::comp
 {
@@ -23,9 +22,6 @@ private:
     sol::function m_update;
 
     bool m_started;
-
-    ImGui::FileBrowser m_fileBrowser;
-
 public:
     Script(Node3D* node);
 
@@ -33,13 +29,12 @@ public:
 
     void Update(float dt) override;
 
-    void        SetScriptPath(const std::string& path) { m_path = path; };
+    void        SetScriptPath(const std::string& path) { m_path = path; LoadScript(); };
     std::string Path() const { return m_path; }
     /**
      * \brief A readable, path-free identifier of the attached script
      * \return The name of the script, i.e. the name of the file, without the whole path but with the extension
      */
     std::string Name() const;
-    void        DrawInspector() override;
 };
 } // lum::comp

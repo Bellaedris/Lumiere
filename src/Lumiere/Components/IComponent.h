@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include <imgui/imgui.h>
-#include "imgui/IconsFontAwesome4.h"
-
 namespace lum
 {
 class Node3D;
@@ -23,6 +20,5 @@ public:
     IComponent(Node3D* node) : m_node(node) {};
     virtual      ~IComponent() = default;
     virtual void Update(float dt) {  };
-    virtual void DrawInspector() = 0;
 };
 }
