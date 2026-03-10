@@ -70,6 +70,7 @@ public:
     [[nodiscard]] const std::vector<SubMesh>& Primitives() const { return m_subMeshes; };
     [[nodiscard]] std::vector<SubMesh>& Primitives() { return m_subMeshes; };
     [[nodiscard]] std::string Name() const;
+    [[nodiscard]] std::string Path() const { return m_path; };
 
     void Draw() const;
 
