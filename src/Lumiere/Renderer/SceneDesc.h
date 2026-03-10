@@ -17,8 +17,10 @@ namespace lum::rdr
 class SceneDesc
 {
 protected:
+    static constexpr int SCENE_DESC_SERIALIZATION_VERSION = 1;
+    static constexpr const char* SCENE_FILE_FORMAT = ".lumsc";
+
     std::unique_ptr<Node3D> m_rootNode;
-    std::vector<gfx::MeshPtr> m_meshes {};
     std::unique_ptr<LightList> m_lights {std::make_unique<LightList>()};
 
     Camera* m_mainCamera {nullptr};
@@ -32,11 +34,9 @@ public:
     SceneDesc();
 
     Node3D *AddNode();
-    void AddMesh(const std::string &path);
     void SetMainCamera(Camera* camera) {m_mainCamera = camera;};
 
     Camera* Camera() const {return m_mainCamera;};
-    const std::vector<gfx::MeshPtr>& Meshes() const { return m_meshes; };
     const std::unique_ptr<LightList>& Lights() const { return m_lights; };
 
     /**
@@ -52,11 +52,9 @@ public:
 
     Node3D* RootNode() {return m_rootNode.get();};
 
-    /**
-     * \brief Just a lambda to do things on all submeshes of a scene. Saves me a few double for loops,
-     * thank you https://github.com/AmelieHeinrich/Seraph/blob/main/code/Renderer/Hybrid/SP_GBuffer.cpp !
-     * \param callback lambda called with every SubMesh/material pair of every Mesh of the scene.
-     */
-    void ForEach(const std::function<void(const gfx::SubMesh &primitive, const gfx::MaterialPtr &material)> &callback) const;
+    void ForEachNode(const std::function<void(Node3D* node)>& callback);
+
+    void Serialize();
+    void Deserialize(const std::string& path);
 };
 } // lum::rdr
