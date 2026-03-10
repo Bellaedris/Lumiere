@@ -18,7 +18,10 @@ private:
 
     int m_selectedType {0};
 
+    /** \brief registration to the component factory status */
     static bool m_registered;
+    /** \brief lua type registration status */
+    static bool m_typeRegistered;
     void RegisterType();
 public:
     #pragma region Constants
@@ -31,9 +34,12 @@ public:
      * \brief Type of this light component
      * \return 0 for directional, 1 for point, 2 for spot
      */
-    int& Type() { return m_selectedType; };
-    glm::vec3& Color() { return m_color; };
-    float& Intensity() { return m_intensity; };
-    float& PointRange() { return m_pointRange; };
+    int&      Type() { return m_selectedType; };
+    glm::vec3&Color() { return m_color; };
+    float&    Intensity() { return m_intensity; };
+    float&    PointRange() { return m_pointRange; }
+
+    void      Serialize(YAML::Node node) override;
+    void      Deserialize(YAML::Node node) override;;
 };
 } // lum::comp

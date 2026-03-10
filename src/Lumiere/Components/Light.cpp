@@ -7,10 +7,12 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Lumiere/ScriptEngine.h"
+#include "Lumiere/Utils/YAMLUtils.h"
 
 namespace lum::comp
 {
-bool Light::m_registered = false;
+bool Light::m_typeRegistered = false;
+REGISTER_TO_COMPONENT_FACTORY(Light, "Light");
 
 void Light::RegisterType()
 {
@@ -33,13 +35,32 @@ void Light::RegisterType()
         [](Light& l, float r) { return l.m_pointRange = r; }
     );
 
-    m_registered = true;
+    m_typeRegistered = true;
 }
 
 Light::Light(Node3D *node)
     : IComponent(node)
 {
-    if (m_registered == false)
+    if (m_typeRegistered == false)
         RegisterType();
+}
+
+void Light::Serialize(YAML::Node node)
+{
+    YAML::Node light;
+    light["componentType"] = "Light";
+    light["type"] = m_selectedType;
+    light["color"] = m_color;
+    light["intensity"] = m_intensity;
+    light["range"] = m_pointRange;
+    node.push_back(light);
+}
+
+void Light::Deserialize(YAML::Node node)
+{
+    m_selectedType = node["type"].as<int>();
+    m_color = node["color"].as<glm::vec3>();
+    m_intensity = node["intensity"].as<float>();
+    m_pointRange = node["range"].as<float>();
 }
 } // lum::comp

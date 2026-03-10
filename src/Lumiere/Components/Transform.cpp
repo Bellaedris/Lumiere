@@ -8,16 +8,18 @@
 #include "Lumiere/Node3D.h"
 #include "Lumiere/ScriptEngine.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "Lumiere/Utils/YAMLUtils.h"
 
 namespace lum::comp
 {
-bool Transform::registered = false;
+REGISTER_TO_COMPONENT_FACTORY(Transform, "Transform");
+bool Transform::m_typeRegistered = false;
 
 Transform::Transform(Node3D* node)
     : IComponent(node)
 {
     // if not done already, register the transform type to the Lua state
-    if (registered == false)
+    if (m_typeRegistered == false)
     {
         sol::state& lua = ScriptEngine::Instance();
         sol::usertype<glm::vec3> vec = lua.new_usertype<glm::vec3>("vec3",
@@ -58,7 +60,7 @@ Transform::Transform(Node3D* node)
         type["worldPosition"] = &Transform::Position;
         type["worldScale"] = &Transform::Scale;
 
-        registered = true;
+        m_typeRegistered = true;
     }
 }
 
@@ -108,6 +110,24 @@ void Transform::SetLocalScale(const glm::vec3 &newScale)
 void Transform::Translate(const glm::vec3 &t)
 {
     m_position += t;
+    m_isDirty = true;
+}
+
+void Transform::Serialize(YAML::Node node)
+{
+    YAML::Node t;
+    t["componentType"] = "Transform";
+    t["position"] = m_position;
+    t["rotation"] = m_rotationEuler;
+    t["scale"] = m_scale;
+    node["transform"] = t;
+}
+
+void Transform::Deserialize(YAML::Node node)
+{
+    m_position = node["position"].as<glm::vec3>();
+    m_rotationEuler = node["rotation"].as<glm::vec3>();
+    m_scale = node["scale"].as<glm::vec3>();
     m_isDirty = true;
 }
 } // lum

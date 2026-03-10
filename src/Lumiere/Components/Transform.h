@@ -23,7 +23,10 @@ private:
 
     glm::mat4 LocalModelMatrix() const;
 
-    static bool registered;
+    /** \brief registration to the component factory status */
+    static bool m_registered;
+    /** \brief lua type registration status */
+    static bool m_typeRegistered;
 public:
     Transform(Node3D* node);
 
@@ -48,6 +51,7 @@ public:
     [[nodiscard]] glm::vec3       LocalScale() const { return m_scale; }
     [[nodiscard]] bool            IsDirty() const { return m_isDirty; }
 
-    void TransformSlider(const char* name, glm::vec3 vector, float defaultValue, std::function<void(const glm::vec3&)> updateVector);
+    void Serialize(YAML::Node node) override;
+    void Deserialize(YAML::Node node) override;
 };
 } // lum

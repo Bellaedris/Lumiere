@@ -9,7 +9,8 @@
 
 namespace lum::comp
 {
-bool MeshRenderer::m_registered = false;
+REGISTER_TO_COMPONENT_FACTORY(MeshRenderer, "MeshRenderer");
+bool MeshRenderer::m_typeRegistered = false;
 
 void MeshRenderer::RegisterType()
 {
@@ -21,12 +22,13 @@ void MeshRenderer::RegisterType()
     sol::usertype<MeshRenderer> type = lua.new_usertype<MeshRenderer>("MeshRenderer");
     type["mesh"] = sol::property([](MeshRenderer& m) { return m.m_mesh; });
 
+    m_typeRegistered = true;
 }
 
 MeshRenderer::MeshRenderer(Node3D *node)
     : IComponent(node)
 {
-    if (m_registered == false)
+    if (m_typeRegistered == false)
         RegisterType();
 }
 
@@ -34,5 +36,18 @@ void MeshRenderer::SetMesh(const std::string &path)
 {
     utils::MeshLoader loader;
     m_mesh = loader.LoadMeshFromFile(path);
+}
+
+void MeshRenderer::Serialize(YAML::Node node)
+{
+    YAML::Node mr;
+    mr["componentType"] = "MeshRenderer";
+    mr["path"] = m_mesh == nullptr ? "" : m_mesh->Path();
+    node.push_back(mr);
+}
+
+void MeshRenderer::Deserialize(YAML::Node node)
+{
+    SetMesh(node["path"].as<std::string>());
 }
 } // lum::comp

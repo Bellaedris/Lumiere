@@ -12,7 +12,10 @@ namespace lum::comp
 class MeshRenderer : public IComponent
 {
 private:
+    /** \brief registration to the component factory status */
     static bool m_registered;
+    /** \brief lua type registration status */
+    static bool m_typeRegistered;
 
     gfx::MeshPtr m_mesh;
 
@@ -28,5 +31,8 @@ public:
     gfx::MeshPtr Mesh() const { return m_mesh; }
 
     void SetMesh(const std::string& path);
+
+    void Serialize(YAML::Node node) override;
+    void Deserialize(YAML::Node node) override;
 };
 } // lum::comp

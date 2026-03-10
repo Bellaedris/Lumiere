@@ -8,6 +8,8 @@
 
 namespace lum::comp
 {
+REGISTER_TO_COMPONENT_FACTORY(Script, "Script");
+
 Script::Script(Node3D *node)
     : IComponent(node)
 {
@@ -69,6 +71,19 @@ std::string Script::Name() const
     size_t name = m_path.find_last_of('/');
 
     return m_path.substr(name + 1, m_path.length() - 1);
+}
+
+void Script::Serialize(YAML::Node node)
+{
+    YAML::Node s;
+    s["componentType"] = "Script";
+    s["path"] = m_path.empty() ? "" : m_path;
+    node.push_back(s);
+}
+
+void Script::Deserialize(YAML::Node node)
+{
+    SetScriptPath(node["path"].as<std::string>());
 }
 
 } // lum::comp

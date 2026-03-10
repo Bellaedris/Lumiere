@@ -14,6 +14,8 @@ namespace lum::comp
 class Script : public IComponent
 {
 private:
+    static bool m_registered;
+
     /** Path to the script that will be executed */
     std::string m_path;
     sol::environment m_env;
@@ -36,5 +38,8 @@ public:
      * \return The name of the script, i.e. the name of the file, without the whole path but with the extension
      */
     std::string Name() const;
+
+    void        Serialize(YAML::Node node) override;
+    void        Deserialize(YAML::Node node) override;
 };
 } // lum::comp
