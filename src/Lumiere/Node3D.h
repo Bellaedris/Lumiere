@@ -34,7 +34,7 @@ public:
     constexpr static const size_t NODE_NAME_MAX_LENGTH = 128;
 
     Node3D();
-    Node3D(std::string name);
+    Node3D(const std::string& name, uuids::uuid& uuid);
 
     Node3D *AddChild();
     void AddChild(std::unique_ptr<Node3D>& child);
@@ -48,6 +48,13 @@ public:
 
     template<typename T>
     void AddComponent();
+
+    /**
+     * \brief Add a component my moving an existing one. useful to deserialize datas, or to create non-empty components.
+     * AddComponent<T> should be always preferred, and this variant shouldn't be exposed to scripting
+     * \param component a valid Component
+     */
+    void AddComponent(std::unique_ptr<comp::IComponent>& component);
     template<typename T>
     bool HasComponent() const;
     template<typename T>

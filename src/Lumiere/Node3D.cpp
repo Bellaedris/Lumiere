@@ -37,10 +37,10 @@ Node3D::Node3D()
     }
 }
 
-Node3D::Node3D(std::string name)
-    : m_name(std::move(name))
-    , m_uuid(uuids::uuid_system_generator{}())
-    , m_transform(this)
+Node3D::Node3D(const std::string& name, uuids::uuid& uuid)
+    : m_transform(this)
+    , m_name(name)
+    , m_uuid(std::move(uuid))
 {
 
 }
@@ -117,6 +117,11 @@ void Node3D::UpdateSelfAndChildren(float dt)
 void Node3D::SetScriptingContext(sol::environment &env) const
 {
     env["node"] = this;
+}
+
+void Node3D::AddComponent(std::unique_ptr<comp::IComponent> &component)
+{
+    m_components.push_back(std::move(component));
 }
 
 bool Node3D::HasAncestor(Node3D *node) const
