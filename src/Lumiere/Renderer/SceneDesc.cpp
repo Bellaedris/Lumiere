@@ -69,6 +69,18 @@ void SceneDesc::GatherAndUploadLights()
     });
 }
 
+void SceneDesc::ResetScene()
+{
+    Serialize();
+    m_rootNode = std::make_unique<Node3D>();
+}
+
+void SceneDesc::LoadScene(const std::string &path)
+{
+    Serialize();
+    Deserialize(path);
+}
+
 void SceneDesc::ForEachNode(const std::function<void(Node3D *node)> &callback)
 {
     std::stack<Node3D*> stack;

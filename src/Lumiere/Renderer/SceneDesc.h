@@ -52,6 +52,17 @@ public:
 
     Node3D* RootNode() {return m_rootNode.get();};
 
+    /**
+     * \brief Serializes the scene and resets the root to a new empty node
+     */
+    void ResetScene();
+
+    /**
+     * \brief Serializes the scene and loads another scene right after
+     * \param path path to the scene to load
+     */
+    void LoadScene(const std::string& path);
+
     void ForEachNode(const std::function<void(Node3D* node)>& callback);
 
     void Serialize();
