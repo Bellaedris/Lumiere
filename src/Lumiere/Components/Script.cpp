@@ -4,6 +4,9 @@
 
 #include "Script.h"
 
+#include <filesystem>
+
+#include "Lumiere/EngineCfg.h"
 #include "Lumiere/ScriptEngine.h"
 
 namespace lum::comp
@@ -77,7 +80,7 @@ void Script::Serialize(YAML::Node node)
 {
     YAML::Node s;
     s["componentType"] = "Script";
-    s["path"] = m_path.empty() ? "" : m_path;
+    s["path"] = m_path.empty() ? "" : std::filesystem::path(m_path).lexically_relative(cfg::EXECUTABLE_DIR).string();
     node.push_back(s);
 }
 

@@ -5,12 +5,14 @@
 #pragma once
 
 #define GLM_ENABLE_EXPERIMENTAL
+#include <filesystem>
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
 #include <utility>
 #include "../GPU/Buffer.h"
 #include "../GPU/VAO.h"
 #include "IMaterial.h"
+#include "Lumiere/EngineCfg.h"
 
 namespace lum::gfx
 {
@@ -67,10 +69,15 @@ public:
     Mesh(std::string path) : m_path {std::move(path)} {};
     Mesh(std::string path, std::vector<SubMesh>& subMeshes) : m_path(std::move(path)), m_subMeshes(std::move(subMeshes)) {}
 
-    [[nodiscard]] const std::vector<SubMesh>& Primitives() const { return m_subMeshes; };
-    [[nodiscard]] std::vector<SubMesh>& Primitives() { return m_subMeshes; };
-    [[nodiscard]] std::string Name() const;
-    [[nodiscard]] std::string Path() const { return m_path; };
+    [[nodiscard]] const std::vector<SubMesh>&Primitives() const { return m_subMeshes; };
+    [[nodiscard]] std::vector<SubMesh>&      Primitives() { return m_subMeshes; };
+    [[nodiscard]] std::string                Name() const;
+
+    /**
+     * \brief Relative path to the mesh resource
+     * \return Relative path to the mesh resource
+     */
+    [[nodiscard]] std::string Path() const { return std::filesystem::path(m_path).lexically_relative(cfg::EXECUTABLE_DIR).string(); };
 
     void Draw() const;
 
