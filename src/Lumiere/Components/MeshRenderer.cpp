@@ -48,6 +48,8 @@ void MeshRenderer::Serialize(YAML::Node node)
 
 void MeshRenderer::Deserialize(YAML::Node node)
 {
-    SetMesh(node["path"].as<std::string>());
+    std::string path = node["path"].as<std::string>();
+    if (path.empty() == false)
+        SetMesh(path);
 }
 } // lum::comp

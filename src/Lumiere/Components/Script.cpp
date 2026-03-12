@@ -78,9 +78,13 @@ std::string Script::Name() const
 
 void Script::Serialize(YAML::Node node)
 {
+    std::filesystem::path path(m_path);
+    if (path.is_absolute())
+        path = path.lexically_relative(cfg::EXECUTABLE_DIR);
+
     YAML::Node s;
     s["componentType"] = "Script";
-    s["path"] = m_path.empty() ? "" : std::filesystem::path(m_path).lexically_relative(cfg::EXECUTABLE_DIR).string();
+    s["path"] = m_path.empty() ? "" : path.string();
     node.push_back(s);
 }
 

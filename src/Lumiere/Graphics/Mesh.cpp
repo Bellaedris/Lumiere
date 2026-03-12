@@ -55,6 +55,15 @@ std::string Mesh::Name() const
     return m_path.substr(name + 1, extension - 1);
 }
 
+std::string Mesh::Path() const
+{
+    std::filesystem::path p(m_path);
+    if (p.is_absolute())
+        return std::filesystem::path(m_path).lexically_relative(cfg::EXECUTABLE_DIR).string();
+    else
+        return p.string();
+}
+
 void Mesh::Draw() const
 {
     for (const SubMesh& submesh: m_subMeshes)

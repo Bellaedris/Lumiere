@@ -77,7 +77,7 @@ public:
      * \brief Relative path to the mesh resource
      * \return Relative path to the mesh resource
      */
-    [[nodiscard]] std::string Path() const { return std::filesystem::path(m_path).lexically_relative(cfg::EXECUTABLE_DIR).string(); };
+    [[nodiscard]] std::string Path() const;
 
     void Draw() const;
 
