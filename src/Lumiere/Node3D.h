@@ -59,6 +59,12 @@ public:
     bool HasComponent() const;
     template<typename T>
     std::optional<T*> GetComponent();
+    /**
+     * \brief Find and destroys a component
+     * \param component Pointer to an existing component
+     */
+    void RemoveComponent(comp::IComponent* component);
+
 
     /**
      * \brief Checks if a node has another node as one of its upper level parent. Can be used to avoid moving a node into

@@ -124,6 +124,18 @@ void Node3D::AddComponent(std::unique_ptr<comp::IComponent> &component)
     m_components.push_back(std::move(component));
 }
 
+void Node3D::RemoveComponent(comp::IComponent *component)
+{
+    auto iter = std::find_if(m_components.begin(), m_components.end(), [&component](const std::unique_ptr<comp::IComponent>& comp)
+    {
+        return comp.get() == component;
+    });
+    if (iter != m_components.end())
+    {
+        m_components.erase(iter);
+    }
+}
+
 bool Node3D::HasAncestor(Node3D *node) const
 {
     const Node3D* current = this;
