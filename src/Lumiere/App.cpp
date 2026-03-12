@@ -9,7 +9,8 @@
 namespace lum
 {
     App::App(int width, int height, int majorVersionHint/* = 4 */, int minorVersionHint/* = 6 */)
-            : m_window(std::make_shared<Window>(width, height, majorVersionHint, minorVersionHint))
+        : m_internalEvents(std::make_shared<evt::EventHandler>())
+        , m_window(std::make_shared<Window>(width, height, majorVersionHint, minorVersionHint, m_internalEvents))
     {
         #ifndef NDEBUG
         vendor = glGetString(GL_VENDOR);

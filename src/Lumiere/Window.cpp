@@ -9,11 +9,14 @@
 #include "VectorUtils.h"
 #include <stdexcept>
 
+#include "Events/RenderEvents.h"
+
 namespace lum
 {
-    Window::Window(int width, int height, int major, int minor)
+    Window::Window(int width, int height, int major, int minor, std::shared_ptr<evt::EventHandler> events)
         : m_width(width)
         , m_height(height)
+        , m_events(events)
     {
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
@@ -71,6 +74,9 @@ namespace lum
         Window* instance = static_cast<Window*>(glfwGetWindowUserPointer(w));
         instance->m_width = width;
         instance->m_height = height;
+
+        // signal that the viewport size just changed
+        instance->m_events->Emit(std::make_unique<evt::WindowResizedEvent>());
     }
 
     void Window::mouse_callback(GLFWwindow *w, double xpos, double ypos)

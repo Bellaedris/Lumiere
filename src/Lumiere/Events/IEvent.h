@@ -10,6 +10,7 @@ enum EventType
 {
     FrameRendered,
     FramebufferResized,
+    WindowResized
 };
 
 class IEvent

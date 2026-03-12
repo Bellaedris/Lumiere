@@ -8,14 +8,7 @@
 #include "Window.h"
 #include "Renderer/Camera.h"
 #include "GPU/Shader.h"
-#include "Graphics/Mesh.h"
-#include "GPU/Framebuffer.h"
 #include "GPU/Timer.h"
-#include "GPU/Texture.h"
-
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
 
 namespace lum
 {
@@ -23,6 +16,7 @@ namespace lum
     {
     protected:
         #pragma region Members
+        std::shared_ptr<evt::EventHandler> m_internalEvents;
         std::shared_ptr<Window> m_window;
 
         std::unique_ptr<rdr::Camera> m_camera {nullptr};

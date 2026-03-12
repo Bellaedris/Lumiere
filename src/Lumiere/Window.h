@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include "InputManager.h"
+#include "Events/EventHandler.h"
 #include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 
@@ -37,9 +38,9 @@ namespace lum
         bool m_mouseLostFocus {true};
 
         void UpdateMouseOffset(double x, double y);
-
+        std::shared_ptr<evt::EventHandler> m_events;
     public:
-        Window(int width, int height, int major, int minor);
+        Window(int width, int height, int major, int minor, std::shared_ptr<evt::EventHandler> events);
 
         bool ShouldClose();
         void PollEvents();
