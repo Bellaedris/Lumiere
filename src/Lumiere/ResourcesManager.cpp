@@ -82,15 +82,13 @@ void ResourcesManager::GenerateDefaultTextures()
         .wrapMode = gpu::Texture::WrapMode::ClampToEdge
     };
 
-    gpu::TexturePtr white = std::make_shared<gpu::Texture>(gpu::Texture::Target2D);
+    gpu::TexturePtr white = CreateTexture(DEFAULT_TEXTURE_WHITE_NAME, desc);
     float dataWhite[4] = {1.f, 1.f, 1.f, 1.f};
     white->Write(dataWhite, gpu::Texture::RGBA, gpu::GLUtils::Float);
-    m_textureCache.emplace(std::hash<std::string>{}(DEFAULT_TEXTURE_WHITE_NAME), white);
 
-    gpu::TexturePtr black = std::make_shared<gpu::Texture>(gpu::Texture::Target2D);
+    gpu::TexturePtr black = CreateTexture(DEFAULT_TEXTURE_BLACK_NAME, desc);
     float dataBlack[4] = {0.f, 0.f, 0.f, 0.f};
-    white->Write(dataBlack, gpu::Texture::RGBA, gpu::GLUtils::Float);
-    m_textureCache.emplace(std::hash<std::string>{}(DEFAULT_TEXTURE_BLACK_NAME), black);
+    black->Write(dataBlack, gpu::Texture::RGBA, gpu::GLUtils::Float);
 }
 
 gpu::ShaderPtr ResourcesManager::GetShader(const std::string &name)

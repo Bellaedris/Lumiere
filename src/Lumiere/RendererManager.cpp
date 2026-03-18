@@ -11,8 +11,8 @@ namespace lum
 {
 RendererManager::RendererManager(int width, int height, const std::shared_ptr<evt::EventHandler> &eventHandler)
     : m_eventHandler(eventHandler)
-    , m_cameraData(std::make_unique<lum::gpu::Buffer>(lum::gpu::Buffer::BufferType::Uniform))
     , m_gBuffer(std::make_unique<rdr::GBuffer>(width, height))
+    , m_cameraData(std::make_unique<lum::gpu::Buffer>(lum::gpu::Buffer::BufferType::Uniform))
 {
     LUM_SUB_TO_EVENT(m_eventHandler, evt::EventType::FramebufferResized, RendererManager::OnEvent);
 

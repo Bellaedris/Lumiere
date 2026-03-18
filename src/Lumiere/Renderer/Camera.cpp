@@ -8,12 +8,12 @@ namespace lum::rdr
 {
     Camera::Camera(const glm::vec3 &pos, float aspectRatio, float fov, float znear, float zfar)
         : m_position(pos)
-        , m_aspectRatio(aspectRatio)
-        , m_fov(glm::radians(fov))
-        , m_znear(znear)
-        , m_zfar(zfar)
         , m_forward({0, 0, 1})
         , m_up({0, 1, 0})
+        , m_fov(glm::radians(fov))
+        , m_aspectRatio(aspectRatio)
+        , m_znear(znear)
+        , m_zfar(zfar)
     {
         UpdateRotation();
         UpdateView();
