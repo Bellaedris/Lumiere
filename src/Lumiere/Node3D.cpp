@@ -7,8 +7,6 @@
 
 #include <utility>
 
-#include "Systems/ScriptEngine.h"
-#include "sol.hpp"
 #include "Components/Light.h"
 #include "Components/MeshRenderer.h"
 
@@ -136,8 +134,6 @@ void Node3D::Update(float dt)
         return;
     }
 
-    for (auto&& component : m_components)
-        component->Update(dt);
     for (auto&& child : m_children)
         child->Update(dt);
 }
@@ -150,15 +146,8 @@ void Node3D::UpdateSelfAndChildren(float dt)
     else
         m_transform.UpdateModelMatrix(m_parent->GetTransform().Model());
 
-    for (auto&& component : m_components)
-        component->Update(dt);
     for (auto&& child : m_children)
         child->UpdateSelfAndChildren(dt);
-}
-
-void Node3D::SetScriptingContext(sol::environment &env) const
-{
-    env["node"] = this;
 }
 
 void Node3D::SetSystemsContext(SystemProvider *systemProvider)

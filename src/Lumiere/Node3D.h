@@ -5,9 +5,9 @@
 #pragma once
 #include <memory>
 
-#include "App.h"
-#include "sol.hpp"
 #include "Components/Transform.h"
+#include <Lumiere/Systems/System.h>
+#include "sol.hpp"
 #include "stduuid/uuid.h"
 
 namespace lum
@@ -46,8 +46,6 @@ public:
     void Update(float dt);
     void UpdateSelfAndChildren(float dt);
 
-    // should probably be private, with IComponents being friend classes...
-    void SetScriptingContext(sol::environment& env) const;
     void SetSystemsContext(SystemProvider* systemProvider);
 
     template<typename T>
