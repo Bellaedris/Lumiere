@@ -5,8 +5,6 @@
 #include "Transform.h"
 
 #include "sol.hpp"
-#include "Lumiere/Node3D.h"
-#include "../Systems/ScriptEngine.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "Lumiere/Utils/YAMLUtils.h"
 

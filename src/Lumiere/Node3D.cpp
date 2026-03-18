@@ -9,6 +9,7 @@
 
 #include "Components/Light.h"
 #include "Components/MeshRenderer.h"
+#include "Systems/ScriptEngine.h"
 
 namespace lum
 {

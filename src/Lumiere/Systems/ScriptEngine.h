@@ -35,7 +35,7 @@ public:
     ScriptEngine();
 
     // lifecycle functions
-    void Update(float dt);
+    void Update(float dt) override;
 
     ScriptHandle Register(const std::string& path, Node3D* context);
     void         Unregister(ScriptHandle handle);

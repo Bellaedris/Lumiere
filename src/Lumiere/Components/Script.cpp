@@ -17,57 +17,34 @@ Script::Script(Node3D *node, SystemProvider* systems)
     : IComponent(node, systems)
     , m_engine(systems->m_scripting)
 {
-    sol::state& lua = m_engine->State();
-    m_env = sol::environment(lua, sol::create, lua.globals());
-    m_env["print"] = lua["print"];
-    m_node->SetScriptingContext(m_env);
+
+}
+
+void Script::OnPlay()
+{
+    m_handle = m_engine->Register(m_path, m_node);
+    m_initialized = true;
+}
+
+void Script::OnStop()
+{
+    m_engine->Unregister(m_handle);
+    m_initialized = false;
 }
 
 void Script::LoadScript()
 {
-    sol::protected_function_result res = m_engine->State().safe_script_file(m_path, m_env, sol::script_pass_on_error);
-    if (res.valid())
+    // register the script
+    if (m_initialized)
     {
-        m_update = m_env["Update"];
-        m_start = m_env["Start"];
+        m_engine->Recreate(m_handle, m_path);
     }
-    else
-    {
-        sol::error err = res;
-        std::cerr << "[Script Error] " << m_path << "\n" << err.what() << std::endl;
-    }
-    m_started = false;
 }
 
-void Script::Update(float dt)
+void Script::SetScriptPath(const std::string &path)
 {
-    if (m_path.empty() == false)
-    {
-        // run start once, before first update
-        if (m_started == false)
-        {
-            if (m_update.valid())
-            {
-                sol::protected_function_result res = m_start();
-                if (res.valid() == false)
-                {
-                    sol::error err = res;
-                    std::cerr << "[Runtime Error] " << m_path << "\n" << err.what() << std::endl;
-                }
-            }
-            m_started = true;
-        }
-
-        if (m_update.valid())
-        {
-            sol::protected_function_result res = m_update(dt);
-            if (res.valid() == false)
-            {
-                sol::error err = res;
-                std::cerr << "[Runtime Error] " << m_path << "\n" << err.what() << std::endl;
-            }
-        }
-    }
+    m_path = path;
+    LoadScript();
 }
 
 std::string Script::Name() const

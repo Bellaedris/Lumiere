@@ -6,7 +6,7 @@
 #include "yaml-cpp/yaml.h"
 
 #include <Lumiere/Components/ComponentFactory.h>
-#include <Lumiere/App.h>
+#include <Lumiere/Systems/System.h>
 
 namespace lum
 {
@@ -25,7 +25,9 @@ protected:
 public:
     IComponent(Node3D* node, SystemProvider* systems) : m_node(node) {};
     virtual      ~IComponent() = default;
-    virtual void Update(float dt) {  };
+
+    virtual void OnPlay() {};
+    virtual void OnStop() {};
 
     virtual void Serialize(YAML::Node node) = 0;
     virtual void Deserialize(YAML::Node node) = 0;

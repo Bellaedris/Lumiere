@@ -67,6 +67,10 @@ public:
 
     void ForEachNode(const std::function<void(Node3D* node)>& callback);
 
+    // lifecycle
+    void OnPlay();
+    void OnStop();
+
     void Serialize();
     void Deserialize(const std::string& path);
 };

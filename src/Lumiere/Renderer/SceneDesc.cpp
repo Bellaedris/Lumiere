@@ -106,6 +106,24 @@ void SceneDesc::ForEachNode(const std::function<void(Node3D *node)> &callback)
     }
 }
 
+void SceneDesc::OnPlay()
+{
+    ForEachNode([&](Node3D* current)
+    {
+        for (auto&& comp : current->Components())
+            comp->OnPlay();
+    });
+}
+
+void SceneDesc::OnStop()
+{
+    ForEachNode([&](Node3D* current)
+    {
+        for (auto&& comp : current->Components())
+            comp->OnStop();
+    });
+}
+
 void SceneDesc::Serialize()
 {
     YAML::Node root;

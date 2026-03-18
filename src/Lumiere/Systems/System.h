@@ -3,11 +3,11 @@
 //
 
 #pragma once
-#include "PhysicsSystem.h"
-#include "ScriptEngine.h"
 
 namespace lum
 {
+class ScriptEngine;
+class PhysicsSystem;
 /**
  * \brief Non-owning pointers to all the systems that will be used by our components during runtime, be it editor or gameplay.
  * For instance, our Rigidbodies need access to our Jolt wrapper in order to create the simulated object.\n
@@ -22,6 +22,7 @@ struct SystemProvider
 
 class ISystem
 {
+public:
     virtual void Update(float dt) = 0;
 };
 }
