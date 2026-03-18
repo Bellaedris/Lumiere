@@ -6,7 +6,7 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Lumiere/ScriptEngine.h"
+#include "../Systems/ScriptEngine.h"
 #include "Lumiere/Utils/YAMLUtils.h"
 
 namespace lum::comp
@@ -14,9 +14,9 @@ namespace lum::comp
 bool Light::m_typeRegistered = false;
 REGISTER_TO_COMPONENT_FACTORY(Light, "Light");
 
-void Light::RegisterType()
+void Light::RegisterType(SystemProvider* systems)
 {
-    sol::state& lua = ScriptEngine::Instance();
+    sol::state& lua = systems->m_scripting->State();
 
     sol::usertype<Light> type = lua.new_usertype<Light>("Light");
 
@@ -38,11 +38,11 @@ void Light::RegisterType()
     m_typeRegistered = true;
 }
 
-Light::Light(Node3D *node)
-    : IComponent(node)
+Light::Light(Node3D *node, SystemProvider* systems)
+    : IComponent(node, systems)
 {
     if (m_typeRegistered == false)
-        RegisterType();
+        RegisterType(systems);
 }
 
 void Light::Serialize(YAML::Node node)

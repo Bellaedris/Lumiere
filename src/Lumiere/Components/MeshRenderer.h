@@ -22,11 +22,11 @@ private:
     /**
      * \brief Registers this component to the Lua scriping backend
      */
-    void RegisterType();
+    void RegisterType(SystemProvider* systems);
 
     void InspectorDrawMeshDetails();
 public:
-    MeshRenderer(Node3D* node);
+    MeshRenderer(Node3D* node, SystemProvider* systems);
 
     gfx::MeshPtr Mesh() const { return m_mesh; }
 

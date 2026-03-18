@@ -6,62 +6,18 @@
 
 #include "sol.hpp"
 #include "Lumiere/Node3D.h"
-#include "Lumiere/ScriptEngine.h"
+#include "../Systems/ScriptEngine.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "Lumiere/Utils/YAMLUtils.h"
 
 namespace lum::comp
 {
 REGISTER_TO_COMPONENT_FACTORY(Transform, "Transform");
-bool Transform::m_typeRegistered = false;
 
-Transform::Transform(Node3D* node)
-    : IComponent(node)
+Transform::Transform(Node3D* node, SystemProvider* systems)
+    : IComponent(node, systems)
 {
-    // if not done already, register the transform type to the Lua state
-    if (m_typeRegistered == false)
-    {
-        sol::state& lua = ScriptEngine::Instance();
-        sol::usertype<glm::vec3> vec = lua.new_usertype<glm::vec3>("vec3",
-            sol::call_constructor,
-            sol::constructors<glm::vec3(float), glm::vec3(float, float, float)>()
-        );
-        vec["x"] = sol::property(
-            [](const glm::vec3& v) { return v.x; },
-            [](glm::vec3& v, float x) { v.x = x; }
-        );
-        vec["y"] = sol::property(
-            [](const glm::vec3& v) { return v.y; },
-            [](glm::vec3& v, float y) { v.y = y; }
-        );
-        vec["z"] = sol::property(
-            [](const glm::vec3& v) { return v.z; },
-            [](glm::vec3& v, float z) { v.z = z; }
-        );
 
-        sol::usertype<Transform> type = lua.new_usertype<Transform>("Transform");
-
-        type["position"] = sol::property(
-            [](Transform& t) -> glm::vec3& { return t.m_position; },
-            [](Transform& t, const glm::vec3& p) { t.SetLocalPosition(p); }
-        );
-        type["Translate"] = &Transform::Translate;
-
-        type["rotation"] = sol::property(
-            [](Transform& t) -> glm::vec3& { return t.m_rotationEuler; },
-            [](Transform& t, const glm::vec3& p) { t.m_rotationEuler = p; }
-        );
-
-        type["scale"] = sol::property(
-            [](Transform& t) -> glm::vec3& { return t.m_scale; },
-            [](Transform& t, const glm::vec3& p) { t.m_scale = p; }
-        );
-
-        type["worldPosition"] = &Transform::Position;
-        type["worldScale"] = &Transform::Scale;
-
-        m_typeRegistered = true;
-    }
 }
 
 glm::mat4 Transform::LocalModelMatrix() const

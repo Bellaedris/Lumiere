@@ -5,6 +5,7 @@
 #pragma once
 #include "Camera.h"
 #include "Lights.h"
+#include "Lumiere/App.h"
 #include "Lumiere/Node3D.h"
 #include "Lumiere/Graphics/Mesh.h"
 
@@ -20,6 +21,7 @@ protected:
     static constexpr int SCENE_DESC_SERIALIZATION_VERSION = 1;
     static constexpr const char* SCENE_FILE_FORMAT = ".lumsc";
 
+    SystemProvider* m_systemProvider;
     std::unique_ptr<Node3D> m_rootNode;
     std::unique_ptr<LightList> m_lights {std::make_unique<LightList>()};
 
@@ -31,7 +33,7 @@ public:
         glm::mat4 model;
     };
 
-    SceneDesc();
+    SceneDesc(SystemProvider* systemProvider);
 
     Node3D *AddNode();
     void SetMainCamera(Camera* camera) {m_mainCamera = camera;};

@@ -7,16 +7,17 @@
 #include <filesystem>
 
 #include "Lumiere/EngineCfg.h"
-#include "Lumiere/ScriptEngine.h"
+#include "../Systems/ScriptEngine.h"
 
 namespace lum::comp
 {
 REGISTER_TO_COMPONENT_FACTORY(Script, "Script");
 
-Script::Script(Node3D *node)
-    : IComponent(node)
+Script::Script(Node3D *node, SystemProvider* systems)
+    : IComponent(node, systems)
+    , m_engine(systems->m_scripting)
 {
-    sol::state& lua = ScriptEngine::Instance();
+    sol::state& lua = m_engine->State();
     m_env = sol::environment(lua, sol::create, lua.globals());
     m_env["print"] = lua["print"];
     m_node->SetScriptingContext(m_env);
@@ -24,7 +25,7 @@ Script::Script(Node3D *node)
 
 void Script::LoadScript()
 {
-    sol::protected_function_result res = ScriptEngine::Instance().safe_script_file(m_path, m_env, sol::script_pass_on_error);
+    sol::protected_function_result res = m_engine->State().safe_script_file(m_path, m_env, sol::script_pass_on_error);
     if (res.valid())
     {
         m_update = m_env["Update"];

@@ -17,6 +17,7 @@ private:
     static bool m_registered;
 
     /** Path to the script that will be executed */
+    ScriptEngine* m_engine {nullptr};
     std::string m_path;
     sol::environment m_env;
 
@@ -25,7 +26,7 @@ private:
 
     bool m_started;
 public:
-    Script(Node3D* node);
+    Script(Node3D* node, SystemProvider* systems);
 
     void LoadScript();
 

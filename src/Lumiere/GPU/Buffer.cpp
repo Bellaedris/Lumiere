@@ -62,8 +62,8 @@ namespace lum::gpu
     }
 
     Buffer::Buffer(Buffer &&other) noexcept
-        : m_type(other.m_type)
-        , m_buffer(other.m_buffer)
+        : m_buffer(other.m_buffer)
+        , m_type(other.m_type)
     {
         other.m_buffer = 0;
     }

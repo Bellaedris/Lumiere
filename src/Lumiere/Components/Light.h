@@ -22,13 +22,13 @@ private:
     static bool m_registered;
     /** \brief lua type registration status */
     static bool m_typeRegistered;
-    void RegisterType();
+    void RegisterType(SystemProvider* systems);
 public:
     #pragma region Constants
     static constexpr int LIGHT_TYPE_COUNT = 3;
     static constexpr const char* LIGHT_TYPES[] = {"Directional", "Point", "Spot"};
     #pragma endregion // Constants
-    Light(Node3D* node);
+    Light(Node3D* node, SystemProvider* systems);
 
     /**
      * \brief Type of this light component

@@ -11,6 +11,9 @@ namespace lum::comp
 {
 class Transform : public IComponent
 {
+// gods forgive me but i really need to register Transform type on the Lua side from this file, otherwise it would be
+// post-init when a service provider is available and it would be very ugly.
+friend Node3D;
 private:
     /** \brief World space datas */
     glm::mat4 m_model         {glm::mat4(1.f)};
@@ -25,10 +28,8 @@ private:
 
     /** \brief registration to the component factory status */
     static bool m_registered;
-    /** \brief lua type registration status */
-    static bool m_typeRegistered;
 public:
-    Transform(Node3D* node);
+    Transform(Node3D* node, SystemProvider* systems);
 
     void UpdateModelMatrix();
     void UpdateModelMatrix(const glm::mat4& parent);

@@ -5,6 +5,7 @@
 #pragma once
 #include <memory>
 
+#include "App.h"
 #include "sol.hpp"
 #include "Components/Transform.h"
 #include "stduuid/uuid.h"
@@ -16,7 +17,8 @@ class Node3D
 private:
     static bool m_registered;
 
-    // eventually use an std list if we want easy reordering of childs
+    SystemProvider* m_systemProvider {nullptr};
+    // eventually use an std list if we want easy reordering of childs, but gives poor cache locality...
     std::vector<std::unique_ptr<Node3D>> m_children;
     Node3D*                              m_parent {nullptr};
     comp::Transform                      m_transform;
@@ -30,6 +32,7 @@ private:
      */
     int         m_depth {0};
 
+    void RegisterType();
 public:
     constexpr static const size_t NODE_NAME_MAX_LENGTH = 128;
 
@@ -45,6 +48,7 @@ public:
 
     // should probably be private, with IComponents being friend classes...
     void SetScriptingContext(sol::environment& env) const;
+    void SetSystemsContext(SystemProvider* systemProvider);
 
     template<typename T>
     void AddComponent();
@@ -64,7 +68,6 @@ public:
      * \param component Pointer to an existing component
      */
     void RemoveComponent(comp::IComponent* component);
-
 
     /**
      * \brief Checks if a node has another node as one of its upper level parent. Can be used to avoid moving a node into
@@ -91,7 +94,7 @@ template<typename T>
 void Node3D::AddComponent()
 {
     if (HasComponent<T>() == false)
-        m_components.push_back(std::make_unique<T>(this));
+        m_components.push_back(std::make_unique<T>(this, m_systemProvider));
 }
 
 template<typename T>

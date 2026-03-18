@@ -4,7 +4,6 @@
 
 #include "App.h"
 #include "../LumiereConfig.h"
-#include "GPU/Framebuffer.h"
 
 namespace lum
 {

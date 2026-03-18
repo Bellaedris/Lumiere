@@ -15,14 +15,17 @@
 
 namespace lum::rdr
 {
-SceneDesc::SceneDesc()
-    : m_rootNode(std::make_unique<Node3D>())
+SceneDesc::SceneDesc(SystemProvider* systemProvider)
+    : m_systemProvider(systemProvider)
+    , m_rootNode(std::make_unique<Node3D>())
 {
 }
 
 Node3D *SceneDesc::AddNode()
 {
-    return m_rootNode->AddChild();
+    Node3D* n = m_rootNode->AddChild();
+    n->SetSystemsContext(m_systemProvider);
+    return n;
 }
 
 std::vector<SceneDesc::RenderInstance> SceneDesc::RenderInstances()
@@ -171,11 +174,13 @@ void SceneDesc::Deserialize(const std::string& path)
         }
         std::unique_ptr<Node3D> n = std::make_unique<Node3D>(name, nodeUUID.value());
         n->GetTransform().Deserialize(node["transform"]);
+        n->SetSystemsContext(m_systemProvider);
         for (const auto& component : node["components"])
         {
             std::unique_ptr<comp::IComponent> comp = comp::ComponentFactory::Create(
                     component["componentType"].as<std::string>(),
-                    n.get()
+                    n.get(),
+                    m_systemProvider
             );
             comp->Deserialize(static_cast<YAML::Node>(component));
             n->AddComponent(comp);

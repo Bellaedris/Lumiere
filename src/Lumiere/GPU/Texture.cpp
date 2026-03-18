@@ -12,9 +12,9 @@ namespace lum::gpu
             , m_width(other.m_width)
             , m_height(other.m_height)
             , m_target(other.m_target)
+            , m_wrappingMethod(other.m_wrappingMethod)
             , m_minFilter(other.m_minFilter)
             , m_magFilter(other.m_magFilter)
-            , m_wrappingMethod(other.m_wrappingMethod)
     {
         other.m_handle = 0;
     }

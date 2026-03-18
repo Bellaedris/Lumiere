@@ -4,7 +4,7 @@
 
 #include "MeshRenderer.h"
 
-#include "Lumiere/ScriptEngine.h"
+#include "../Systems/ScriptEngine.h"
 #include "Lumiere/Utils/MeshLoader.h"
 
 namespace lum::comp
@@ -12,9 +12,9 @@ namespace lum::comp
 REGISTER_TO_COMPONENT_FACTORY(MeshRenderer, "MeshRenderer");
 bool MeshRenderer::m_typeRegistered = false;
 
-void MeshRenderer::RegisterType()
+void MeshRenderer::RegisterType(SystemProvider* systems)
 {
-    sol::state& lua = ScriptEngine::Instance();
+    sol::state& lua =  systems->m_scripting->State();
 
     sol::usertype<gfx::Mesh> mesh = lua.new_usertype<gfx::Mesh>("Mesh");
     mesh["name"] = &gfx::Mesh::Name;
@@ -25,11 +25,11 @@ void MeshRenderer::RegisterType()
     m_typeRegistered = true;
 }
 
-MeshRenderer::MeshRenderer(Node3D *node)
-    : IComponent(node)
+MeshRenderer::MeshRenderer(Node3D *node, SystemProvider* systems)
+    : IComponent(node, systems)
 {
     if (m_typeRegistered == false)
-        RegisterType();
+        RegisterType(systems);
 }
 
 void MeshRenderer::SetMesh(const std::string &path)

@@ -7,7 +7,7 @@
 
 #include <utility>
 
-#include "ScriptEngine.h"
+#include "Systems/ScriptEngine.h"
 #include "sol.hpp"
 #include "Components/Light.h"
 #include "Components/MeshRenderer.h"
@@ -16,29 +16,71 @@ namespace lum
 {
 bool Node3D::m_registered = false;
 
+void Node3D::RegisterType()
+{
+    m_registered = true;
+
+    sol::state& lua = m_systemProvider->m_scripting->State();
+    // since Transforms are always created alongside Nodes, we register the 2 types at the same time so we don't have to
+    // give any scripting context to Transform post-creation, which would be very ugly.
+
+    sol::usertype<glm::vec3> vec = lua.new_usertype<glm::vec3>("vec3",
+            sol::call_constructor,
+            sol::constructors<glm::vec3(float), glm::vec3(float, float, float)>()
+        );
+    vec["x"] = sol::property(
+        [](const glm::vec3& v) { return v.x; },
+        [](glm::vec3& v, float x) { v.x = x; }
+    );
+    vec["y"] = sol::property(
+        [](const glm::vec3& v) { return v.y; },
+        [](glm::vec3& v, float y) { v.y = y; }
+    );
+    vec["z"] = sol::property(
+        [](const glm::vec3& v) { return v.z; },
+        [](glm::vec3& v, float z) { v.z = z; }
+    );
+
+    sol::usertype<comp::Transform> transform = lua.new_usertype<comp::Transform>("Transform");
+
+    transform["position"] = sol::property(
+        [](comp::Transform& t) -> glm::vec3& { return t.m_position; },
+        [](comp::Transform& t, const glm::vec3& p) { t.SetLocalPosition(p); }
+    );
+    transform["Translate"] = &comp::Transform::Translate;
+
+    transform["rotation"] = sol::property(
+        [](comp::Transform& t) -> glm::vec3& { return t.m_rotationEuler; },
+        [](comp::Transform& t, const glm::vec3& p) { t.m_rotationEuler = p; }
+    );
+
+    transform["scale"] = sol::property(
+        [](comp::Transform& t) -> glm::vec3& { return t.m_scale; },
+        [](comp::Transform& t, const glm::vec3& p) { t.m_scale = p; }
+    );
+
+    transform["worldPosition"] = &comp::Transform::Position;
+    transform["worldScale"] = &comp::Transform::Scale;
+
+    sol::usertype<Node3D> type = lua.new_usertype<Node3D>("Node3D");
+    // there is no templated functions in lua so we have to bind all the possible get/add components functions by hand :(
+    // LAMBDAS MUST RETURN REFERENCES
+    type["transform"] = sol::property([](Node3D& node) -> comp::Transform& { return node.m_transform; });
+    type["GetMeshComponent"] = &Node3D::GetComponent<comp::MeshRenderer>;
+    type["GetLightComponent"] = &Node3D::GetComponent<comp::Light>;
+
+    type["name"] = &Node3D::GetName;
+}
+
 Node3D::Node3D()
-    : m_transform(this)
+    : m_transform(this, nullptr)
     , m_uuid(uuids::uuid_system_generator{}())
 {
-    if (m_registered == false)
-    {
-        m_registered = true;
 
-        sol::state& lua = ScriptEngine::Instance();
-        sol::usertype<Node3D> type = lua.new_usertype<Node3D>("Node3D");
-
-        // there is no templated functions in lua so we have to bind all the possible get/add components functions by hand :(
-        // LAMBDAS MUST RETURN REFERENCES
-        type["transform"] = sol::property([](Node3D& node) -> comp::Transform& { return node.m_transform; });
-        type["GetMeshComponent"] = &Node3D::GetComponent<comp::MeshRenderer>;
-        type["GetLightComponent"] = &Node3D::GetComponent<comp::Light>;
-
-        type["name"] = &Node3D::GetName;
-    }
 }
 
 Node3D::Node3D(const std::string& name, uuids::uuid& uuid)
-    : m_transform(this)
+    : m_transform(this, nullptr)
     , m_name(name)
     , m_uuid(std::move(uuid))
 {
@@ -117,6 +159,13 @@ void Node3D::UpdateSelfAndChildren(float dt)
 void Node3D::SetScriptingContext(sol::environment &env) const
 {
     env["node"] = this;
+}
+
+void Node3D::SetSystemsContext(SystemProvider *systemProvider)
+{
+    m_systemProvider = systemProvider;
+    if (m_registered == false)
+        RegisterType();
 }
 
 void Node3D::AddComponent(std::unique_ptr<comp::IComponent> &component)
