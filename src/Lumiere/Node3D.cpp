@@ -40,26 +40,55 @@ void Node3D::RegisterType()
         [](glm::vec3& v, float z) { v.z = z; }
     );
 
+    sol::usertype<glm::quat> quat = lua.new_usertype<glm::quat>("quat",
+            sol::call_constructor,
+            sol::constructors<glm::quat(float, float, float, float), glm::quat(glm::vec3)>()
+        );
+    quat["x"] = sol::property(
+        [](const glm::quat& q) { return q.x; },
+        [](glm::quat& q, float x) { q.x = x; }
+    );
+    quat["y"] = sol::property(
+        [](const glm::quat& v) { return v.y; },
+        [](glm::quat& v, float y) { v.y = y; }
+    );
+    quat["z"] = sol::property(
+        [](const glm::quat& v) { return v.z; },
+        [](glm::quat& v, float z) { v.z = z; }
+    );
+    quat["w"] = sol::property(
+        [](const glm::quat& v) { return v.w; },
+        [](glm::quat& v, float w) { v.w = w; }
+    );
+
+    // add rotation functions
+
     sol::usertype<comp::Transform> transform = lua.new_usertype<comp::Transform>("Transform");
 
-    transform["position"] = sol::property(
+    transform["localPosition"] = sol::property(
         [](comp::Transform& t) -> glm::vec3& { return t.m_position; },
         [](comp::Transform& t, const glm::vec3& p) { t.SetLocalPosition(p); }
     );
     transform["Translate"] = &comp::Transform::Translate;
 
-    transform["rotation"] = sol::property(
-        [](comp::Transform& t) -> glm::vec3& { return t.m_rotationEuler; },
-        [](comp::Transform& t, const glm::vec3& p) { t.m_rotationEuler = p; }
+    transform["localRotation"] = sol::property(
+        [](comp::Transform& t) -> glm::quat& { return t.m_rotation; },
+        [](comp::Transform& t, const glm::quat& p) { t.m_rotation = p; }
     );
 
-    transform["scale"] = sol::property(
+    transform["localScale"] = sol::property(
         [](comp::Transform& t) -> glm::vec3& { return t.m_scale; },
         [](comp::Transform& t, const glm::vec3& p) { t.m_scale = p; }
     );
 
-    transform["worldPosition"] = &comp::Transform::Position;
-    transform["worldScale"] = &comp::Transform::Scale;
+    transform["position"] = sol::property(
+        [](comp::Transform& t) -> glm::vec3 { return t.Position(); },
+        [](comp::Transform& t, const glm::vec3& p) { t.SetPosition(p); }
+    );
+    transform["scale"] = sol::property(
+        [](comp::Transform& t) -> glm::vec3 { return t.Scale(); },
+        [](comp::Transform& t, const glm::vec3& p) { t.SetScale(p); }
+    );
 
     sol::usertype<Node3D> type = lua.new_usertype<Node3D>("Node3D");
     // there is no templated functions in lua so we have to bind all the possible get/add components functions by hand :(
