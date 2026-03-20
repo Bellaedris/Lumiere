@@ -5,6 +5,7 @@
 #include "Transform.h"
 
 #include "sol.hpp"
+#include "Lumiere/Node3D.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "Lumiere/Utils/YAMLUtils.h"
 
@@ -21,14 +22,8 @@ Transform::Transform(Node3D* node, SystemProvider* systems)
 glm::mat4 Transform::LocalModelMatrix() const
 {
     const glm::mat4 identity(1.f);
-    glm::mat4       rot(1.f);
-    glm::mat4       rotX = glm::rotate(identity, glm::radians(m_rotationEuler.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::mat4       rotY = glm::rotate(identity, glm::radians(m_rotationEuler.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4       rotZ = glm::rotate(identity, glm::radians(m_rotationEuler.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-    rot = rotY * rotX * rotZ;
-
-    return glm::translate(identity, m_position) * rot * glm::scale(identity, m_scale);
+    glm::mat4 rotation = glm::mat4(m_rotation);
+    return glm::translate(identity, m_position) * rotation * glm::scale(identity, m_scale);
 }
 
 void Transform::UpdateModelMatrix()
@@ -43,15 +38,56 @@ void Transform::UpdateModelMatrix(const glm::mat4 &parent)
     m_isDirty = false;
 }
 
+void Transform::SetPosition(const glm::vec3 &newPosition)
+{
+    if (m_node->Parent() != nullptr)
+    {
+        glm::mat4 inverseModel = glm::inverse(m_node->Parent()->GetTransform().Model());
+        m_position = glm::vec3(inverseModel * glm::vec4(newPosition, 1));
+    }
+    else
+    {
+        m_position = newPosition;
+    }
+    m_isDirty = true;
+}
+
 void Transform::SetLocalPosition(const glm::vec3 &newPosition)
 {
     m_position = newPosition;
     m_isDirty = true;
 }
 
-void Transform::SetLocalRotation(const glm::vec3 &newRotation)
+void Transform::SetRotation(const glm::quat &newRotation)
 {
-    m_rotationEuler = newRotation;
+    if (m_node->Parent() != nullptr)
+    {
+        glm::quat inverseModel = glm::inverse(m_node->Parent()->GetTransform().Rotation());
+        m_rotation = inverseModel * glm::normalize(newRotation);
+    }
+    else
+    {
+        m_rotation = glm::normalize(newRotation);
+    }
+    m_isDirty = true;
+}
+
+void Transform::SetLocalRotation(const glm::quat &newRotation)
+{
+    m_rotation = newRotation;
+    m_isDirty = true;
+}
+
+void Transform::SetScale(const glm::vec3 &newScale)
+{
+    if (m_node->Parent() != nullptr)
+    {
+        m_scale = m_node->Parent()->GetTransform().Scale() * newScale;
+    }
+    else
+    {
+        m_scale = newScale;
+    }
     m_isDirty = true;
 }
 
@@ -61,10 +97,25 @@ void Transform::SetLocalScale(const glm::vec3 &newScale)
     m_isDirty = true;
 }
 
+void Transform::SetEulerAngles(const glm::vec3 &eulerAngles)
+{
+    m_rotation = glm::quat(glm::radians(eulerAngles));
+    m_isDirty = true;
+}
+
 void Transform::Translate(const glm::vec3 &t)
 {
     m_position += t;
     m_isDirty = true;
+}
+
+glm::quat Transform::Rotation() const
+{
+    if (m_node->Parent() != nullptr)
+    {
+        return m_node->Parent()->GetTransform().Rotation() * m_rotation;
+    }
+    return m_rotation;
 }
 
 void Transform::Serialize(YAML::Node node)
@@ -72,7 +123,7 @@ void Transform::Serialize(YAML::Node node)
     YAML::Node t;
     t["componentType"] = "Transform";
     t["position"] = m_position;
-    t["rotation"] = m_rotationEuler;
+    t["rotation"] = m_rotation;
     t["scale"] = m_scale;
     node["transform"] = t;
 }
@@ -80,7 +131,7 @@ void Transform::Serialize(YAML::Node node)
 void Transform::Deserialize(YAML::Node node)
 {
     m_position = node["position"].as<glm::vec3>();
-    m_rotationEuler = node["rotation"].as<glm::vec3>();
+    m_rotation = node["rotation"].as<glm::quat>();
     m_scale = node["scale"].as<glm::vec3>();
     m_isDirty = true;
 }
