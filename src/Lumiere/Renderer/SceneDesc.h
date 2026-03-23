@@ -55,7 +55,12 @@ public:
     Node3D* RootNode() {return m_rootNode.get();};
 
     /**
-     * \brief Serializes the scene and resets the root to a new empty node
+     * \brief Delete all nodes
+     */
+    void ClearNodes();
+
+    /**
+     * \brief Saves the current scene and removes all nodes, creating a new empty scene
      */
     void ResetScene();
 

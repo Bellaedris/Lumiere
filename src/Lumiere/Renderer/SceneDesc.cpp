@@ -72,10 +72,15 @@ void SceneDesc::GatherAndUploadLights()
     });
 }
 
+void SceneDesc::ClearNodes()
+{
+    m_rootNode = std::make_unique<Node3D>();
+}
+
 void SceneDesc::ResetScene()
 {
     Serialize();
-    m_rootNode = std::make_unique<Node3D>();
+    ClearNodes();
 }
 
 void SceneDesc::LoadScene(const std::string &path)

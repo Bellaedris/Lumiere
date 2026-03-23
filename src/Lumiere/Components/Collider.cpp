@@ -6,4 +6,9 @@
 
 namespace lum::comp
 {
+Collider::Collider(Node3D *node, SystemProvider *systems)
+    : IComponent(node, systems)
+    , m_physicsSystem(systems->m_physics)
+{
+}
 } // lum

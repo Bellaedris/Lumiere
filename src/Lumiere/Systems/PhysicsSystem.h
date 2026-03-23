@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <map>
 #include <Jolt/Jolt.h>
 
 #include <Jolt/RegisterTypes.h>
@@ -20,8 +21,99 @@
 #include "Jolt/Physics/Collision/BroadPhase/BroadPhaseLayerInterfaceMask.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
 
+#include "slot_map/slot_map.h"
+
 namespace lum
 {
+class Node3D;
+
+namespace Layers
+{
+    static constexpr JPH::ObjectLayer NON_MOVING = 0;
+    static constexpr JPH::ObjectLayer MOVING     = 1;
+    static constexpr JPH::ObjectLayer NUM_LAYERS = 2;
+};
+
+namespace BroadPhaseLayers
+{
+    static constexpr JPH::BroadPhaseLayer NON_MOVING(0);
+    static constexpr JPH::BroadPhaseLayer MOVING(1);
+    static constexpr uint                 NUM_LAYERS(2);
+};
+
+class BPLayerInterfaceImpl final : public JPH::BroadPhaseLayerInterface
+{
+public:
+    BPLayerInterfaceImpl()
+    {
+        // Create a mapping table from object to broad phase layer
+        mObjectToBroadPhase[Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
+        mObjectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
+    }
+
+    virtual uint					GetNumBroadPhaseLayers() const override
+    {
+        return BroadPhaseLayers::NUM_LAYERS;
+    }
+
+    virtual JPH::BroadPhaseLayer			GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
+    {
+        JPH_ASSERT(inLayer < Layers::NUM_LAYERS);
+        return mObjectToBroadPhase[inLayer];
+    }
+
+    #if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
+    virtual const char *			GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override
+    {
+        switch (static_cast<JPH::BroadPhaseLayer::Type>(inLayer))
+        {
+            case static_cast<JPH::BroadPhaseLayer::Type>(BroadPhaseLayers::NON_MOVING):	return "NON_MOVING";
+            case static_cast<JPH::BroadPhaseLayer::Type>(BroadPhaseLayers::MOVING):		return "MOVING";
+            default:													JPH_ASSERT(false); return "INVALID";
+        }
+    }
+    #endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
+
+private:
+    JPH::BroadPhaseLayer					mObjectToBroadPhase[Layers::NUM_LAYERS];
+};
+
+/// Class that determines if an object layer can collide with a broadphase layer
+class ObjectVsBroadPhaseLayerFilterImpl : public JPH::ObjectVsBroadPhaseLayerFilter
+{
+public:
+    virtual bool				ShouldCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2) const override
+    {
+        switch (inLayer1)
+        {
+            case Layers::NON_MOVING:
+                return inLayer2 == BroadPhaseLayers::MOVING;
+            case Layers::MOVING:
+                return true;
+            default:
+                JPH_ASSERT(false);
+                return false;
+        }
+    }
+};
+
+class ObjectLayerPairFilterImpl : public JPH::ObjectLayerPairFilter
+{
+public:
+    virtual bool					ShouldCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2) const override
+    {
+        switch (inObject1)
+        {
+            case Layers::NON_MOVING:
+                return inObject2 == Layers::MOVING; // Non moving only collides with moving
+            case Layers::MOVING:
+                return true; // Moving collides with everything
+            default:
+                JPH_ASSERT(false);
+                return false;
+        }
+    }
+};
 
 class PhysicsSystem
 {
@@ -45,16 +137,26 @@ private:
     constexpr static float PHYSICS_DELTA_TIME = 1.f / 60.f;
     #pragma endregion // Constants
 
-    JPH::TempAllocatorImpl* m_tempAllocator {nullptr};
-    std::unique_ptr<JPH::BroadPhaseLayerInterfaceMask> m_broadphaseLayerInterfaceMask {nullptr};
-    std::unique_ptr<JPH::ObjectVsBroadPhaseLayerFilterMask> m_objectVsBroadPhaseLayerFilterMask {nullptr};
-    std::unique_ptr<JPH::ObjectLayerPairFilterMask> m_objectLayerPairFilterMask {nullptr};
+    std::unique_ptr<JPH::TempAllocatorImpl> m_tempAllocator {nullptr};
+    std::unique_ptr<JPH::JobSystemThreadPool> m_jobSystem {nullptr};
+
+    std::unique_ptr<BPLayerInterfaceImpl> m_broadphaseLayerInterfaceMask {nullptr};
+    std::unique_ptr<ObjectVsBroadPhaseLayerFilterImpl> m_objectVsBroadPhaseLayerFilterMask {nullptr};
+    std::unique_ptr<ObjectLayerPairFilterImpl> m_objectLayerPairFilterMask {nullptr};
 
     JPH::PhysicsSystem m_physicsSystem;
     JPH::BodyInterface* m_bodyInterface {nullptr};
 
+    std::map<JPH::BodyID, Node3D*> m_bodiesToNodes;
 public:
     PhysicsSystem();
     ~PhysicsSystem();
+
+    void Update();
+
+    JPH::BodyInterface* BodyInterface() { return m_bodyInterface; }
+
+    void Register(JPH::BodyID id, Node3D* node);
+    void Unregister(JPH::BodyID body);
 };
 } // lum
