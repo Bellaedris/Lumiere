@@ -54,8 +54,8 @@ void GBuffer::Init()
         .height = static_cast<int>(m_height),
         .format = gpu::Texture::DepthComponent,
         .dataType = gpu::GLUtils::Float,
-        .minFilter = gpu::Texture::Linear,
-        .magFilter = gpu::Texture::Linear,
+        .minFilter = gpu::Texture::Nearest,
+        .magFilter = gpu::Texture::Nearest,
         .wrapMode = gpu::Texture::WrapMode::ClampToBorder
     };
     // albedo
