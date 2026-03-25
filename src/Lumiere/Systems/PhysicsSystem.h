@@ -13,19 +13,64 @@
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
-#include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 #include "Jolt/Physics/Collision/BroadPhase/ObjectVsBroadPhaseLayerFilterMask.h"
 #include "Jolt/Physics/Collision/BroadPhase/BroadPhaseLayerInterfaceMask.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
+#include "Jolt/Physics/Collision/RayCast.h"
+#include "Jolt/Physics/Collision/CastResult.h"
+#include "Jolt/Physics/Collision/NarrowPhaseQuery.h"
 
-#include "slot_map/slot_map.h"
+#include "glm/glm.hpp"
 
 namespace lum
 {
 class Node3D;
+
+#pragma region Structs
+struct Ray
+{
+    /**
+     * \brief Ray origin in world space
+     */
+    glm::vec3 origin;
+
+    /**
+     * \brief Ray direction. Always normalized by the constructor
+     */
+    glm::vec3 direction;
+
+    /**
+     * \brief Maximal hit distance. Hits with a distance greater than this will be ignored
+     */
+    float maxHitDistance;
+    Ray(const glm::vec3& o, const glm::vec3& d, float hd) : origin(o), direction(glm::normalize(d)), maxHitDistance(hd) {}
+};
+
+struct RaycastResult
+{
+    /**
+     * \brief Distance from the ray origin
+     */
+    float distance;
+
+    /**
+     * \brief Node that was hit
+     */
+    Node3D* node;
+
+    /**
+     * \brief World position of the hit
+     */
+    glm::vec3 position;
+
+    /**
+     * \brief Hit normal
+     */
+    glm::vec3 normal;
+};
+#pragma endregion // Structs
 
 namespace Layers
 {
@@ -148,11 +193,15 @@ private:
     JPH::BodyInterface* m_bodyInterface {nullptr};
 
     std::map<JPH::BodyID, Node3D*> m_bodiesToNodes;
+
+    float m_timeSinceLastPhysicsTick {.0f};
 public:
     PhysicsSystem();
     ~PhysicsSystem();
 
-    void Update();
+    void Update(float dt);
+
+    std::optional<RaycastResult> Raycast(const Ray& ray);
 
     JPH::BodyInterface* BodyInterface() { return m_bodyInterface; }
 

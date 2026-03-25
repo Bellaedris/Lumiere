@@ -50,35 +50,77 @@ PhysicsSystem::~PhysicsSystem()
     JPH::Factory::sInstance = nullptr;
 }
 
-void PhysicsSystem::Update()
+void PhysicsSystem::Update(float dt)
 {
+    // FIXME WE MAY WANT TO MOVE THE CATCHUP PHYSICS TO A HIGHER LEVEL, OTHERWISE WE CAN'T
+    // HAVE OTHER CODE PARTS EXECUTING PHYSICS DEPENDANT CODE (FixedUpdate and such that should only be called
+    // when the physics refreshes)
+
     // call OptimizeBroadphase on first update/upon bodies insertion
 
-    // Note: in case of physics catchup, we might run more than 1 collision steps, or 0.
-    int                      collisionSteps = 1;
-    JPH::EPhysicsUpdateError updateRes       = m_physicsSystem.Update(
-            PHYSICS_DELTA_TIME,
-            collisionSteps,
-            m_tempAllocator.get(),
-            m_jobSystem.get());
-
-    if (updateRes != JPH::EPhysicsUpdateError::None)
+    m_timeSinceLastPhysicsTick += dt;
+    while (m_timeSinceLastPhysicsTick > PHYSICS_DELTA_TIME)
     {
-        std::cerr << "Physics update error\n";
+        m_timeSinceLastPhysicsTick -= PHYSICS_DELTA_TIME;
+        // Note: in case of physics catchup, we might run more than 1 collision steps, or 0.
+        JPH::EPhysicsUpdateError updateRes       = m_physicsSystem.Update(
+                PHYSICS_DELTA_TIME,
+                1,
+                m_tempAllocator.get(),
+                m_jobSystem.get());
+
+        if (updateRes != JPH::EPhysicsUpdateError::None)
+        {
+            std::cerr << "Physics update error\n";
+        }
+
+        // after the physics update, sync the positions with the gameObjects
+        for (auto& body : m_bodiesToNodes)
+        {
+            comp::Transform* t = body.second->GetTransform();
+
+            JPH::RVec3 jPos;
+            JPH::Quat  jRot;
+            m_bodyInterface->GetPositionAndRotation(body.first, jPos, jRot);
+
+            t->SetPosition({jPos.GetX(), jPos.GetY(), jPos.GetZ()});
+            t->SetRotation({jRot.GetX(), jRot.GetY(), jRot.GetZ(), jRot.GetW()});
+        }
+    }
+}
+
+std::optional<RaycastResult> PhysicsSystem::Raycast(const Ray &ray)
+{
+    // jolt's raycast has the max hit distance embedded in the ray direction
+    JPH::RRayCast r(
+        {ray.origin.x, ray.origin.y, ray.origin.z},
+        {ray.direction.x * ray.maxHitDistance, ray.direction.y * ray.maxHitDistance, ray.direction.z * ray.maxHitDistance}
+    );
+
+    JPH::RayCastResult res;
+    // TODO allow the passing of layers to filter the collisions, when we have actual layer add/delete to work with
+    if (m_physicsSystem.GetNarrowPhaseQuery().CastRay(r, res) == false)
+        return {};
+
+    JPH::Vec3 normal;
+    const JPH::BodyLockInterfaceLocking& lockInterface = m_physicsSystem.GetBodyLockInterface();
+    {
+        JPH::BodyLockRead lock(lockInterface, res.mBodyID);
+        if (lock.Succeeded())
+        {
+            const JPH::Body &body = lock.GetBody();
+            normal = body.GetWorldSpaceSurfaceNormal(res.mSubShapeID2, r.GetPointOnRay(res.mFraction));
+        }
     }
 
-    // after the physics update, sync the positions with the gameObjects
-    for (auto& body : m_bodiesToNodes)
-    {
-        comp::Transform& t = body.second->GetTransform();
+    RaycastResult result {
+        .distance = res.mFraction * ray.maxHitDistance,
+        .node = m_bodiesToNodes[res.mBodyID],
+        .position = ray.origin + res.mFraction * ray.maxHitDistance * ray.direction,
+        .normal = {normal.GetX(), normal.GetY(), normal.GetZ()}
+    };
 
-        JPH::RVec3 jPos;
-        JPH::Quat  jRot;
-        m_bodyInterface->GetPositionAndRotation(body.first, jPos, jRot);
-
-        t.SetPosition({jPos.GetX(), jPos.GetY(), jPos.GetZ()});
-        t.SetRotation({jRot.GetX(), jRot.GetY(), jRot.GetZ(), jRot.GetW()});
-    }
+    return {std::move(result)};
 }
 
 void PhysicsSystem::Register(JPH::BodyID id, Node3D *node)
