@@ -30,6 +30,8 @@ RendererManager::RendererManager(int width, int height, const std::shared_ptr<ev
     };
 
     ResourcesManager::Instance()->CreateTexture(RENDERED_FRAME_NAME, output);
+
+    m_debugPass = std::make_unique<rdr::Debug>(width, height);
 }
 
 void RendererManager::AddPipeline(rdr::RenderPipeline &pipeline)
@@ -51,7 +53,16 @@ void RendererManager::SetActivePipeline(int pipelineId)
 void RendererManager::Render(const rdr::FrameData &frameData)
 {
     // upload camera data
-    CameraData cameraData = {frameData.scene->Camera()->View(), frameData.scene->Camera()->Projection(), frameData.scene->Camera()->Position()};
+    glm::mat4  view       = frameData.scene->Camera()->View();
+    glm::mat4  projection = frameData.scene->Camera()->Projection();
+    CameraData cameraData = {
+        view,
+        glm::inverse(view),
+        projection,
+        glm::inverse(projection),
+         frameData.scene->Camera()->Position(), frameData.scene->Camera()->ZNear(),
+         frameData.scene->Camera()->ZFar()
+    };
     m_cameraData->Write(sizeof(CameraData), &cameraData, lum::gpu::Buffer::DynamicDraw);
     m_cameraData->Bind(0);
 
@@ -63,6 +74,9 @@ void RendererManager::Render(const rdr::FrameData &frameData)
     m_gBuffer->Render(frameData);
 
     m_pipelines[m_activePipeline].Render(frameData);
+
+    m_debugPass->Render(frameData);
+
     gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(RENDERED_FRAME_NAME);
     m_eventHandler->Emit(std::make_shared<evt::FrameRenderedEvent>(frame));
 }
@@ -81,6 +95,7 @@ void RendererManager::OnEvent(const std::shared_ptr<evt::IEvent> &e)
         output->SetSize(static_cast<int>(event->m_size.x), static_cast<int>(event->m_size.y));
         output->Reallocate();
         m_gBuffer->Rebuild(static_cast<int>(event->m_size.x), static_cast<int>(event->m_size.y));
+        m_debugPass->Rebuild(static_cast<int>(event->m_size.x), static_cast<int>(event->m_size.y));
         for (auto& pipeline : m_pipelines)
             pipeline.Rebuild(event->m_size);
     }

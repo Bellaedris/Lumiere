@@ -8,6 +8,7 @@ namespace lum
 {
 class ScriptEngine;
 class PhysicsSystem;
+class RendererManager;
 /**
  * \brief Non-owning pointers to all the systems that will be used by our components during runtime, be it editor or gameplay.
  * For instance, our Rigidbodies need access to our Jolt wrapper in order to create the simulated object.\n
@@ -18,6 +19,7 @@ struct SystemProvider
 {
     PhysicsSystem* m_physics;
     ScriptEngine* m_scripting;
+    RendererManager* m_renderer;
 };
 
 class ISystem

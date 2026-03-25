@@ -10,6 +10,7 @@
 #include "Lumiere/Components/Light.h"
 #include "Lumiere/Components/MeshRenderer.h"
 #include "Lumiere/Utils/MeshLoader.h"
+#include "Lumiere/Components/Transform.h"
 #include "yaml-cpp/node/convert.h"
 #include <yaml-cpp/yaml.h>
 
@@ -37,7 +38,7 @@ std::vector<SceneDesc::RenderInstance> SceneDesc::RenderInstances()
         std::optional<comp::MeshRenderer*> comp = current->GetComponent<comp::MeshRenderer>();
         if (comp.has_value() && comp.value()->Mesh() != nullptr)
         {
-            renderInstances.emplace_back(comp.value()->Mesh(), current->GetTransform().Model());
+            renderInstances.emplace_back(comp.value()->Mesh(), current->GetTransform()->Model());
         }
     });
 
@@ -57,10 +58,10 @@ void SceneDesc::GatherAndUploadLights()
             switch (light->Type())
             {
                 case 0:
-                    m_lights->AddDirLight(current->GetTransform().Forward(), light->Intensity(), light->Color());
+                    m_lights->AddDirLight(current->GetTransform()->Forward(), light->Intensity(), light->Color());
                     break;
                 case 1:
-                    m_lights->AddPointLight(current->GetTransform().Position(), light->Intensity(), light->Color(), light->PointRange());
+                    m_lights->AddPointLight(current->GetTransform()->Position(), light->Intensity(), light->Color(), light->PointRange());
                     break;
                     case 2:
                     // not implemented
@@ -141,7 +142,7 @@ void SceneDesc::Serialize()
         YAML::Node n;
         n["name"] = node->Name();
         n["uuid"] = to_string(node->UUID());
-        node->GetTransform().Serialize(n);
+        node->GetTransform()->Serialize(n);
         YAML::Node components = n["components"];
         for (auto&& component : node->Components())
             component->Serialize(components);
@@ -196,7 +197,7 @@ void SceneDesc::Deserialize(const std::string& path)
             return;
         }
         std::unique_ptr<Node3D> n = std::make_unique<Node3D>(name, nodeUUID.value());
-        n->GetTransform().Deserialize(node["transform"]);
+        n->GetTransform()->Deserialize(node["transform"]);
         n->SetSystemsContext(m_systemProvider);
         for (const auto& component : node["components"])
         {
