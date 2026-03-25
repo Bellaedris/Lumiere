@@ -111,7 +111,12 @@ public:
      */
     gfx::MeshPtr CacheMesh(const std::string& path, std::vector<gfx::SubMesh> &meshData);
 
-    void GenerateDefaultMeshes();
+    void                                             GenerateDefaultMeshes();
+    /**
+     * \brief Gathers all mesh names so they can be displayed, for instance in an asset-manager like widget of the editor
+     * \return A vector with all the cached meshes' path as well as a more readable identifier
+     */
+    std::vector<std::pair<std::string, std::string>> MeshNames();
     #pragma endregion Mesh Cache
 };
 } // lum

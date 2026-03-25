@@ -144,4 +144,14 @@ void ResourcesManager::GenerateDefaultMeshes()
     std::vector<gfx::SubMesh> sphere = gfx::Mesh::GenerateSphere(1.f);
     CacheMesh(DEFAULT_SPHERE_NAME, sphere);
 }
+
+std::vector<std::pair<std::string, std::string>> ResourcesManager::MeshNames()
+{
+    // TODO change it to be cached and only get rebuilt when we add/remove meshes
+    std::vector<std::pair<std::string, std::string>> names;
+    names.reserve(m_meshCache.size());
+    for (const auto& m : m_meshCache)
+        names.emplace_back(m.second->Path(), m.second->Name());
+    return names;
+}
 } // lum
