@@ -21,7 +21,11 @@ private:
         Kinematic
     };
 
+    static bool m_registered;
+    static bool m_typeRegistered;
+
     PhysicsSystem* m_physicsSystem {nullptr};
+    ScriptEngine* m_scriptEngine {nullptr};
     JPH::BodyID m_bodyID;
 
     MotionType m_motionType {MotionType::Static};
@@ -33,8 +37,10 @@ private:
     float m_mass {1.f};
 
     JPH::EMotionType LumToJoltMotionType(MotionType type);
-
-    static bool m_registered;
+    /**
+     * \brief Registers rigidbody type for the lua VM
+     */
+    void             RegisterTypes();
 public:
     constexpr static std::array<const char*, 3> DISPLAYABLE_MOTION_TYPES = {"Static", "Dynamic", "Kinematic"};
 

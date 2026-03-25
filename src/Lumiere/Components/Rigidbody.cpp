@@ -7,9 +7,13 @@
 #include "Collider.h"
 #include "Lumiere/Node3D.h"
 #include "Lumiere/Systems/PhysicsSystem.h"
+#include "Lumiere/Components/Transform.h"
+#include "Lumiere/Systems/ScriptEngine.h"
 
 namespace lum::comp
 {
+bool Rigidbody::m_typeRegistered = false;
+
 REGISTER_TO_COMPONENT_FACTORY(Rigidbody, "Rigidbody");
 JPH::EMotionType Rigidbody::LumToJoltMotionType(MotionType type)
 {
@@ -29,7 +33,17 @@ JPH::EMotionType Rigidbody::LumToJoltMotionType(MotionType type)
 Rigidbody::Rigidbody(Node3D *parent, SystemProvider *systems)
     : IComponent(parent, systems)
     , m_physicsSystem(systems->m_physics)
+    , m_scriptEngine(systems->m_scripting)
 {
+    if (m_typeRegistered == false)
+        RegisterTypes();
+}
+
+void Rigidbody::RegisterTypes()
+{
+    m_typeRegistered = true;
+    sol::state& lua = m_scriptEngine->State();
+
 
 }
 
@@ -70,8 +84,8 @@ void Rigidbody::OnPlay()
         return;
     }
 
-    glm::vec3 pos = m_node->GetTransform().Position();
-    glm::quat rot = m_node->GetTransform().LocalRotation();
+    glm::vec3 pos = m_node->GetTransform()->Position();
+    glm::quat rot = m_node->GetTransform()->LocalRotation();
 
     JPH::ObjectLayer layer;
     // eventually add a layer for triggers later

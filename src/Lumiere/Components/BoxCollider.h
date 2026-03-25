@@ -18,10 +18,11 @@ private:
 public:
     BoxCollider(Node3D* node, SystemProvider* systems);
     JPH::ShapeRefC CreateShape() override;
+    void RegisterGuizmo() override;
 
     glm::vec3& Size() { return m_boxSize; }
 
-    void           Serialize(YAML::Node node) override;
-    void           Deserialize(YAML::Node node) override;
+    void Serialize(YAML::Node node) override;
+    void Deserialize(YAML::Node node) override;
 };
 } // lum

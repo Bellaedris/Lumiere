@@ -18,10 +18,11 @@ private:
 public:
     SphereCollider(Node3D* node, SystemProvider* systems);
     JPH::ShapeRefC CreateShape() override;
+    void RegisterGuizmo() override;
 
     float& Radius() { return m_radius; }
 
-    void           Serialize(YAML::Node node) override;
-    void           Deserialize(YAML::Node node) override;
+    void Serialize(YAML::Node node) override;
+    void Deserialize(YAML::Node node) override;
 };
 } // lum

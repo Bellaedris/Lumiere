@@ -23,6 +23,17 @@ JPH::ShapeRefC SphereCollider::CreateShape()
     return s.HasError() ? nullptr : s.Get();
 }
 
+void SphereCollider::RegisterGuizmo()
+{
+    m_guizmoHandle = m_debugRenderer->DebugPass()->DrawDebugSphere(
+        m_guizmoHandle,
+        {.0f, .0f, .0f},
+        m_radius,
+        {.0f, 1.f, .0f},
+        glm::translate(glm::mat4(1.f), m_node->GetTransform()->Position())
+    );
+}
+
 void SphereCollider::Serialize(YAML::Node node)
 {
     YAML::Node s;

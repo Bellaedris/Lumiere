@@ -42,7 +42,7 @@ void Transform::SetPosition(const glm::vec3 &newPosition)
 {
     if (m_node->Parent() != nullptr)
     {
-        glm::mat4 inverseModel = glm::inverse(m_node->Parent()->GetTransform().Model());
+        glm::mat4 inverseModel = glm::inverse(m_node->Parent()->GetTransform()->Model());
         m_position = glm::vec3(inverseModel * glm::vec4(newPosition, 1));
     }
     else
@@ -62,7 +62,7 @@ void Transform::SetRotation(const glm::quat &newRotation)
 {
     if (m_node->Parent() != nullptr)
     {
-        glm::quat inverseModel = glm::inverse(m_node->Parent()->GetTransform().Rotation());
+        glm::quat inverseModel = glm::inverse(m_node->Parent()->GetTransform()->Rotation());
         m_rotation = inverseModel * glm::normalize(newRotation);
     }
     else
@@ -82,7 +82,7 @@ void Transform::SetScale(const glm::vec3 &newScale)
 {
     if (m_node->Parent() != nullptr)
     {
-        m_scale = m_node->Parent()->GetTransform().Scale() * newScale;
+        m_scale = m_node->Parent()->GetTransform()->Scale() * newScale;
     }
     else
     {
@@ -113,7 +113,7 @@ glm::quat Transform::Rotation() const
 {
     if (m_node->Parent() != nullptr)
     {
-        return m_node->Parent()->GetTransform().Rotation() * m_rotation;
+        return m_node->Parent()->GetTransform()->Rotation() * m_rotation;
     }
     return m_rotation;
 }

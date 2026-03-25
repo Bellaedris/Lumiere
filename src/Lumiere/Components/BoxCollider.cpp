@@ -6,6 +6,7 @@
 
 #include "Lumiere/Node3D.h"
 #include "Lumiere/Utils/YAMLUtils.h"
+#include "Lumiere/Components/Transform.h"
 
 namespace lum::comp
 {
@@ -21,6 +22,17 @@ JPH::ShapeRefC BoxCollider::CreateShape()
     JPH::ShapeSettings::ShapeResult s = shape.Create();
 
     return s.HasError() ? nullptr : s.Get();
+}
+
+void BoxCollider::RegisterGuizmo()
+{
+    m_guizmoHandle = m_debugRenderer->DebugPass()->DrawDebugBox(
+        m_guizmoHandle,
+        {.0f, .0f, .0f},
+        m_boxSize,
+        {.0f, 1.f, .0f},
+        glm::translate(glm::mat4(1.f), m_node->GetTransform()->Position())
+    );
 }
 
 void BoxCollider::Serialize(YAML::Node node)

@@ -26,8 +26,12 @@ public:
     IComponent(Node3D* node, SystemProvider* systems) : m_node(node) {};
     virtual      ~IComponent() = default;
 
+    Node3D* Node() const { return m_node; }
+
     virtual void OnPlay() {};
     virtual void OnStop() {};
+    virtual void RegisterGuizmo() {};
+    virtual void UnregisterGuizmo() {};
 
     virtual void Serialize(YAML::Node node) = 0;
     virtual void Deserialize(YAML::Node node) = 0;
