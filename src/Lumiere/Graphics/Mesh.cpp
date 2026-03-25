@@ -9,6 +9,8 @@
 #include <memory>
 #include <assimp/Importer.hpp>
 
+#include "MaterialPBR.h"
+
 namespace lum::gfx
 {
 SubMesh::SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material, const std::string& name)
@@ -28,8 +30,8 @@ SubMesh::SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indic
 
     m_vao.SetAttribute(0, gpu::GLUtils::DataType::Float, 0, 3, sizeof(VertexData)); // positions
     m_vao.SetAttribute(1, gpu::GLUtils::DataType::Float, offsetof(VertexData, normal), 3, sizeof(VertexData)); // normals
-    m_vao.SetAttribute(2, gpu::GLUtils::DataType::Float, offsetof(VertexData, normal), 3, sizeof(VertexData)); // tangents
-    m_vao.SetAttribute(3, gpu::GLUtils::DataType::Float, offsetof(VertexData, normal), 3, sizeof(VertexData)); // bitangents
+    m_vao.SetAttribute(2, gpu::GLUtils::DataType::Float, offsetof(VertexData, tangent), 3, sizeof(VertexData)); // tangents
+    m_vao.SetAttribute(3, gpu::GLUtils::DataType::Float, offsetof(VertexData, bitangent), 3, sizeof(VertexData)); // bitangents
     m_vao.SetAttribute(4, gpu::GLUtils::DataType::Float, offsetof(VertexData, texcoord), 2, sizeof(VertexData)); // texcoords
 
     m_vao.Unbind();
@@ -89,7 +91,8 @@ std::vector<SubMesh> Mesh::GeneratePlane(float halfSize)
     };
 
     std::vector<SubMesh> subMeshes;
-    subMeshes.emplace_back(vertices, indices, nullptr, "plane");
+    MaterialPtr m = std::make_unique<MaterialPBR>();
+    subMeshes.emplace_back(vertices, indices, m, "plane");
 
     return subMeshes;
 }
@@ -197,7 +200,8 @@ std::vector<SubMesh> Mesh::GenerateSphere(float radius)
     }
 
     std::vector<SubMesh> subMeshes;
-    subMeshes.emplace_back(vertices, indices, nullptr, "sphere");
+    MaterialPtr m = std::make_unique<MaterialPBR>();
+    subMeshes.emplace_back(vertices, indices, m, "sphere");
 
     return subMeshes;
 }
