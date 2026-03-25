@@ -7,9 +7,11 @@
 
 #include <utility>
 
+#include "Components/Transform.h"
 #include "Components/Light.h"
 #include "Components/MeshRenderer.h"
 #include "Systems/ScriptEngine.h"
+#include "Systems/PhysicsSystem.h"
 
 namespace lum
 {
@@ -93,22 +95,54 @@ void Node3D::RegisterType()
     sol::usertype<Node3D> type = lua.new_usertype<Node3D>("Node3D");
     // there is no templated functions in lua so we have to bind all the possible get/add components functions by hand :(
     // LAMBDAS MUST RETURN REFERENCES
-    type["transform"] = sol::property([](Node3D& node) -> comp::Transform& { return node.m_transform; });
+    type["transform"] = sol::property([](Node3D& node) -> comp::Transform* { return node.m_transform.get(); });
     type["GetMeshComponent"] = &Node3D::GetComponent<comp::MeshRenderer>;
     type["GetLightComponent"] = &Node3D::GetComponent<comp::Light>;
 
     type["name"] = &Node3D::GetName;
+
+    // Node3D should be the first registration to be called and therefore has to load all accessible systems
+    // physics:
+    sol::usertype<Ray> ray = lua.new_usertype<Ray>("Ray",
+        sol::call_constructor,
+        sol::constructors<Ray(const glm::vec3&, const glm::vec3&, float)>()
+    );
+    ray["origin"] = sol::property(
+        [](Ray& r) -> glm::vec3 {return r.origin; },
+        [](Ray& r, const glm::vec3& v) {r.origin = v; }
+    );
+    ray["direction"] = sol::property(
+        [](Ray& r) -> glm::vec3 {return r.direction; },
+        [](Ray& r, const glm::vec3& v) {r.direction = v; }
+    );
+    ray["maxHitDistance"] = sol::property(
+        [](Ray& r) -> float {return r.maxHitDistance; },
+        [](Ray& r, float d) {r.maxHitDistance = d; }
+    );
+
+    sol::usertype<RaycastResult> raycastResult = lua.new_usertype<RaycastResult>("RaycastResult");
+    raycastResult["distance"] = sol::property([](RaycastResult& r) -> float { return r.distance; });
+    raycastResult["node"] = sol::property([](RaycastResult& r) -> Node3D* { return r.node; });
+    raycastResult["position"] = sol::property([](RaycastResult& r) -> glm::vec3 { return r.position; });
+    raycastResult["normal"] = sol::property([](RaycastResult& r) -> glm::vec3 { return r.normal; });
+
+    // register the type, but do not give it a constructor so scripters can't accidentally create a new Pḧysics system
+    sol::usertype<PhysicsSystem> physics = lua.new_usertype<PhysicsSystem>("PhysicsSystem");
+
+    physics["Raycast"] = &PhysicsSystem::Raycast;
+
+    lua["Physics"] = m_systemProvider->m_physics;
 }
 
 Node3D::Node3D()
-    : m_transform(this, nullptr)
+    : m_transform(std::make_unique<comp::Transform>(this, nullptr))
     , m_uuid(uuids::uuid_system_generator{}())
 {
 
 }
 
 Node3D::Node3D(const std::string& name, uuids::uuid& uuid)
-    : m_transform(this, nullptr)
+    : m_transform(std::make_unique<comp::Transform>(this, nullptr))
     , m_name(name)
     , m_uuid(std::move(uuid))
 {
@@ -158,7 +192,7 @@ void Node3D::TransferChild(Node3D *child, Node3D* destination)
 
 void Node3D::Update(float dt)
 {
-    if (m_transform.IsDirty())
+    if (m_transform->IsDirty())
     {
         UpdateSelfAndChildren(dt);
         return;
@@ -172,9 +206,9 @@ void Node3D::UpdateSelfAndChildren(float dt)
 {
     // if this node is dirty, update this node and its children. Otherwise, just go deeper and update the dirty nodes
     if (m_parent == nullptr)
-        m_transform.UpdateModelMatrix();
+        m_transform->UpdateModelMatrix();
     else
-        m_transform.UpdateModelMatrix(m_parent->GetTransform().Model());
+        m_transform->UpdateModelMatrix(m_parent->GetTransform()->Model());
 
     for (auto&& child : m_children)
         child->UpdateSelfAndChildren(dt);

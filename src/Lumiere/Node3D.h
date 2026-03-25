@@ -5,13 +5,19 @@
 #pragma once
 #include <memory>
 
-#include "Components/Transform.h"
 #include <Lumiere/Systems/System.h>
 #include "sol.hpp"
+#include "Components/IComponent.h"
+#include "Components/Transform.h"
 #include "stduuid/uuid.h"
 
 namespace lum
 {
+namespace comp
+{
+class Transform;
+}
+
 class Node3D
 {
 private:
@@ -21,7 +27,7 @@ private:
     // eventually use an std list if we want easy reordering of childs, but gives poor cache locality...
     std::vector<std::unique_ptr<Node3D>> m_children;
     Node3D*                              m_parent {nullptr};
-    comp::Transform                      m_transform;
+    std::unique_ptr<comp::Transform>     m_transform {nullptr};
 
     std::vector<std::unique_ptr<comp::IComponent>> m_components;
 
@@ -79,7 +85,7 @@ public:
     void SetName(const std::string& name) { m_name = name; }
 
     [[nodiscard]] const std::vector<std::unique_ptr<Node3D>>&Children() const { return m_children; }
-    [[nodiscard]] comp::Transform&                           GetTransform() { return m_transform; }
+    [[nodiscard]] comp::Transform*                           GetTransform() { return m_transform.get(); }
     [[nodiscard]] Node3D*                                    Parent() const { return m_parent; }
     [[nodiscard]] const std::string&                         GetName() const { return m_name; }
     [[nodiscard]] std::string&                               Name() { return m_name; }
