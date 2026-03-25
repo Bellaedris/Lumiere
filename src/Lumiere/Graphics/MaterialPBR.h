@@ -15,14 +15,15 @@ class MaterialPBR : public IMaterial
 public:
 private:
     #pragma region Members
-    gpu::TexturePtr m_albedoTexture;
-    gpu::TexturePtr m_normalTexture;
-    gpu::TexturePtr m_metalRoughTexture;
-    gpu::TexturePtr m_emissiveTexture;
+    gpu::TexturePtr m_albedoTexture{nullptr};
+    gpu::TexturePtr m_normalTexture{nullptr};
+    gpu::TexturePtr m_metalRoughTexture{nullptr};
+    gpu::TexturePtr m_emissiveTexture{nullptr};
 
     float m_emissionStrength {1.f};
     #pragma endregion Members
 public:
+    MaterialPBR() = default;
     MaterialPBR
     (
         const gpu::TexturePtr &albedo,
