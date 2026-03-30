@@ -72,6 +72,14 @@ public:
 
     void ForEachNode(const std::function<void(Node3D* node)>& callback);
 
+    /**
+     * \brief Try to find the first component of a specified type
+     * \tparam T A component type
+     * \return the first found component of type T, nullptr if none is present
+     */
+    template<typename T>
+    T* FindComponentOfType();
+
     // lifecycle
     void OnPlay();
     void OnStop();
@@ -79,4 +87,16 @@ public:
     void Serialize();
     void Deserialize(const std::string& path);
 };
+
+template<typename T>
+T * SceneDesc::FindComponentOfType()
+{
+    T* res = nullptr;
+    ForEachNode([&](Node3D* node)
+    {
+        if (node->HasComponent<T>() && res == nullptr)
+            res = node->GetComponent<T>().value();
+    });
+    return res;
+}
 } // lum::rdr
