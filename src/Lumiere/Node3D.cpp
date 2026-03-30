@@ -25,6 +25,19 @@ void Node3D::RegisterType()
     // since Transforms are always created alongside Nodes, we register the 2 types at the same time so we don't have to
     // give any scripting context to Transform post-creation, which would be very ugly.
 
+    sol::usertype<glm::vec2> vec2 = lua.new_usertype<glm::vec2>("vec2",
+            sol::call_constructor,
+            sol::constructors<glm::vec2(float), glm::vec2(float, float)>()
+        );
+    vec2["x"] = sol::property(
+        [](const glm::vec2& v) { return v.x; },
+        [](glm::vec2& v, float x) { v.x = x; }
+    );
+    vec2["y"] = sol::property(
+        [](const glm::vec2& v) { return v.y; },
+        [](glm::vec2& v, float y) { v.y = y; }
+    );
+
     sol::usertype<glm::vec3> vec = lua.new_usertype<glm::vec3>("vec3",
             sol::call_constructor,
             sol::constructors<glm::vec3(float), glm::vec3(float, float, float)>()
@@ -67,11 +80,13 @@ void Node3D::RegisterType()
 
     sol::usertype<comp::Transform> transform = lua.new_usertype<comp::Transform>("Transform");
 
+    transform["Translate"] = &comp::Transform::Translate;
+    transform["Rotate"] = &comp::Transform::Rotate;
+
     transform["localPosition"] = sol::property(
         [](comp::Transform& t) -> glm::vec3& { return t.m_position; },
         [](comp::Transform& t, const glm::vec3& p) { t.SetLocalPosition(p); }
     );
-    transform["Translate"] = &comp::Transform::Translate;
 
     transform["localRotation"] = sol::property(
         [](comp::Transform& t) -> glm::quat& { return t.m_rotation; },
@@ -91,6 +106,13 @@ void Node3D::RegisterType()
         [](comp::Transform& t) -> glm::vec3 { return t.Scale(); },
         [](comp::Transform& t, const glm::vec3& p) { t.SetScale(p); }
     );
+    transform["euler"] = sol::property(
+        [](const comp::Transform& t) -> glm::vec3 {return t.EulerAngles();},
+        [](comp::Transform& t, const glm::vec3& ea) { t.SetEulerAngles(ea); }
+    );
+    transform["forward"] = sol::property([](const comp::Transform& t) -> glm::vec3 {return t.Forward();});
+    transform["right"] = sol::property([](const comp::Transform& t) -> glm::vec3 {return t.Right();});
+    transform["up"] = sol::property([](const comp::Transform& t) -> glm::vec3 {return t.Up();});
 
     sol::usertype<Node3D> type = lua.new_usertype<Node3D>("Node3D");
     // there is no templated functions in lua so we have to bind all the possible get/add components functions by hand :(
@@ -99,7 +121,7 @@ void Node3D::RegisterType()
     type["GetMeshComponent"] = &Node3D::GetComponent<comp::MeshRenderer>;
     type["GetLightComponent"] = &Node3D::GetComponent<comp::Light>;
 
-    type["name"] = &Node3D::GetName;
+    type["name"] = sol::property([](const Node3D& n) -> std::string {return n.GetName();});
 
     // Node3D should be the first registration to be called and therefore has to load all accessible systems
     // physics:
