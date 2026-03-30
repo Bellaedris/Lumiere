@@ -237,51 +237,51 @@ void Debug::Init()
 
 void Debug::Render(const FrameData &frameData)
 {
-    if (m_debugVertices.empty())
-        return;
-
     if (frameData.profilerGPU)
         frameData.profilerGPU->BeginScope("Debug");
 
-    m_framebuffer->Bind(gpu::Framebuffer::ReadWrite);
-
-    glEnable(GL_BLEND);
-    glBlendEquation(GL_MAX);
-    glBlendFunc(GL_ONE, GL_ONE);
-
-    // draw grid
-    if (m_shouldDrawGridNextFrame)
+    if (m_debugVertices.empty() == false)
     {
-        gpu::ShaderPtr grid = ResourcesManager::Instance()->GetShader(GRID_SHADER_NAME);
-        grid->Bind();
+        m_framebuffer->Bind(gpu::Framebuffer::ReadWrite);
 
-        gpu::TexturePtr depth = ResourcesManager::Instance()->GetTexture(GBuffer::GBUFFER_DEPTH_NAME);
-        gpu::TexturePtr res = ResourcesManager::Instance()->GetTexture(RendererManager::RENDERED_FRAME_NAME);
+        glEnable(GL_BLEND);
+        glBlendEquation(GL_MAX);
+        glBlendFunc(GL_ONE, GL_ONE);
 
-        depth->Bind(0);
-        res->Bind(1);
+        // draw grid
+        if (m_shouldDrawGridNextFrame)
+        {
+            gpu::ShaderPtr grid = ResourcesManager::Instance()->GetShader(GRID_SHADER_NAME);
+            grid->Bind();
 
-        ResourcesManager::Instance()->GetMesh(ResourcesManager::DEFAULT_PLANE_NAME)->Draw();
+            gpu::TexturePtr depth = ResourcesManager::Instance()->GetTexture(GBuffer::GBUFFER_DEPTH_NAME);
+            gpu::TexturePtr res = ResourcesManager::Instance()->GetTexture(RendererManager::RENDERED_FRAME_NAME);
 
-        //m_shouldDrawGridNextFrame = false;
+            depth->Bind(0);
+            res->Bind(1);
+
+            ResourcesManager::Instance()->GetMesh(ResourcesManager::DEFAULT_PLANE_NAME)->Draw();
+
+            //m_shouldDrawGridNextFrame = false;
+        }
+
+        // draw guizmos
+        gpu::ShaderPtr shader = ResourcesManager::Instance()->GetShader(DEBUG_SHADER_NAME);
+        shader->Bind();
+
+        // pack our vertex datas in a buffer
+        if (m_dirty)
+        {
+            std::vector<gfx::DebugVertex> data = PrepareData();
+            m_lineRenderer.SetData(data);
+        }
+
+        m_lineRenderer.Draw();
+
+        m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
+
+        glDisable(GL_BLEND);
     }
-
-    // draw guizmos
-    gpu::ShaderPtr shader = ResourcesManager::Instance()->GetShader(DEBUG_SHADER_NAME);
-    shader->Bind();
-
-    // pack our vertex datas in a buffer
-    if (m_dirty)
-    {
-        std::vector<gfx::DebugVertex> data = PrepareData();
-        m_lineRenderer.SetData(data);
-    }
-
-    m_lineRenderer.Draw();
-
-    m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
-
-    glDisable(GL_BLEND);
 
     if (frameData.profilerGPU)
         frameData.profilerGPU->EndScope("Debug");
