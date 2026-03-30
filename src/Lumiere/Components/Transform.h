@@ -42,8 +42,10 @@ public:
     void SetScale(const glm::vec3& newScale);
     void SetLocalScale(const glm::vec3& newScale);
     void SetEulerAngles(const glm::vec3& eulerAngles);
+    void SetLocalEulerAngles(const glm::vec3& eulerAngles);
 
     void Translate(const glm::vec3& t);
+    void Rotate(const glm::vec3& euler);
 
     [[nodiscard]] const glm::mat4&Model() const {return m_model;}
     [[nodiscard]] glm::mat4&      Model() {return m_model;}

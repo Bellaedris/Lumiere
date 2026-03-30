@@ -99,6 +99,11 @@ void Transform::SetLocalScale(const glm::vec3 &newScale)
 
 void Transform::SetEulerAngles(const glm::vec3 &eulerAngles)
 {
+    SetRotation(glm::quat(glm::radians(eulerAngles)));
+}
+
+void Transform::SetLocalEulerAngles(const glm::vec3 &eulerAngles)
+{
     m_rotation = glm::quat(glm::radians(eulerAngles));
     m_isDirty = true;
 }
@@ -107,6 +112,12 @@ void Transform::Translate(const glm::vec3 &t)
 {
     m_position += t;
     m_isDirty = true;
+}
+
+void Transform::Rotate(const glm::vec3 &euler)
+{
+    glm::quat angle = glm::quat(glm::radians(euler));
+    m_rotation = angle * m_rotation;
 }
 
 glm::quat Transform::Rotation() const
@@ -133,6 +144,7 @@ void Transform::Deserialize(YAML::Node node)
     m_position = node["position"].as<glm::vec3>();
     m_rotation = node["rotation"].as<glm::quat>();
     m_scale = node["scale"].as<glm::vec3>();
+    UpdateModelMatrix();
     m_isDirty = true;
 }
 } // lum
