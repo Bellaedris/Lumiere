@@ -4,6 +4,7 @@
 
 #pragma once
 #include <map>
+#include <glm/glm.hpp>
 
 namespace lum
 {
@@ -40,8 +41,12 @@ private:
         bool downLastFrame {false};
     };
 
-    inline static std::map<KeyCode, KeyState> keyStates;
+    inline static std::map<KeyCode, KeyState>     keyStates;
     inline static std::map<MouseButton, KeyState> mouseButtonStates;
+    /**
+     * \brief Mouse movement recorded each frame by the window
+     */
+    inline static glm::vec2 m_axis {.0f, .0f};
 
     friend class Window;
 
@@ -53,6 +58,8 @@ public:
     static bool IsMouseButtonDown(MouseButton button) { return mouseButtonStates[button].isDown; }
     static bool IsMouseButtonPressed(MouseButton button) { return mouseButtonStates[button].isDown && !mouseButtonStates[button].downLastFrame; }
     static bool IsMouseButtonReleased(MouseButton button) { return !mouseButtonStates[button].isDown && mouseButtonStates[button].downLastFrame; }
+
+    static glm::vec2 GetAxis() { return m_axis; };
 
     static void Update();
 };
