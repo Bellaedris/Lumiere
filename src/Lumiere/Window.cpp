@@ -60,6 +60,11 @@ namespace lum
         for (auto& [isDown, downLastFrame] : InputManager::mouseButtonStates | std::views::values)
             downLastFrame = isDown;
 
+        InputManager::m_axis = {m_offsetX, m_offsetY};
+        // reset once consume, or we always have movement, which is quite troublesome
+        m_offsetX = 0;
+        m_offsetY = 0;
+
         glfwPollEvents();
     }
 
@@ -82,15 +87,8 @@ namespace lum
     void Window::mouse_callback(GLFWwindow *w, double xpos, double ypos)
     {
         Window* instance = static_cast<Window*>(glfwGetWindowUserPointer(w));
-        // Camera movement is only tracked when pressing LEFT ALT
-        if(glfwGetKey(w, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
-        {
-            glfwSetInputMode(w, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            // update the offset between last frame and the current frame
-            instance->UpdateMouseOffset(xpos, ypos);
-        }
-        else
-            instance->UpdateMouseOffset(instance->m_lastX, instance->m_lastY);
+        // update the offset between last frame and the current frame
+        instance->UpdateMouseOffset(xpos, ypos);
     }
 
     void Window::mouse_button_callback(GLFWwindow *w, int button, int action, int mods)
@@ -153,36 +151,8 @@ namespace lum
 
         m_lastX = x;
         m_lastY = y;
-    }
 
-    glm::vec3 Window::GatherInput()
-    {
-        if(glfwGetKey(m_window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
-        {
-            glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            // update the offset between last frame and the current frame
-        }
-        else
-        {
-            glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            m_mouseLostFocus = true;
-        }
-
-        // get the input axes by reading pressed keys
-        glm::vec3 dir(0, 0, 0);
-        if(glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
-            dir += VectorUtils::FORWARD;
-        if(glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
-            dir -= VectorUtils::RIGHT;
-        if(glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
-            dir -= VectorUtils::FORWARD;
-        if(glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
-            dir += VectorUtils::RIGHT;
-        if(glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
-            dir -= VectorUtils::UP;
-        if(glfwGetKey(m_window, GLFW_KEY_E) == GLFW_PRESS)
-            dir += VectorUtils::UP;
-
-        return dir;
+        if (std::abs(m_offsetX) < 1.f) m_offsetX = .0f;
+        if (std::abs(m_offsetY) < 1.f) m_offsetY = .0f;
     }
 }
