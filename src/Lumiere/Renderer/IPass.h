@@ -10,6 +10,7 @@
 #include <yaml-cpp/node/node.h>
 #include <yaml-cpp/yaml.h>
 #include "Lumiere/ProfilerGPU.h"
+#include "Lumiere/Systems/CameraSystem.h"
 #include "Passes/PassFactory.h"
 
 namespace lum::rdr
@@ -19,6 +20,7 @@ struct FrameData
 {
     const std::shared_ptr<SceneDesc>& scene;
     int frameIndex;
+    CameraSystem* cameraSystem;
     const std::shared_ptr<ProfilerGPU>& profilerGPU;
 };
 

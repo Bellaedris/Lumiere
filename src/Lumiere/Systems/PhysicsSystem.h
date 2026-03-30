@@ -15,6 +15,8 @@
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
+
+#include "System.h"
 #include "Jolt/Physics/Collision/BroadPhase/ObjectVsBroadPhaseLayerFilterMask.h"
 #include "Jolt/Physics/Collision/BroadPhase/BroadPhaseLayerInterfaceMask.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
@@ -160,7 +162,7 @@ public:
     }
 };
 
-class PhysicsSystem
+class PhysicsSystem : public ISystem
 {
 private:
     #pragma region Constants

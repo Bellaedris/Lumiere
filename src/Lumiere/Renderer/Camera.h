@@ -11,6 +11,17 @@
 
 namespace lum::rdr
 {
+struct CameraData
+{
+    glm::mat4 viewMatrix;
+    glm::mat4 inverseViewMatrix;
+    glm::mat4 projectionMatrix;
+    glm::mat4 inverseProjectionMatrix;
+    glm::vec3 position;
+    float znear;
+    float zfar;
+};
+
 class Camera
 {
 public:
@@ -60,6 +71,7 @@ public:
     void UpdatePosition(glm::vec3 dir, float dt);
 
     void SetAspect(float aspect);
+    void SetSensitivity(float sensitivity) { m_viewSpeed = sensitivity; }
 
     float ZNear() const { return m_znear; };
     float ZFar() const { return m_zfar; };

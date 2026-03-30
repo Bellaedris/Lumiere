@@ -53,17 +53,8 @@ void RendererManager::SetActivePipeline(int pipelineId)
 void RendererManager::Render(const rdr::FrameData &frameData)
 {
     // upload camera data
-    glm::mat4  view       = frameData.scene->Camera()->View();
-    glm::mat4  projection = frameData.scene->Camera()->Projection();
-    CameraData cameraData = {
-        view,
-        glm::inverse(view),
-        projection,
-        glm::inverse(projection),
-         frameData.scene->Camera()->Position(), frameData.scene->Camera()->ZNear(),
-         frameData.scene->Camera()->ZFar()
-    };
-    m_cameraData->Write(sizeof(CameraData), &cameraData, lum::gpu::Buffer::DynamicDraw);
+    rdr::CameraData cameraData = frameData.cameraSystem->CameraData();
+    m_cameraData->Write(sizeof(rdr::CameraData), &cameraData, lum::gpu::Buffer::DynamicDraw);
     m_cameraData->Bind(0);
 
     // upload light datas so the passes can use them

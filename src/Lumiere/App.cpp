@@ -38,15 +38,7 @@ namespace lum
     void App::PreRender()
     {
         m_deltaTime = m_deltaTimer.Elapsed();
-        // If there are things you want to do before rendering ...
-        glm::vec3 inputDir = m_window->GatherInput();
-        m_camera->ProcessMouseMovement(m_window->GetMousePosOffset());
-        m_camera->UpdatePosition(inputDir, m_deltaTime);
-
         // update dt
         m_deltaTimer.Reset();
-
-        // Initialise a new frame
-
     }
 }

@@ -14,6 +14,9 @@
 #include "yaml-cpp/node/convert.h"
 #include <yaml-cpp/yaml.h>
 
+#include "Lumiere/Components/Camera.h"
+#include "Lumiere/Systems/CameraSystem.h"
+
 namespace lum::rdr
 {
 SceneDesc::SceneDesc(SystemProvider* systemProvider)
@@ -114,6 +117,10 @@ void SceneDesc::ForEachNode(const std::function<void(Node3D *node)> &callback)
 
 void SceneDesc::OnPlay()
 {
+    if (auto cam = FindComponentOfType<comp::Camera>(); cam != nullptr)
+        m_systemProvider->m_camera->SetPlayerCamera(cam->Node());
+    m_systemProvider->m_camera->SetPlayMode();
+
     ForEachNode([&](Node3D* current)
     {
         for (auto&& comp : current->Components())
@@ -123,6 +130,7 @@ void SceneDesc::OnPlay()
 
 void SceneDesc::OnStop()
 {
+    m_systemProvider->m_camera->SetEditorMode();
     ForEachNode([&](Node3D* current)
     {
         for (auto&& comp : current->Components())

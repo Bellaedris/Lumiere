@@ -17,17 +17,6 @@ namespace lum
 class RendererManager
 {
 private:
-    struct CameraData
-    {
-        glm::mat4 viewMatrix;
-        glm::mat4 inverseViewMatrix;
-        glm::mat4 projectionMatrix;
-        glm::mat4 inverseProjectionMatrix;
-        glm::vec3 position;
-        float znear;
-        float zfar;
-    };
-
     std::shared_ptr<evt::EventHandler> m_eventHandler;
     std::vector<rdr::RenderPipeline> m_pipelines;
 
