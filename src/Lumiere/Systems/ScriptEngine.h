@@ -9,6 +9,7 @@
 #include <sol/sol.hpp>
 
 #include "System.h"
+#include "Lumiere/Events/ScriptEventHandler.h"
 
 namespace lum
 {
@@ -27,8 +28,8 @@ using ScriptHandle = dod::slot_map<ScriptInternal>::key;
 class ScriptEngine : public ISystem
 {
 private:
-
     sol::state m_state;
+    std::unique_ptr<evt::ScriptEventHandler> m_scriptEvents;
 
     dod::slot_map<ScriptInternal> m_scripts;
 public:
@@ -45,6 +46,8 @@ public:
      * \param path path of the script to load
      */
     void         Recreate(ScriptHandle handle, const std::string& path);
+
+    sol::environment& GetScriptContext(const ScriptHandle& handle);
 
     sol::state& State() { return m_state; };
 };

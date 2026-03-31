@@ -10,6 +10,7 @@
 namespace lum
 {
 ScriptEngine::ScriptEngine()
+    : m_scriptEvents(std::make_unique<evt::ScriptEventHandler>())
 {
     m_state.open_libraries(sol::lib::base);
     m_state.open_libraries(sol::lib::math);
@@ -44,6 +45,12 @@ ScriptEngine::ScriptEngine()
     m_state["IsMouseButtonPressed"] = [](float k) {return InputManager::IsMouseButtonPressed(static_cast<MouseButton>(k));};
     m_state["IsMouseButtonReleased"] = [](float k) {return InputManager::IsMouseButtonReleased(static_cast<MouseButton>(k));};
     m_state["GetAxis"] = &InputManager::GetAxis;
+
+    // register event system
+    sol::table events = m_state.create_table();
+    events["Subscribe"] = [&](const std::string& s, const sol::function& callback){ m_scriptEvents->Subscribe(s, callback); };
+    events["Emit"] = [&](const std::string& s) { m_scriptEvents->Emit(s); };
+    m_state["Events"] = events;
 }
 
 void ScriptEngine::Update(float dt)
@@ -122,5 +129,10 @@ void ScriptEngine::Recreate(ScriptHandle handle, const std::string &path)
             std::cerr << "[Script Error] " << path << "\n" << err.what() << std::endl;
         }
     }
+}
+
+sol::environment & ScriptEngine::GetScriptContext(const ScriptHandle &handle)
+{
+    return m_scripts.get(handle)->m_env;
 }
 }

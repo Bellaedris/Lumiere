@@ -13,11 +13,34 @@ namespace lum::comp
 {
 REGISTER_TO_COMPONENT_FACTORY(Script, "Script");
 
+bool Script::m_typeRegistered {false};
+
 Script::Script(Node3D *node, SystemProvider* systems)
     : IComponent(node, systems)
     , m_engine(systems->m_scripting)
 {
-
+    if (m_typeRegistered == false)
+    {
+        m_typeRegistered = true;
+        sol::state& state = systems->m_scripting->State();
+        state["Message"] = [this](Node3D* node, const std::string& callbackName)
+        {
+            std::optional<Script*> s = node->GetComponent<Script>();
+            if (s.has_value() == false)
+                return;
+            sol::environment& env = m_engine->GetScriptContext(s.value()->Handle());
+            sol::function callback = env[callbackName];
+            if (callback.valid())
+            {
+                sol::protected_function_result res = callback();
+                if (res.valid() == false)
+                {
+                    sol::error err = res;
+                    std::cerr << "[Runtime Error] " << "\n" << err.what() << std::endl;
+                }
+            }
+        };
+    }
 }
 
 void Script::OnPlay()

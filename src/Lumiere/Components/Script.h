@@ -16,13 +16,14 @@ class Script : public IComponent
 {
 private:
     static bool m_registered;
+    static bool m_typeRegistered;
 
     ScriptEngine* m_engine {nullptr};
 
     /** \brief Path to the script that will be executed */
     std::string m_path;
     /** \brief index of the script in the scriptEngine array */
-    ScriptHandle m_handle;
+    ScriptHandle m_handle {};
     bool m_initialized {false};
 
 public:
@@ -35,6 +36,7 @@ public:
 
     void        SetScriptPath(const std::string& path);;
     std::string Path() const { return m_path; }
+    const ScriptHandle& Handle() const { return m_handle; }
 
     /**
      * \brief A readable, path-free identifier of the attached script
