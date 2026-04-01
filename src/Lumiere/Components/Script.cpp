@@ -23,7 +23,7 @@ Script::Script(Node3D *node, SystemProvider* systems)
     {
         m_typeRegistered = true;
         sol::state& state = systems->m_scripting->State();
-        state["Message"] = [this](Node3D* node, const std::string& callbackName)
+        state["Message"] = [this](Node3D* node, const std::string& callbackName, const sol::variadic_args& args)
         {
             std::optional<Script*> s = node->GetComponent<Script>();
             if (s.has_value() == false)
@@ -32,7 +32,7 @@ Script::Script(Node3D *node, SystemProvider* systems)
             sol::function callback = env[callbackName];
             if (callback.valid())
             {
-                sol::protected_function_result res = callback();
+                sol::protected_function_result res = callback(args);
                 if (res.valid() == false)
                 {
                     sol::error err = res;

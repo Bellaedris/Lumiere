@@ -13,12 +13,12 @@ void ScriptEventHandler::Subscribe(const std::string &name, const sol::function 
     m_listeners[name].push_back(callback);
 }
 
-void ScriptEventHandler::Emit(const std::string &name)
+void ScriptEventHandler::Emit(const std::string &name, const sol::variadic_args& args)
 {
     if (m_listeners.contains(name))
         for (auto& function : m_listeners[name])
         {
-            sol::protected_function_result res = function();
+            sol::protected_function_result res = function(args);
             if (res.valid() == false)
             {
                 sol::error err = res;

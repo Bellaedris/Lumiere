@@ -49,7 +49,7 @@ ScriptEngine::ScriptEngine()
     // register event system
     sol::table events = m_state.create_table();
     events["Subscribe"] = [&](const std::string& s, const sol::function& callback){ m_scriptEvents->Subscribe(s, callback); };
-    events["Emit"] = [&](const std::string& s) { m_scriptEvents->Emit(s); };
+    events["Emit"] = [&](const std::string& s, const sol::variadic_args &args) { m_scriptEvents->Emit(s, args); };
     m_state["Events"] = events;
 }
 
