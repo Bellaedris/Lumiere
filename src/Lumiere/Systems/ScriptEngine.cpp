@@ -6,11 +6,14 @@
 
 #include "Lumiere/InputManager.h"
 #include "Lumiere/Node3D.h"
+#include "CameraSystem.h"
+#include "Lumiere/Components/Script.h"
 
 namespace lum
 {
-ScriptEngine::ScriptEngine()
+ScriptEngine::ScriptEngine(CameraSystem* cameraSystem)
     : m_scriptEvents(std::make_unique<evt::ScriptEventHandler>())
+    , m_cameraSystem(cameraSystem)
 {
     m_state.open_libraries(sol::lib::base);
     m_state.open_libraries(sol::lib::math);
@@ -51,6 +54,27 @@ ScriptEngine::ScriptEngine()
     events["Subscribe"] = [&](const std::string& s, const sol::function& callback){ m_scriptEvents->Subscribe(s, callback); };
     events["Emit"] = [&](const std::string& s, const sol::variadic_args &args) { m_scriptEvents->Emit(s, args); };
     m_state["Events"] = events;
+
+    m_state["Message"] = [this](Node3D* node, const std::string& callbackName, const sol::variadic_args& args)
+    {
+        std::optional<comp::Script*> s = node->GetComponent<comp::Script>();
+        if (s.has_value() == false)
+            return;
+        sol::environment& env = GetScriptContext(s.value()->Handle());
+        sol::function callback = env[callbackName];
+        if (callback.valid())
+        {
+            sol::protected_function_result res = callback(args);
+            if (res.valid() == false)
+            {
+                sol::error err = res;
+                std::cerr << "[Runtime Error] " << "\n" << err.what() << std::endl;
+            }
+        }
+    };
+
+    // Camera/viewport settings
+    m_state["SetCursorVisible"] = [this](const bool visible){ m_cameraSystem->SetCursorVisible(visible); };
 }
 
 void ScriptEngine::Update(float dt)

@@ -30,10 +30,15 @@ class ScriptEngine : public ISystem
 private:
     sol::state m_state;
     std::unique_ptr<evt::ScriptEventHandler> m_scriptEvents;
+    // We NEED the scripting to be able to access other systems, for instance the Camera system to allow for cursor manipulation!
+    // It should be located here because we need a class that always exists at runtime, so it cannot be a Node that will
+    // be recreated multiple times during play sessions... This constrains the ScriptEngine to be the last created object.
+    // It might not be ideal, if someone has a better option.
+    CameraSystem* m_cameraSystem;
 
     dod::slot_map<ScriptInternal> m_scripts;
 public:
-    ScriptEngine();
+    ScriptEngine(CameraSystem* cameraSystem);
 
     // lifecycle functions
     void Update(float dt) override;

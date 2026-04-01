@@ -43,7 +43,7 @@ void Rigidbody::RegisterTypes()
 {
     m_typeRegistered = true;
     sol::state& lua = m_scriptEngine->State();
-
+    // TODO expose RB settings and methods for physics interactions
 
 }
 
