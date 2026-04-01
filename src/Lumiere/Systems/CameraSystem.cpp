@@ -6,6 +6,7 @@
 
 #include "Lumiere/Components/Camera.h"
 #include "Lumiere/Events/RenderEvents.h"
+#include "Lumiere/Events/WindowEvents.h"
 
 namespace lum
 {
@@ -31,7 +32,16 @@ void CameraSystem::Update(float dt)
             else
                 UploadGameCameraData();
             break;
+        case CameraMode::EditorInPlay:
+            if (m_editorCamera != nullptr)
+                UploadEditorCameraData();
+            break;
     }
+}
+
+void CameraSystem::SetCursorVisible(bool visible) const
+{
+    m_events->Emit(std::make_shared<evt::CursorStateChangeQueriedEvent>(visible));
 }
 
 void CameraSystem::UploadGameCameraData()

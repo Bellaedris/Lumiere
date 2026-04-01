@@ -12,14 +12,14 @@ namespace lum
 {
 class CameraSystem : public ISystem
 {
-private:
+public:
     enum CameraMode
     {
         Editor,
         Play,
         EditorInPlay
     };
-
+private:
     uint32_t m_viewportWidth {1};
     uint32_t m_viewportHeight {1};
     rdr::Camera* m_editorCamera {nullptr};
@@ -39,12 +39,19 @@ public:
 
     void SetPlayerCamera(Node3D* cam) { m_playerCamera = cam; }
     void SetEditorCamera(rdr::Camera* cam) { m_editorCamera = cam; }
+    /**
+     * \brief Enables or disables the window cursor.
+     * TODO DOES IT MAKE SENSE TO HAVE THIS HERE? NOT THAT MUCH BUT IT'S CONVENIENT AND I CAN HIDE IT IN BINDINGS
+     * \param visible true to show the cursor, false to hide it
+     */
+    void SetCursorVisible(bool visible) const;
 
     rdr::CameraData& CameraData() { return m_cameraData; }
 
     void SetEditorMode() {m_mode = Editor; }
     void SetPlayMode() {m_mode = Play; }
     void SetEditorInPlayMode() {m_mode = EditorInPlay; }
+    CameraMode CurrentMode() const { return m_mode; }
 
     void OnEvent(const std::shared_ptr<evt::IEvent>& e);
 };

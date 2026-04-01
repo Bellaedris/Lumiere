@@ -39,6 +39,8 @@ namespace lum
 
         void UpdateMouseOffset(double x, double y);
         std::shared_ptr<evt::EventHandler> m_events;
+
+        void OnEvent(const std::shared_ptr<evt::IEvent>& evt);
     public:
         Window(int width, int height, int major, int minor, std::shared_ptr<evt::EventHandler> events);
 

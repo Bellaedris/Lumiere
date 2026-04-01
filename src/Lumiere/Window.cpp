@@ -10,6 +10,7 @@
 #include <stdexcept>
 
 #include "Events/RenderEvents.h"
+#include "Events/WindowEvents.h"
 
 namespace lum
 {
@@ -44,6 +45,8 @@ namespace lum
         glfwSetWindowUserPointer(m_window, this);
 
         glfwMaximizeWindow(m_window);
+
+        LUM_SUB_TO_EVENT(m_events, evt::EventType::CursorStateChangeQueried, Window::OnEvent);
     }
 
     bool Window::ShouldClose()
@@ -122,6 +125,7 @@ namespace lum
             case GLFW_KEY_LEFT_CONTROL: return KeyCode::lKeyCtrl;
             case GLFW_KEY_LEFT_SHIFT:   return KeyCode::lKeyShift;
             case GLFW_KEY_SPACE:        return KeyCode::lKeySpace;
+            case GLFW_KEY_ESCAPE:       return KeyCode::lKeyEsc;
             default:                    return KeyCode::lKeyUnknown;
         }
     }
@@ -154,5 +158,14 @@ namespace lum
 
         if (std::abs(m_offsetX) < 1.f) m_offsetX = .0f;
         if (std::abs(m_offsetY) < 1.f) m_offsetY = .0f;
+    }
+
+    void Window::OnEvent(const std::shared_ptr<evt::IEvent> &evt)
+    {
+        if (evt->Type() == evt::EventType::CursorStateChangeQueried)
+        {
+            auto e = std::dynamic_pointer_cast<evt::CursorStateChangeQueriedEvent>(evt);
+            glfwSetInputMode(m_window, GLFW_CURSOR, e->m_show ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+        }
     }
 }

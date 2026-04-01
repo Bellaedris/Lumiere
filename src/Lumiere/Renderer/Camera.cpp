@@ -87,12 +87,8 @@ namespace lum::rdr
 
     void Camera::ProcessMouseMovement(const glm::vec2& offset)
     {
-        // avoid small movements
-        float offsetX = std::abs(offset.x) <= 1.f ? 0.f : offset.x;
-        float offsetY = std::abs(offset.y) <= 1.f ? 0.f : offset.y;
-
-        m_yaw += offsetX * m_viewSpeed;
-        m_pitch += offsetY * m_viewSpeed;
+        m_yaw += offset.x * m_viewSpeed;
+        m_pitch += offset.y * m_viewSpeed;
 
         if (m_pitch > PITCH_LIMIT)
             m_pitch = PITCH_LIMIT;

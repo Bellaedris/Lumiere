@@ -21,6 +21,7 @@ enum class KeyCode
     lKeySpace,
     lKeyCtrl,
     lKeyShift,
+    lKeyEsc
 };
 
 enum class MouseButton
