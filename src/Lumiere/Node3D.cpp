@@ -10,6 +10,7 @@
 #include "Components/Transform.h"
 #include "Components/Light.h"
 #include "Components/MeshRenderer.h"
+#include "Systems/CameraSystem.h"
 #include "Systems/ScriptEngine.h"
 #include "Systems/PhysicsSystem.h"
 
@@ -25,9 +26,38 @@ void Node3D::RegisterType()
     // since Transforms are always created alongside Nodes, we register the 2 types at the same time so we don't have to
     // give any scripting context to Transform post-creation, which would be very ugly.
 
+    auto vec2Mul = sol::overload( []( const glm::vec2& v1, const glm::vec2& v2 ) { return v1 * v2; },
+                                                  []( const glm::vec2& v1, float value ) { return v1 * value; },
+                                                  []( float value, const glm::vec2& v1 ) { return v1 * value; } );
+
+    // divider overloads
+    auto vec2Div = sol::overload( []( const glm::vec2& v1, const glm::vec2& v2 ) { return v1 / v2; },
+                                                []( const glm::vec2& v1, float value ) { return v1 / value; },
+                                                []( float value, const glm::vec2& v1 ) { return v1 / value; } );
+
+    // addition overloads
+    auto vec2Add = sol::overload( []( const glm::vec2& v1, const glm::vec2& v2 ) { return v1 + v2; },
+                                                  []( const glm::vec2& v1, float value ) { return v1 + value; },
+                                                  []( float value, const glm::vec2& v1 ) { return v1 + value; } );
+
+    // subtraction overloads
+    auto vec2Sub = sol::overload( []( const glm::vec2& v1, const glm::vec2& v2 ) { return v1 - v2; },
+                                                     []( const glm::vec2& v1, float value ) { return v1 - value; },
+                                                     []( float value, const glm::vec2& v1 ) { return v1 - value; } );
+
     sol::usertype<glm::vec2> vec2 = lua.new_usertype<glm::vec2>("vec2",
             sol::call_constructor,
-            sol::constructors<glm::vec2(float), glm::vec2(float, float)>()
+            sol::constructors<glm::vec2(float), glm::vec2(float, float)>(),
+            sol::meta_function::multiplication,
+            vec2Mul,
+            sol::meta_function::division,
+            vec2Div,
+            sol::meta_function::addition,
+            vec2Add,
+            sol::meta_function::subtraction,
+            vec2Sub,
+            sol::meta_function::unary_minus,
+            sol::overload([](const glm::vec2& v) { return - v;})
         );
     vec2["x"] = sol::property(
         [](const glm::vec2& v) { return v.x; },
@@ -38,9 +68,38 @@ void Node3D::RegisterType()
         [](glm::vec2& v, float y) { v.y = y; }
     );
 
+    auto vec3Mul = sol::overload( []( const glm::vec3& v1, const glm::vec3& v2 ) { return v1 * v2; },
+                                                  []( const glm::vec3& v1, float value ) { return v1 * value; },
+                                                  []( float value, const glm::vec3& v1 ) { return v1 * value; } );
+
+    // divider overloads
+    auto vec3Div = sol::overload( []( const glm::vec3& v1, const glm::vec3& v2 ) { return v1 / v2; },
+                                                []( const glm::vec3& v1, float value ) { return v1 / value; },
+                                                []( float value, const glm::vec3& v1 ) { return v1 / value; } );
+
+    // addition overloads
+    auto vec3Add = sol::overload( []( const glm::vec3& v1, const glm::vec3& v2 ) { return v1 + v2; },
+                                                  []( const glm::vec3& v1, float value ) { return v1 + value; },
+                                                  []( float value, const glm::vec3& v1 ) { return v1 + value; } );
+
+    // subtraction overloads
+    auto vec3Sub = sol::overload( []( const glm::vec3& v1, const glm::vec3& v2 ) { return v1 - v2; },
+                                                     []( const glm::vec3& v1, float value ) { return v1 - value; },
+                                                     []( float value, const glm::vec3& v1 ) { return v1 - value; } );
+
     sol::usertype<glm::vec3> vec = lua.new_usertype<glm::vec3>("vec3",
             sol::call_constructor,
-            sol::constructors<glm::vec3(float), glm::vec3(float, float, float)>()
+            sol::constructors<glm::vec3(float), glm::vec3(float, float, float)>(),
+            sol::meta_function::multiplication,
+            vec3Mul,
+            sol::meta_function::division,
+            vec3Div,
+            sol::meta_function::addition,
+            vec3Add,
+            sol::meta_function::subtraction,
+            vec3Sub,
+            sol::meta_function::unary_minus,
+            sol::overload([](const glm::vec3& v) { return - v;})
         );
     vec["x"] = sol::property(
         [](const glm::vec3& v) { return v.x; },
