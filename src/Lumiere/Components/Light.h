@@ -39,7 +39,7 @@ public:
     float&    Intensity() { return m_intensity; };
     float&    PointRange() { return m_pointRange; }
 
-    void      Serialize(YAML::Node node) override;
-    void      Deserialize(YAML::Node node) override;;
+    void      Serialize(YAML::Node& node) override;
+    void      Deserialize(YAML::Node& node) override;;
 };
 } // lum::comp

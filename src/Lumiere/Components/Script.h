@@ -44,7 +44,7 @@ public:
      */
     std::string Name() const;
 
-    void        Serialize(YAML::Node node) override;
-    void        Deserialize(YAML::Node node) override;
+    void        Serialize(YAML::Node& node) override;
+    void        Deserialize(YAML::Node& node) override;
 };
 } // lum::comp

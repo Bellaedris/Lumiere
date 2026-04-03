@@ -34,7 +34,7 @@ void SphereCollider::RegisterGuizmo()
     );
 }
 
-void SphereCollider::Serialize(YAML::Node node)
+void SphereCollider::Serialize(YAML::Node& node)
 {
     YAML::Node s;
     s["componentType"] = "SphereCollider";
@@ -42,7 +42,7 @@ void SphereCollider::Serialize(YAML::Node node)
     node.push_back(s);
 }
 
-void SphereCollider::Deserialize(YAML::Node node)
+void SphereCollider::Deserialize(YAML::Node& node)
 {
     m_radius = node["radius"].as<float>();
 }

@@ -22,7 +22,7 @@ public:
 
     glm::vec3& Size() { return m_boxSize; }
 
-    void Serialize(YAML::Node node) override;
-    void Deserialize(YAML::Node node) override;
+    void Serialize(YAML::Node& node) override;
+    void Deserialize(YAML::Node& node) override;
 };
 } // lum

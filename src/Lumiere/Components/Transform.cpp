@@ -129,7 +129,7 @@ glm::quat Transform::Rotation() const
     return m_rotation;
 }
 
-void Transform::Serialize(YAML::Node node)
+void Transform::Serialize(YAML::Node& node)
 {
     YAML::Node t;
     t["componentType"] = "Transform";
@@ -139,7 +139,7 @@ void Transform::Serialize(YAML::Node node)
     node["transform"] = t;
 }
 
-void Transform::Deserialize(YAML::Node node)
+void Transform::Deserialize(YAML::Node& node)
 {
     m_position = node["position"].as<glm::vec3>();
     m_rotation = node["rotation"].as<glm::quat>();

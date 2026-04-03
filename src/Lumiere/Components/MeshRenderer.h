@@ -32,7 +32,7 @@ public:
 
     void SetMesh(const std::string& path);
 
-    void Serialize(YAML::Node node) override;
-    void Deserialize(YAML::Node node) override;
+    void Serialize(YAML::Node& node) override;
+    void Deserialize(YAML::Node& node) override;
 };
 } // lum::comp

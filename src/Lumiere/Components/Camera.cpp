@@ -43,7 +43,7 @@ std::string Camera::CameraType() const
     return m_perspective ? "Perspective" : "Orthographic";
 }
 
-void Camera::Serialize(YAML::Node node)
+void Camera::Serialize(YAML::Node& node)
 {
     YAML::Node cam;
     cam["componentType"] = "Camera";
@@ -59,7 +59,7 @@ void Camera::Serialize(YAML::Node node)
     node.push_back(cam);
 }
 
-void Camera::Deserialize(YAML::Node node)
+void Camera::Deserialize(YAML::Node& node)
 {
     m_perspective = node["perspective"].as<bool>();
     m_zNear = node["znear"].as<float>();

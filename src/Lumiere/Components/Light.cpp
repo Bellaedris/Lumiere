@@ -45,7 +45,7 @@ Light::Light(Node3D *node, SystemProvider* systems)
         RegisterType(systems);
 }
 
-void Light::Serialize(YAML::Node node)
+void Light::Serialize(YAML::Node& node)
 {
     YAML::Node light;
     light["componentType"] = "Light";
@@ -56,7 +56,7 @@ void Light::Serialize(YAML::Node node)
     node.push_back(light);
 }
 
-void Light::Deserialize(YAML::Node node)
+void Light::Deserialize(YAML::Node& node)
 {
     m_selectedType = node["type"].as<int>();
     m_color = node["color"].as<glm::vec3>();

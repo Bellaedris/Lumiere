@@ -22,7 +22,7 @@ public:
 
     float& Radius() { return m_radius; }
 
-    void Serialize(YAML::Node node) override;
-    void Deserialize(YAML::Node node) override;
+    void Serialize(YAML::Node& node) override;
+    void Deserialize(YAML::Node& node) override;
 };
 } // lum

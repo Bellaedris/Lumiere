@@ -38,7 +38,7 @@ void MeshRenderer::SetMesh(const std::string &path)
     m_mesh = loader.LoadMeshFromFile(path);
 }
 
-void MeshRenderer::Serialize(YAML::Node node)
+void MeshRenderer::Serialize(YAML::Node& node)
 {
     YAML::Node mr;
     mr["componentType"] = "MeshRenderer";
@@ -46,7 +46,7 @@ void MeshRenderer::Serialize(YAML::Node node)
     node.push_back(mr);
 }
 
-void MeshRenderer::Deserialize(YAML::Node node)
+void MeshRenderer::Deserialize(YAML::Node& node)
 {
     std::string path = node["path"].as<std::string>();
     if (path.empty() == false)

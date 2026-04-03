@@ -33,7 +33,7 @@ public:
     virtual void RegisterGuizmo() {};
     virtual void UnregisterGuizmo() {};
 
-    virtual void Serialize(YAML::Node node) = 0;
-    virtual void Deserialize(YAML::Node node) = 0;
+    virtual void Serialize(YAML::Node& node) = 0;
+    virtual void Deserialize(YAML::Node& node) = 0;
 };
 }

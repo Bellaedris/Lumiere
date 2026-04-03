@@ -39,7 +39,7 @@ public:
 
     void SetCameraType(bool value) { m_perspective = value; };
 
-    void Serialize(YAML::Node node) override;
-    void Deserialize(YAML::Node node) override;
+    void Serialize(YAML::Node& node) override;
+    void Deserialize(YAML::Node& node) override;
 };
 } // lum

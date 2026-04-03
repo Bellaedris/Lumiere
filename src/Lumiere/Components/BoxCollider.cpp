@@ -35,7 +35,7 @@ void BoxCollider::RegisterGuizmo()
     );
 }
 
-void BoxCollider::Serialize(YAML::Node node)
+void BoxCollider::Serialize(YAML::Node& node)
 {
     YAML::Node s;
     s["componentType"] = "BoxCollider";
@@ -43,7 +43,7 @@ void BoxCollider::Serialize(YAML::Node node)
     node.push_back(s);
 }
 
-void BoxCollider::Deserialize(YAML::Node node)
+void BoxCollider::Deserialize(YAML::Node& node)
 {
     m_boxSize = node["size"].as<glm::vec3>();
 }

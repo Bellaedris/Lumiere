@@ -61,7 +61,7 @@ public:
     [[nodiscard]] glm::vec3       EulerAngles() const { return glm::degrees(glm::eulerAngles(m_rotation)); }
     [[nodiscard]] bool            IsDirty() const { return m_isDirty; }
 
-    void Serialize(YAML::Node node) override;
-    void Deserialize(YAML::Node node) override;
+    void Serialize(YAML::Node& node) override;
+    void Deserialize(YAML::Node& node) override;
 };
 } // lum

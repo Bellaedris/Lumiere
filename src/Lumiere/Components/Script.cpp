@@ -61,7 +61,7 @@ std::string Script::Name() const
     return m_path.substr(name + 1, m_path.length() - 1);
 }
 
-void Script::Serialize(YAML::Node node)
+void Script::Serialize(YAML::Node& node)
 {
     std::filesystem::path path(m_path);
     if (path.is_absolute())
@@ -73,7 +73,7 @@ void Script::Serialize(YAML::Node node)
     node.push_back(s);
 }
 
-void Script::Deserialize(YAML::Node node)
+void Script::Deserialize(YAML::Node& node)
 {
     SetScriptPath(node["path"].as<std::string>());
 }
