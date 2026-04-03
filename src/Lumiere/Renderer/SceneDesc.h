@@ -84,7 +84,12 @@ public:
     void OnPlay();
     void OnStop();
 
-    void Serialize();
+    /**
+     * \brief Serializes the scene to YAML
+     * \return The relative path the scene was written to. Something like Assets/name.lumsc. Can be nullopt if the serialization
+     * process failed.
+     */
+    std::optional<std::string> Serialize();
     void Deserialize(const std::string& path);
 };
 

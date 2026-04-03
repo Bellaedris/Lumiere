@@ -138,7 +138,7 @@ void SceneDesc::OnStop()
     });
 }
 
-void SceneDesc::Serialize()
+std::optional<std::string> SceneDesc::Serialize()
 {
     YAML::Node root;
     root["version"] = SCENE_DESC_SERIALIZATION_VERSION;
@@ -146,25 +146,39 @@ void SceneDesc::Serialize()
     root["uuid"] = to_string(m_rootNode->UUID());
 
     // i don't want another member function for the recursion....
-    std::function<void(YAML::Node, Node3D*)> serialize = [&](YAML::Node parent, Node3D* node) {
+    std::function<void(YAML::Node&, Node3D*)> serialize = [&](YAML::Node& parent, Node3D* node) {
         YAML::Node n;
         n["name"] = node->Name();
         n["uuid"] = to_string(node->UUID());
+
         node->GetTransform()->Serialize(n);
-        YAML::Node components = n["components"];
+        YAML::Node components;
         for (auto&& component : node->Components())
             component->Serialize(components);
+        n["components"] = components;
 
-        parent["children"].push_back(n);
         for (auto&& child : node->Children())
             serialize(n, child.get());
+        parent["children"].push_back(n);
     };
 
     for (auto&& child : m_rootNode->Children())
         serialize(root, child.get());
 
-    std::ofstream out("Assets/" + RootNode()->Name() + SCENE_FILE_FORMAT);
-    out << root;
+    std::string path = "Assets/" + RootNode()->Name() + SCENE_FILE_FORMAT;
+    YAML::Emitter emitter;
+    emitter << root;
+    if (emitter.good() == false)
+    {
+        std::cerr << "Couldn't serialize the scene " << RootNode()->Name() << ": " << emitter.GetLastError() << "\n";
+        return {};
+    }
+
+    // we could eventually ensure the write process is correct by writing to a tmp file then renaming, but i'm kinda lazy
+    std::ofstream out(path, std::ios::out | std::ios::trunc);
+    out << emitter.c_str();
+
+    return path;
 }
 
 void SceneDesc::Deserialize(const std::string& path)
@@ -205,16 +219,18 @@ void SceneDesc::Deserialize(const std::string& path)
             return;
         }
         std::unique_ptr<Node3D> n = std::make_unique<Node3D>(name, nodeUUID.value());
-        n->GetTransform()->Deserialize(node["transform"]);
+        YAML::Node transform = node["transform"];
+        n->GetTransform()->Deserialize(transform);
         n->SetSystemsContext(m_systemProvider);
-        for (const auto& component : node["components"])
+        for (auto& component : node["components"])
         {
+            YAML::Node compNode = static_cast<YAML::Node>(component);
             std::unique_ptr<comp::IComponent> comp = comp::ComponentFactory::Create(
                     component["componentType"].as<std::string>(),
                     n.get(),
                     m_systemProvider
             );
-            comp->Deserialize(static_cast<YAML::Node>(component));
+            comp->Deserialize(compNode);
             n->AddComponent(comp);
         }
         parent->AddChild(n);
