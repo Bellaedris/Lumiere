@@ -14,15 +14,21 @@ namespace lum::utils
 {
 gfx::MeshPtr MeshLoader::LoadMeshFromFile(const std::string &filename)
 {
+    // ensure we normalize the paths we receive to a relative form!
+    std::filesystem::path filepath(filename);
+    if (filepath.is_absolute())
+        filepath = std::filesystem::path(filepath).lexically_relative(cfg::EXECUTABLE_DIR).string();
+    std::string path = filepath.string();
+
     // if we cached the mesh already, just return it
-    gfx::MeshPtr cachedMesh = ResourcesManager::Instance()->GetMesh(filename);
-    if (ResourcesManager::Instance()->GetMesh(filename) != nullptr)
+    gfx::MeshPtr cachedMesh = ResourcesManager::Instance()->GetMesh(path);
+    if (ResourcesManager::Instance()->GetMesh(path) != nullptr)
         return cachedMesh;
 
     // else, load it with assimp
     Assimp::Importer importer;
 
-    const aiScene* scene = importer.ReadFile(filename.c_str(),
+    const aiScene* scene = importer.ReadFile(path.c_str(),
         aiProcess_JoinIdenticalVertices   |
         aiProcess_SortByPType             |
         aiProcess_GenNormals              | // create the normals if not already in the file
@@ -32,16 +38,16 @@ gfx::MeshPtr MeshLoader::LoadMeshFromFile(const std::string &filename)
 
     if (scene == nullptr)
     {
-        std::cerr << "Couldn't load the mesh at " << filename << "\nWith error:" << importer.GetErrorString() << "\n";
+        std::cerr << "Couldn't load the mesh at " << path << "\nWith error:" << importer.GetErrorString() << "\n";
         return {};
     }
 
-    directory = filename.substr(0, filename.find_last_of('/'));
+    directory = path.substr(0, path.find_last_of('/'));
     std::vector<gfx::SubMesh> meshes;
     ProcessNode(scene->mRootNode, scene, meshes);
 
-    std::cout << "Loaded mesh " << filename << "\n";
-    return ResourcesManager::Instance()->CacheMesh(filename, meshes);
+    std::cout << "Loaded mesh " << path << "\n";
+    return ResourcesManager::Instance()->CacheMesh(path, meshes);
 }
 
 void MeshLoader::ProcessNode(aiNode *node, const aiScene *scene, std::vector<gfx::SubMesh> &subMeshes)
