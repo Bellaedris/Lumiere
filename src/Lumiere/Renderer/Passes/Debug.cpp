@@ -240,7 +240,7 @@ void Debug::Render(const FrameData &frameData)
     if (frameData.profilerGPU)
         frameData.profilerGPU->BeginScope("Debug");
 
-    if (m_debugVertices.empty() == false)
+    if (m_shouldDrawGridNextFrame || m_debugVertices.empty() == false)
     {
         m_framebuffer->Bind(gpu::Framebuffer::ReadWrite);
 
@@ -265,18 +265,21 @@ void Debug::Render(const FrameData &frameData)
             //m_shouldDrawGridNextFrame = false;
         }
 
-        // draw guizmos
-        gpu::ShaderPtr shader = ResourcesManager::Instance()->GetShader(DEBUG_SHADER_NAME);
-        shader->Bind();
-
-        // pack our vertex datas in a buffer
-        if (m_dirty)
+        if (m_debugVertices.empty() == false)
         {
-            std::vector<gfx::DebugVertex> data = PrepareData();
-            m_lineRenderer.SetData(data);
-        }
+            // draw guizmos
+            gpu::ShaderPtr shader = ResourcesManager::Instance()->GetShader(DEBUG_SHADER_NAME);
+            shader->Bind();
 
-        m_lineRenderer.Draw();
+            // pack our vertex datas in a buffer
+            if (m_dirty)
+            {
+                std::vector<gfx::DebugVertex> data = PrepareData();
+                m_lineRenderer.SetData(data);
+            }
+
+            m_lineRenderer.Draw();
+        }
 
         m_framebuffer->Unbind(gpu::Framebuffer::ReadWrite);
 
