@@ -17,6 +17,7 @@ namespace lum::gfx
 class IMaterial
 {
 public:
+    virtual ~IMaterial() = default;
     /**
      * \brief Activates the shader associated with this material and send all the required datas referenced
      */
