@@ -58,8 +58,11 @@ void PhysicsSystem::Update(float dt)
 
     // call OptimizeBroadphase on first update/upon bodies insertion
 
+
+
     m_timeSinceLastPhysicsTick += dt;
-    while (m_timeSinceLastPhysicsTick > PHYSICS_DELTA_TIME)
+    int physicsFrameThisFrame = 0;
+    while (m_timeSinceLastPhysicsTick > PHYSICS_DELTA_TIME && physicsFrameThisFrame < MAX_CATCHUP_FRAME)
     {
         m_timeSinceLastPhysicsTick -= PHYSICS_DELTA_TIME;
         // Note: in case of physics catchup, we might run more than 1 collision steps, or 0.
@@ -73,19 +76,20 @@ void PhysicsSystem::Update(float dt)
         {
             std::cerr << "Physics update error\n";
         }
+        physicsFrameThisFrame += 1;
+    }
 
-        // after the physics update, sync the positions with the gameObjects
-        for (auto& body : m_bodiesToNodes)
-        {
-            comp::Transform* t = body.second->GetTransform();
+    // after the physics update, sync the positions with the gameObjects
+    for (auto& body : m_bodiesToNodes)
+    {
+        comp::Transform* t = body.second->Node()->GetTransform();
 
-            JPH::RVec3 jPos;
-            JPH::Quat  jRot;
-            m_bodyInterface->GetPositionAndRotation(body.first, jPos, jRot);
+        JPH::RVec3 jPos;
+        JPH::Quat  jRot;
+        m_bodyInterface->GetPositionAndRotation(body.first, jPos, jRot);
 
-            t->SetPosition({jPos.GetX(), jPos.GetY(), jPos.GetZ()});
-            t->SetRotation({jRot.GetX(), jRot.GetY(), jRot.GetZ(), jRot.GetW()});
-        }
+        t->SetPosition({jPos.GetX(), jPos.GetY(), jPos.GetZ()});
+        t->SetRotation({jRot.GetW(), jRot.GetX(), jRot.GetY(), jRot.GetZ()});
     }
 }
 
@@ -115,7 +119,7 @@ std::optional<RaycastResult> PhysicsSystem::Raycast(const Ray &ray)
 
     RaycastResult result {
         .distance = res.mFraction * ray.maxHitDistance,
-        .node = m_bodiesToNodes[res.mBodyID],
+        .node = m_bodiesToNodes[res.mBodyID]->Node(),
         .position = ray.origin + res.mFraction * ray.maxHitDistance * ray.direction,
         .normal = {normal.GetX(), normal.GetY(), normal.GetZ()}
     };
@@ -123,9 +127,9 @@ std::optional<RaycastResult> PhysicsSystem::Raycast(const Ray &ray)
     return {std::move(result)};
 }
 
-void PhysicsSystem::Register(JPH::BodyID id, Node3D *node)
+void PhysicsSystem::Register(JPH::BodyID id, comp::Rigidbody *rb)
 {
-    m_bodiesToNodes.emplace(id, node);
+    m_bodiesToNodes.emplace(id, rb);
 }
 
 void PhysicsSystem::Unregister(JPH::BodyID body)

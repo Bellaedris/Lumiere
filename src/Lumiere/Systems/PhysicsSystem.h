@@ -23,6 +23,7 @@
 #include "Jolt/Physics/Collision/RayCast.h"
 #include "Jolt/Physics/Collision/CastResult.h"
 #include "Jolt/Physics/Collision/NarrowPhaseQuery.h"
+#include "Lumiere/Components/Rigidbody.h"
 
 #include "glm/glm.hpp"
 
@@ -182,6 +183,8 @@ private:
 
     // physics refreshes at 60hz
     constexpr static float PHYSICS_DELTA_TIME = 1.f / 60.f;
+
+    constexpr static int MAX_CATCHUP_FRAME = 4;
     #pragma endregion // Constants
 
     std::unique_ptr<JPH::TempAllocatorImpl> m_tempAllocator {nullptr};
@@ -194,7 +197,7 @@ private:
     JPH::PhysicsSystem m_physicsSystem;
     JPH::BodyInterface* m_bodyInterface {nullptr};
 
-    std::map<JPH::BodyID, Node3D*> m_bodiesToNodes;
+    std::map<JPH::BodyID, comp::Rigidbody*> m_bodiesToNodes;
 
     float m_timeSinceLastPhysicsTick {.0f};
 public:
@@ -207,7 +210,7 @@ public:
 
     JPH::BodyInterface* BodyInterface() { return m_bodyInterface; }
 
-    void Register(JPH::BodyID id, Node3D* node);
+    void Register(JPH::BodyID id, comp::Rigidbody* rb);
     void Unregister(JPH::BodyID body);
 };
 } // lum
