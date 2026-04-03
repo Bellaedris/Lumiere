@@ -179,6 +179,7 @@ void Node3D::RegisterType()
     type["transform"] = sol::property([](Node3D& node) -> comp::Transform* { return node.m_transform.get(); });
     type["GetMeshComponent"] = &Node3D::GetComponent<comp::MeshRenderer>;
     type["GetLightComponent"] = &Node3D::GetComponent<comp::Light>;
+    type["GetRigidbodyComponent"] = &Node3D::GetComponent<comp::Rigidbody>;
 
     type["name"] = sol::property([](const Node3D& n) -> std::string {return n.GetName();});
 
