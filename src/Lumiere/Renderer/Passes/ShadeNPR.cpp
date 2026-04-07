@@ -61,6 +61,7 @@ void ShadeNPR::Render(const FrameData &frameData)
     // send light counts, as we will actively need them
     shader->UniformData("pointLightCount", frameData.scene->Lights()->PointLightCount());
     shader->UniformData("dirLightCount", frameData.scene->Lights()->DirectionalLightCount());
+    shader->UniformData("sketchTextureTiling", m_sketchTextureTiling);
 
     gpu::TexturePtr gbufferAlbedo = ResourcesManager::Instance()->GetTexture(GBuffer::GBUFFER_ALBEDO_NAME);
     gbufferAlbedo->Bind(0);
@@ -94,6 +95,7 @@ void ShadeNPR::RenderUI()
 {
    if (ImGui::TreeNode("ShadeNPR"))
    {
+       ImGui::DragFloat("Draw texture tiling", &m_sketchTextureTiling, .1f, 0.001f, 100.f);
        if (ImGui::CollapsingHeader("Preview"))
        {
            IMGUI_PASS_DEBUG_IMAGE_OPENGL(SHADE_NPR_NAME);

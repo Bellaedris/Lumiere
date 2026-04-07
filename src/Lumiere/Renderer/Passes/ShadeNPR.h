@@ -13,6 +13,8 @@ private:
     uint32_t m_width;
     uint32_t m_height;
     std::unique_ptr<gpu::Framebuffer> m_framebuffer {nullptr};
+
+    float m_sketchTextureTiling{15.f};
 public:
     static bool m_registered;
     #pragma region Constants
