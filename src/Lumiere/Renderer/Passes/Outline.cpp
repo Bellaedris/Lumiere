@@ -49,12 +49,17 @@ void Outline::Render(const FrameData &frameData)
     gpu::ShaderPtr outlineCompute = ResourcesManager::Instance()->GetShader(OUTLINE_SOBEL_SHADER_NAME);
     outlineCompute->Bind();
     outlineCompute->UniformData("lineWidth", m_lineWidth);
+    outlineCompute->UniformData("depthThreshold", m_depthThreshold);
 
     gpu::TexturePtr normals = ResourcesManager::Instance()->GetTexture(GBuffer::GBUFFER_NORMALS_NAME);
     normals->BindImage(0, 0, gpu::GLUtils::Read);
 
+    gpu::TexturePtr depth = ResourcesManager::Instance()->GetTexture(GBuffer::GBUFFER_DEPTH_NAME);
+    depth->Bind(1);
+    outlineCompute->UniformData("GDepth", 1);
+
     gpu::TexturePtr outlineHorizontal = ResourcesManager::Instance()->GetTexture(OUTLINE_SOBEL_NAME);
-    outlineHorizontal->BindImage(1, 0, gpu::GLUtils::Write);
+    outlineHorizontal->BindImage(2, 0, gpu::GLUtils::Write);
 
     outlineCompute->Dispatch(std::ceil(m_width / 16) + 1, std::ceil(m_height / 16) + 1, 1);
     outlineCompute->Wait();
@@ -68,6 +73,7 @@ void Outline::RenderUI()
     if (ImGui::TreeNode("Outline"))
     {
         ImGui::InputFloat("Line Width", &m_lineWidth);
+        ImGui::InputFloat("Depth Threshold", &m_depthThreshold);
         if (ImGui::CollapsingHeader("Preview"))
         {
             IMGUI_PASS_DEBUG_IMAGE_OPENGL(OUTLINE_SOBEL_NAME);
