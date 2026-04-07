@@ -114,8 +114,8 @@ void DepthOfField::Render(const FrameData &frameData)
     separationShader->Bind();
     separationShader->UniformData("focusDistance", m_focusDistance);
     separationShader->UniformData("focusRange", m_focusRange);
-    separationShader->UniformData("zNear", frameData.scene->Camera()->ZNear());
-    separationShader->UniformData("zFar", frameData.scene->Camera()->ZFar());
+    separationShader->UniformData("zNear", frameData.scene->MainCamera()->ZNear());
+    separationShader->UniformData("zFar", frameData.scene->MainCamera()->ZFar());
 
     gpu::TexturePtr depth = ResourcesManager::Instance()->GetTexture(GBuffer::GBUFFER_DEPTH_NAME);
     gpu::TexturePtr frame = ResourcesManager::Instance()->GetTexture(Bloom::BLOOM_NAME);

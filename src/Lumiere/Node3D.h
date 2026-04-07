@@ -6,7 +6,7 @@
 #include <memory>
 
 #include <Lumiere/Systems/System.h>
-#include "sol.hpp"
+#include <sol/sol.hpp>
 #include "Components/IComponent.h"
 #include "Components/Transform.h"
 #include "stduuid/uuid.h"

@@ -38,7 +38,7 @@ public:
     Node3D *AddNode();
     void SetMainCamera(Camera* camera) {m_mainCamera = camera;};
 
-    Camera* Camera() const {return m_mainCamera;};
+    Camera* MainCamera() const {return m_mainCamera;};
     const std::unique_ptr<LightList>& Lights() const { return m_lights; };
 
     /**
