@@ -52,6 +52,15 @@ void RendererManager::SetActivePipeline(int pipelineId)
 
 void RendererManager::Render(const rdr::FrameData &frameData)
 {
+    if (frameData.settings->m_shouldSwitchPipeline && frameData.settings->m_activePipeline != m_activePipeline)
+    {
+        SetActivePipeline(frameData.settings->m_activePipeline);
+        frameData.settings->m_shouldSwitchPipeline = false;
+        // If we don't do this, we get a mismatch in size between the new frames and the previous ones that do not track
+        // the same passes
+        frameData.profilerGPU->Reset();
+    }
+
     // upload camera data
     rdr::CameraData cameraData = frameData.cameraSystem->CameraData();
     m_cameraData->Write(sizeof(rdr::CameraData), &cameraData, lum::gpu::Buffer::DynamicDraw);
@@ -74,6 +83,7 @@ void RendererManager::Render(const rdr::FrameData &frameData)
 
 void RendererManager::RenderUI()
 {
+    m_gBuffer->RenderUI();
     m_pipelines[m_activePipeline].RenderUI();
 }
 

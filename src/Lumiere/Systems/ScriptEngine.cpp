@@ -8,12 +8,14 @@
 #include "Lumiere/Node3D.h"
 #include "CameraSystem.h"
 #include "Lumiere/Components/Script.h"
+#include "Lumiere/Renderer/RenderSettings.h"
 
 namespace lum
 {
-ScriptEngine::ScriptEngine(CameraSystem* cameraSystem)
+ScriptEngine::ScriptEngine(CameraSystem* cameraSystem, rdr::RenderSettings* settings)
     : m_scriptEvents(std::make_unique<evt::ScriptEventHandler>())
     , m_cameraSystem(cameraSystem)
+    , m_renderSettings(settings)
 {
     m_state.open_libraries(sol::lib::base);
     m_state.open_libraries(sol::lib::math);
@@ -75,6 +77,19 @@ ScriptEngine::ScriptEngine(CameraSystem* cameraSystem)
 
     // Camera/viewport settings
     m_state["SetCursorVisible"] = [this](const bool visible){ m_cameraSystem->SetCursorVisible(visible); };
+
+    // Render settings
+    sol::usertype<rdr::RenderSettings> s = m_state.new_usertype<rdr::RenderSettings>("RenderSettings");
+    s["activePipeline"] = sol::property(
+        [this]() { return m_renderSettings->m_activePipeline; },
+        [this](int id) { m_renderSettings->m_activePipeline = id; m_renderSettings->m_shouldSwitchPipeline = true; }
+    );
+
+    s["cameraSensorIso"] = sol::property(
+        [this]() { return m_renderSettings->m_cameraSensorIso; },
+        [this](float iso) { m_renderSettings->m_cameraSensorIso = iso; }
+    );
+    m_state["RenderSettings"] = m_renderSettings;
 }
 
 void ScriptEngine::Update(float dt)

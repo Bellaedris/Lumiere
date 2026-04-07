@@ -9,6 +9,8 @@
 
 #include <yaml-cpp/node/node.h>
 #include <yaml-cpp/yaml.h>
+
+#include "RenderSettings.h"
 #include "Lumiere/ProfilerGPU.h"
 #include "Lumiere/Systems/CameraSystem.h"
 #include "Passes/PassFactory.h"
@@ -21,6 +23,7 @@ struct FrameData
     const std::shared_ptr<SceneDesc>& scene;
     int frameIndex;
     CameraSystem* cameraSystem;
+    RenderSettings* settings;
     const std::shared_ptr<ProfilerGPU>& profilerGPU;
 };
 

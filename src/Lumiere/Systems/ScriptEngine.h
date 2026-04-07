@@ -10,6 +10,7 @@
 
 #include "System.h"
 #include "Lumiere/Events/ScriptEventHandler.h"
+#include "Lumiere/Renderer/RenderSettings.h"
 
 namespace lum
 {
@@ -35,10 +36,11 @@ private:
     // be recreated multiple times during play sessions... This constrains the ScriptEngine to be the last created object.
     // It might not be ideal, if someone has a better option.
     CameraSystem* m_cameraSystem;
+    rdr::RenderSettings* m_renderSettings;
 
     dod::slot_map<ScriptInternal> m_scripts;
 public:
-    ScriptEngine(CameraSystem* cameraSystem);
+    ScriptEngine(CameraSystem* cameraSystem, rdr::RenderSettings* renderSettings);
 
     // lifecycle functions
     void Update(float dt) override;
