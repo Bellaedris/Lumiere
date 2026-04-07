@@ -262,7 +262,7 @@ void Debug::Render(const FrameData &frameData)
 
             ResourcesManager::Instance()->GetMesh(ResourcesManager::DEFAULT_PLANE_NAME)->Draw();
 
-            //m_shouldDrawGridNextFrame = false;
+            m_shouldDrawGridNextFrame = false;
         }
 
         if (m_debugVertices.empty() == false)
@@ -270,6 +270,9 @@ void Debug::Render(const FrameData &frameData)
             // draw guizmos
             gpu::ShaderPtr shader = ResourcesManager::Instance()->GetShader(DEBUG_SHADER_NAME);
             shader->Bind();
+
+            gpu::TexturePtr depth = ResourcesManager::Instance()->GetTexture(GBuffer::GBUFFER_DEPTH_NAME);
+            depth->Bind(0);
 
             // pack our vertex datas in a buffer
             if (m_dirty)
