@@ -11,7 +11,7 @@ class Outline : public IPass
 {
 private:
     float m_lineWidth {1.f};
-    float m_depthThreshold {.01f};
+    float m_depthThreshold {10.f};
 
     uint32_t m_width;
     uint32_t m_height;
