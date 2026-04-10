@@ -82,6 +82,9 @@ void PhysicsSystem::Update(float dt)
     // after the physics update, sync the positions with the gameObjects
     for (auto& body : m_bodiesToNodes)
     {
+        if (body.second->GetMotionType() != comp::Rigidbody::MotionType::Dynamic)
+            continue;
+        
         comp::Transform* t = body.second->Node()->GetTransform();
 
         JPH::RVec3 jPos;
