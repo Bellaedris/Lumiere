@@ -19,6 +19,7 @@ ScriptEngine::ScriptEngine(CameraSystem* cameraSystem, rdr::RenderSettings* sett
 {
     m_state.open_libraries(sol::lib::base);
     m_state.open_libraries(sol::lib::math);
+    m_state.open_libraries(sol::lib::table);
     m_state.script("print('Lua Scripting engine started')");
 
     // also register types that do not have dependencies on component-related types,
