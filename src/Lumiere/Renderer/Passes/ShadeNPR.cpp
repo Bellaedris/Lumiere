@@ -29,7 +29,7 @@ void ShadeNPR::Init()
         .width = static_cast<int>(m_width),
         .height = static_cast<int>(m_height),
         .format = gpu::Texture::RGBA,
-        .dataType = gpu::GLUtils::UnsignedByte,
+        .dataType = gpu::GLUtils::Float,
         .minFilter = gpu::Texture::LinearMipMapLinear,
         .magFilter = gpu::Texture::Linear,
         .wrapMode = gpu::Texture::WrapMode::ClampToBorder
