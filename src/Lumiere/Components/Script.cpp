@@ -51,7 +51,6 @@ void Script::LoadScript()
 void Script::SetScriptPath(const std::string &path)
 {
     m_path = path;
-    LoadScript();
 }
 
 std::string Script::Name() const
