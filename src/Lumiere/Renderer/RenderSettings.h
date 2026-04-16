@@ -15,5 +15,6 @@ struct RenderSettings
     bool m_shouldSwitchPipeline {false};
     int m_activePipeline {0};
     float m_cameraSensorIso {1.f};
+    bool m_accumulate {false};
 };
 }

@@ -56,7 +56,7 @@ void ShadePBR::Render(const FrameData &frameData)
         frameData.profilerGPU->BeginScope("ShadePBR");
 
     m_framebuffer->Bind(gpu::Framebuffer::ReadWrite);
-    if (m_accumulate)
+    if (frameData.settings->m_accumulate)
     {
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);

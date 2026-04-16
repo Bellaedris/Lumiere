@@ -49,7 +49,7 @@ void CameraSensor::Render(const FrameData &frameData)
 
     gpu::ShaderPtr colorShader = ResourcesManager::Instance()->GetShader(CAMERA_SENSOR_SHADER_NAME);
     colorShader->Bind();
-    colorShader->UniformData("iso", frameData.settings->m_cameraSensorIso);
+    colorShader->UniformData("iso", frameData.scene->IsPlaying() ? frameData.settings->m_cameraSensorIso : m_iso);
 
     gpu::TexturePtr in = ResourcesManager::Instance()->GetTexture(ShadePBR::SHADE_PBR_NAME);
     in->Bind(0);
