@@ -67,7 +67,6 @@ void RenderPipeline::Deserialize(const YAML::Node &pipeline)
         std::unique_ptr<IPass> constructed = PassFactory::Create(pass["name"].as<std::string>());
         if (constructed != nullptr)
         {
-            std::cerr << "Deserialized pass " << pass["name"].as<std::string>() << "\n";
             constructed->Deserialize(static_cast<YAML::Node>(pass));
             m_passes.push_back(std::move(constructed));
         }
