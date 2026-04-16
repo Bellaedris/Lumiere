@@ -197,6 +197,7 @@ target_include_directories(sol2
         INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/includes/sol
 )
+target_compile_definitions(Lumiere PUBLIC SOL_ALL_SAFETIES_ON=1)
 
 target_link_libraries(sol2
         INTERFACE
