@@ -24,6 +24,7 @@ protected:
     SystemProvider* m_systemProvider;
     std::unique_ptr<Node3D> m_rootNode;
     std::unique_ptr<LightList> m_lights {std::make_unique<LightList>()};
+    bool m_isPlaying {false};
 
     Camera* m_mainCamera {nullptr};
 public:
@@ -38,6 +39,7 @@ public:
     Node3D *AddNode();
     void SetMainCamera(Camera* camera) {m_mainCamera = camera;};
 
+    bool IsPlaying() const { return m_isPlaying; };
     Camera* MainCamera() const {return m_mainCamera;};
     const std::unique_ptr<LightList>& Lights() const { return m_lights; };
 
@@ -46,6 +48,12 @@ public:
      * \return An array containing a description of all renderable components in the scene
      */
     std::vector<RenderInstance> RenderInstances();
+
+    /**
+     * \brief Gathers all renderable UI components from the scene and returns them in an array
+     * \return An array containing a description of all renderable UI components in the scene
+     */
+    std::vector<RenderInstance> UIRenderInstances();
 
     /**
      * \brief Gathers all lights from scene hierarchy and upload their data to the GPU

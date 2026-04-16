@@ -90,6 +90,11 @@ ScriptEngine::ScriptEngine(CameraSystem* cameraSystem, rdr::RenderSettings* sett
         [this]() { return m_renderSettings->m_cameraSensorIso; },
         [this](float iso) { m_renderSettings->m_cameraSensorIso = iso; }
     );
+
+    s["accumulate"] = sol::property(
+        [this]() { return m_renderSettings->m_accumulate; },
+        [this](bool b) { m_renderSettings->m_accumulate = b; }
+    );
     m_state["RenderSettings"] = m_renderSettings;
 }
 
@@ -100,7 +105,7 @@ void ScriptEngine::Update(float dt)
         // run start once, before first update
         if (script.m_started == false)
         {
-            if (script.m_update.valid())
+            if (script.m_start.valid())
             {
                 sol::protected_function_result res = script.m_start();
                 if (res.valid() == false)

@@ -8,6 +8,7 @@
 #include "Renderer/RenderPipeline.h"
 #include "Renderer/Passes/Debug.h"
 #include "Renderer/Passes/GBuffer.h"
+#include "Renderer/Passes/UI.h"
 
 namespace lum
 {
@@ -24,6 +25,7 @@ private:
     // this looks like very bad architecture tho if i'm being honest.. I'll need to rethink rendering at some point
     std::unique_ptr<rdr::GBuffer> m_gBuffer;
     std::unique_ptr<rdr::Debug> m_debugPass;
+    std::unique_ptr<rdr::UI> m_uiPass;
 
     std::unique_ptr<gpu::Buffer> m_cameraData;
     int m_activePipeline {0};

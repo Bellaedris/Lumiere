@@ -15,6 +15,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "Lumiere/Components/Camera.h"
+#include "Lumiere/Components/UIElement.h"
 #include "Lumiere/Systems/CameraSystem.h"
 
 namespace lum::rdr
@@ -39,6 +40,22 @@ std::vector<SceneDesc::RenderInstance> SceneDesc::RenderInstances()
     ForEachNode([&](Node3D* current)
     {
         std::optional<comp::MeshRenderer*> comp = current->GetComponent<comp::MeshRenderer>();
+        if (comp.has_value() && comp.value()->Mesh() != nullptr)
+        {
+            renderInstances.emplace_back(comp.value()->Mesh(), current->GetTransform()->Model());
+        }
+    });
+
+    return renderInstances;
+}
+
+std::vector<SceneDesc::RenderInstance> SceneDesc::UIRenderInstances()
+{
+    std::vector<SceneDesc::RenderInstance> renderInstances;
+
+    ForEachNode([&](Node3D* current)
+    {
+        std::optional<comp::UIElement*> comp = current->GetComponent<comp::UIElement>();
         if (comp.has_value() && comp.value()->Mesh() != nullptr)
         {
             renderInstances.emplace_back(comp.value()->Mesh(), current->GetTransform()->Model());
@@ -117,6 +134,7 @@ void SceneDesc::ForEachNode(const std::function<void(Node3D *node)> &callback)
 
 void SceneDesc::OnPlay()
 {
+    m_isPlaying = true;
     if (auto cam = FindComponentOfType<comp::Camera>(); cam != nullptr)
         m_systemProvider->m_camera->SetPlayerCamera(cam->Node());
     m_systemProvider->m_camera->SetPlayMode();
@@ -130,6 +148,7 @@ void SceneDesc::OnPlay()
 
 void SceneDesc::OnStop()
 {
+    m_isPlaying = false;
     m_systemProvider->m_camera->SetEditorMode();
     ForEachNode([&](Node3D* current)
     {
