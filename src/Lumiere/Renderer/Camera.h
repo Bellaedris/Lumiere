@@ -66,11 +66,15 @@ public:
     const glm::mat4& Projection();
     const glm::mat4& View();
     const glm::vec3& Position() const;
+    const float Pitch() const { return m_pitch; };
+    const float Yaw() const { return m_yaw; };
 
     void ProcessMouseMovement(const glm::vec2& offset);
     void UpdatePosition(glm::vec3 dir, float dt);
 
     void SetAspect(float aspect);
+    void SetPosition(const glm::vec3& pos) { m_position = pos; m_updateView = true; };
+    void SetPitchYaw(float pitch, float yaw) { m_pitch = pitch; m_yaw = yaw; UpdateRotation(); };
     void SetSensitivity(float sensitivity) { m_viewSpeed = sensitivity; }
 
     float ZNear() const { return m_znear; };
