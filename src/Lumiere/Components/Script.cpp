@@ -29,14 +29,20 @@ Script::Script(Node3D *node, SystemProvider* systems)
 
 void Script::OnPlay()
 {
-    m_handle = m_engine->Register(m_path, m_node);
-    m_initialized = true;
+    if (m_path.empty() == false)
+    {
+        m_handle = m_engine->Register(m_path, m_node);
+        m_initialized = true;
+    }
 }
 
 void Script::OnStop()
 {
-    m_engine->Unregister(m_handle);
-    m_initialized = false;
+    if (m_initialized)
+    {
+        m_engine->Unregister(m_handle);
+        m_initialized = false;
+    }
 }
 
 void Script::LoadScript()
