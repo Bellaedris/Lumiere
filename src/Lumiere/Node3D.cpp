@@ -89,7 +89,7 @@ void Node3D::RegisterType()
 
     sol::usertype<glm::vec3> vec = lua.new_usertype<glm::vec3>("vec3",
             sol::call_constructor,
-            sol::constructors<glm::vec3(float), glm::vec3(float, float, float)>(),
+            sol::constructors<glm::vec3(glm::vec3), glm::vec3(float), glm::vec3(float, float, float)>(),
             sol::meta_function::multiplication,
             vec3Mul,
             sol::meta_function::division,
