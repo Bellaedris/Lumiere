@@ -91,6 +91,9 @@ public:
     #pragma endregion Structs
 private:
     #pragma region Members
+    /** \brief relative path to the texture. Only used for textures loaded from files, textures created at runtime have a blank path */
+    std::string m_path;
+
     uint32_t m_handle {0};
 
     int m_width {0};
@@ -141,7 +144,8 @@ public:
     void SetBorderColor(const glm::vec4& color);
     void SetSize(int width, int height);
 
-    glm::ivec2 Size() { return {m_width, m_height}; };
+    glm::ivec2 Size() const { return {m_width, m_height}; };
+    std::string Path() const { return m_path; }
 };
 
 using TexturePtr = std::shared_ptr<Texture>;

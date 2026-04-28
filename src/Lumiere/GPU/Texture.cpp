@@ -7,36 +7,6 @@
 
 namespace lum::gpu
 {
-    Texture::Texture(Texture &&other) noexcept
-            : m_handle(other.m_handle)
-            , m_width(other.m_width)
-            , m_height(other.m_height)
-            , m_target(other.m_target)
-            , m_wrappingMethod(other.m_wrappingMethod)
-            , m_minFilter(other.m_minFilter)
-            , m_magFilter(other.m_magFilter)
-    {
-        other.m_handle = 0;
-    }
-
-    Texture &Texture::operator=(Texture &&other) noexcept
-    {
-        if (this != &other)
-        {
-            glDeleteTextures(1, &m_handle);
-            m_handle = other.m_handle;
-            m_width = other.m_width;
-            m_height = other.m_height;
-            m_target = other.m_target;
-            m_minFilter = other.m_minFilter;
-            m_magFilter = other.m_magFilter;
-            m_wrappingMethod = other.m_wrappingMethod;
-
-            other.m_handle = 0;
-        }
-        return *this;
-    }
-
     Texture::Texture(Texture::TextureTarget target)
         : m_target(target)
     {
@@ -44,15 +14,16 @@ namespace lum::gpu
     }
 
     Texture::Texture(Texture::TextureTarget target, const char *path, bool generateMipmaps)
-        : m_target(target)
+        : m_path(path)
+        , m_target(target)
     {
         glGenTextures(1, &m_handle);
 
         // read image
         // flip the image since OpenGL has reverse y compared to images
         //stbi_set_flip_vertically_on_load(true);
-        int width, height, numChannels;
-        unsigned char* data = stbi_load(path, &width, &height, &numChannels, 0);
+        int           width, height, numChannels;
+        unsigned char*data = stbi_load(path, &width, &height, &numChannels, 0);
         if(data == nullptr)
         {
             std::cerr << "Couldn't read image at " << path << "\n";
@@ -70,6 +41,111 @@ namespace lum::gpu
             glGenerateMipmap(GetTextureTarget(m_target));
 
         stbi_image_free(data);
+    }
+
+    Texture::Texture(Texture &&other) noexcept
+        : m_path(std::move(other.m_path))
+        , m_handle(other.m_handle)
+        , m_width(other.m_width)
+        , m_height(other.m_height)
+        , m_target(other.m_target)
+        , m_wrappingMethod(other.m_wrappingMethod)
+        , m_minFilter(other.m_minFilter)
+        , m_magFilter(other.m_magFilter)
+    {
+        other.m_handle = 0;
+    }
+
+    Texture &Texture::operator=(Texture &&other) noexcept
+    {
+        if (this != &other)
+        {
+            glDeleteTextures(1, &m_handle);
+            m_path           = std::move(other.m_path);
+            m_handle         = other.m_handle;
+            m_width          = other.m_width;
+            m_height         = other.m_height;
+            m_target         = other.m_target;
+            m_minFilter      = other.m_minFilter;
+            m_magFilter      = other.m_magFilter;
+            m_wrappingMethod = other.m_wrappingMethod;
+
+            other.m_handle = 0;
+        }
+        return *this;
+    }
+
+    void Texture::Bind()
+    {
+        glBindTexture(GetTextureTarget(m_target), m_handle);
+    }
+
+    void Texture::Bind(uint32_t unit)
+    {
+        glActiveTexture(GL_TEXTURE0 + unit);
+        Bind();
+    }
+
+    void Texture::BindImage(uint32_t unit, uint32_t mipLevel, GLUtils::Access access)
+    {
+        glBindImageTexture
+                (
+                        unit,
+                        m_handle,
+                        mipLevel,
+                        GL_FALSE,
+                        0,
+                        GLUtils::GetAccess(access),
+                        GetPixelInternalFormat(m_format, m_dataType)
+                        );
+    }
+
+    void Texture::Allocate(Texture::PixelFormat format, GLUtils::DataType dataType)
+    {
+        m_format   = format;
+        m_dataType = dataType;
+        Bind();
+        glTexImage2D(
+                GetTextureTarget(m_target),
+                0,
+                GetPixelInternalFormat(format, dataType),
+                m_width,
+                m_height,
+                0,
+                GetPixelFormat(format),
+                GLUtils::GetDataType(dataType),
+                nullptr
+                );
+    }
+
+    void Texture::AllocateMipmapsStorage(int levels)
+    {
+        // ensure we don't generate too many mip level, as having a mip of size < 1 will probably crash the app
+        int maxLevel = static_cast<int>(std::floor(std::log2(std::max(m_width, m_height)))) + 1;
+        glTextureStorage2D(m_handle, std::min(levels, maxLevel), GetPixelInternalFormat(m_format, m_dataType), m_width, m_height);
+    }
+
+    void Texture::Reallocate()
+    {
+        Allocate(m_format, m_dataType);
+    }
+
+    void Texture::Write(void *data, Texture::PixelFormat format, GLUtils::DataType dataType)
+    {
+        m_format   = format;
+        m_dataType = dataType;
+        Bind();
+        glTexImage2D(
+                GetTextureTarget(m_target),
+                0,
+                GetPixelInternalFormat(format, dataType),
+                m_width,
+                m_height,
+                0,
+                GetPixelFormat(format),
+                GLUtils::GetDataType(dataType),
+                data
+                );
     }
 
     void Texture::SetMinFilter(Texture::Filtering filter)
@@ -108,81 +184,8 @@ namespace lum::gpu
     void Texture::SetSize(int width, int height)
     {
         Bind();
-        m_width = width;
+        m_width  = width;
         m_height = height;
-    }
-
-    void Texture::Allocate(Texture::PixelFormat format, GLUtils::DataType dataType)
-    {
-        m_format = format;
-        m_dataType = dataType;
-        Bind();
-        glTexImage2D(
-            GetTextureTarget(m_target),
-            0,
-            GetPixelInternalFormat(format, dataType),
-            m_width,
-            m_height,
-            0,
-            GetPixelFormat(format),
-            GLUtils::GetDataType(dataType),
-            nullptr
-        );
-    }
-
-    void Texture::AllocateMipmapsStorage(int levels)
-    {
-        // ensure we don't generate too many mip level, as having a mip of size < 1 will probably crash the app
-        int maxLevel = static_cast<int>(std::floor(std::log2(std::max(m_width, m_height)))) + 1;
-        glTextureStorage2D(m_handle, std::min(levels, maxLevel), GetPixelInternalFormat(m_format, m_dataType), m_width, m_height);
-    }
-
-    void Texture::Reallocate()
-    {
-        Allocate(m_format, m_dataType);
-    }
-
-    void Texture::Write(void *data, Texture::PixelFormat format, GLUtils::DataType dataType)
-    {
-        m_format = format;
-        m_dataType = dataType;
-        Bind();
-        glTexImage2D(
-                GetTextureTarget(m_target),
-                0,
-                GetPixelInternalFormat(format, dataType),
-                m_width,
-                m_height,
-                0,
-                GetPixelFormat(format),
-                GLUtils::GetDataType(dataType),
-                data
-        );
-    }
-
-    void Texture::Bind()
-    {
-        glBindTexture(GetTextureTarget(m_target), m_handle);
-    }
-
-    void Texture::Bind(uint32_t unit)
-    {
-        glActiveTexture(GL_TEXTURE0 + unit);
-        Bind();
-    }
-
-    void Texture::BindImage(uint32_t unit, uint32_t mipLevel, GLUtils::Access access)
-    {
-        glBindImageTexture
-        (
-            unit,
-            m_handle,
-            mipLevel,
-            GL_FALSE,
-            0,
-            GLUtils::GetAccess(access),
-            GetPixelInternalFormat(m_format, m_dataType)
-        );
     }
 
     #pragma region EnumAccessFunctions
