@@ -101,12 +101,12 @@ void GBuffer::Render(const FrameData &frameData)
 
     for (const auto& instance : frameData.scene->RenderInstances())
     {
-        gbufferShader->UniformData("modelMatrix", instance.model);
-        gbufferShader->UniformData("normalMatrix", glm::inverse(glm::transpose(instance.model)));
-        for (const gfx::SubMesh& submesh : instance.mesh->Primitives())
+        instance.first->Bind(gbufferShader);
+        for (const auto& submesh : instance.second)
         {
-            submesh.Material()->Bind(gbufferShader);
-            submesh.Draw();
+            gbufferShader->UniformData("modelMatrix", submesh.model);
+            gbufferShader->UniformData("normalMatrix", glm::inverse(glm::transpose(submesh.model)));
+            submesh.mesh->Draw();
         }
     }
 

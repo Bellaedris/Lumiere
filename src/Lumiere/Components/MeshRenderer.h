@@ -18,6 +18,7 @@ private:
     static bool m_typeRegistered;
 
     gfx::MeshPtr m_mesh;
+    std::vector<gfx::MaterialPtr> m_materials;
 
     /**
      * \brief Registers this component to the Lua scriping backend
@@ -29,6 +30,7 @@ public:
     MeshRenderer(Node3D* node, SystemProvider* systems);
 
     gfx::MeshPtr Mesh() const { return m_mesh; }
+    std::vector<gfx::MaterialPtr>& Materials() { return m_materials; }
 
     void SetMesh(const std::string& path);
 

@@ -29,6 +29,6 @@ std::string FileUtils::PathToName(const std::string &path)
     size_t name = path.find_last_of('/');
     size_t extension = path.find_last_of('.');
 
-    return path.substr(name + 1, extension - 1);
+    return path.substr(name + 1, extension - name - 1);
 }
 } // mgl::utils

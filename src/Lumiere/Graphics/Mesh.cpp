@@ -10,15 +10,16 @@
 #include <assimp/Importer.hpp>
 
 #include "MaterialPBR.h"
+#include "Lumiere/ResourcesManager.h"
 
 namespace lum::gfx
 {
-SubMesh::SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material, const std::string& name)
+SubMesh::SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const std::string& matHint, const std::string& name)
     : m_vertexSize(vertices.size())
     , m_indexSize(indices.size())
     , m_buffer(gpu::Buffer::BufferType::Vertex)
     , m_indexBuffer(gpu::Buffer::BufferType::Index)
-    , m_material(material)
+    , m_defaultMatPath(matHint)
     , m_name(name)
 {
     m_vao.Bind();
@@ -91,8 +92,7 @@ std::vector<SubMesh> Mesh::GeneratePlane(float halfSize)
     };
 
     std::vector<SubMesh> subMeshes;
-    MaterialPtr m = std::make_unique<MaterialPBR>();
-    subMeshes.emplace_back(vertices, indices, m, "plane");
+    subMeshes.emplace_back(vertices, indices, ResourcesManager::DEFAULT_MATERIAL_PBR_LIT, "plane");
 
     return subMeshes;
 }
@@ -200,8 +200,7 @@ std::vector<SubMesh> Mesh::GenerateSphere(float radius)
     }
 
     std::vector<SubMesh> subMeshes;
-    MaterialPtr m = std::make_unique<MaterialPBR>();
-    subMeshes.emplace_back(vertices, indices, m, "sphere");
+    subMeshes.emplace_back(vertices, indices, ResourcesManager::DEFAULT_MATERIAL_PBR_LIT, "sphere");
 
     return subMeshes;
 }

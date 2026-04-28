@@ -8,9 +8,18 @@
 #include "GPU/Texture.h"
 #include "GPU/Shader.h"
 #include "Graphics/Mesh.h"
+#include "stduuid/uuid.h"
 
 namespace lum
 {
+#pragma region Structs
+struct MaterialRegistryEntry
+{
+    bool loaded;
+    std::string path;
+};
+#pragma endregion // Structs
+
 /**
  * \brief Owns and caches all the "cumbersome" resources of the engine: Textures, Shaders, Meshes. In the future, this
  * class might be split with a "Manager" dedicated for each resource that needs more complexity. We keep a simple model for now.
@@ -29,15 +38,25 @@ private:
     std::map<std::string, gpu::ShaderPtr> m_shaderCache;
     /** \brief Mesh cache is indexed by a hash of the mesh's path */
     std::map<size_t, gfx::MeshPtr> m_meshCache;
+    /** \brief Material cache is indexed by a hash of the material's path */
+    std::map<std::string, gfx::MaterialPtr> m_materialCache;
+    /**
+     * \brief Lists all known materials and wether or not they are registered.
+     * This way we can have a list of available materials without loading them in GPU memory right away
+     */
+    std::map<std::string, MaterialRegistryEntry> m_materialRegistry;
     #pragma endregion Members
 
 public:
-    #pragma region Default Names
+    #pragma region Constants
     constexpr static const char* DEFAULT_PLANE_NAME = "Lumiere_default_plane";
     constexpr static const char* DEFAULT_SPHERE_NAME = "Lumiere_default_sphere";
     constexpr static const char* DEFAULT_TEXTURE_WHITE_NAME = "Lumiere_default_texture_white";
     constexpr static const char* DEFAULT_TEXTURE_BLACK_NAME = "Lumiere_default_texture_black";
-    #pragma endregion Default Names
+    constexpr static const char* DEFAULT_MATERIAL_PBR_LIT = "Lumiere_default_PBR_lit";
+
+    constexpr static const char* MATERIAL_SAVE_PATH = "Assets/Materials/";
+    #pragma endregion Constants
 
     // we can't copy the resource manager singleton
     ResourcesManager(const ResourcesManager&) = delete;
@@ -118,5 +137,51 @@ public:
      */
     std::vector<std::pair<std::string, std::string>> MeshNames();
     #pragma endregion Mesh Cache
+
+    #pragma region Material cache
+    /**
+     * \brief Try to access a material, if it exists
+     * \param name name of this material - usually extracted from a loaded mesh, or user-specified
+     * \return optional material or nullopt
+     */
+    std::optional<gfx::MaterialPtr> GetMaterial(const std::string& name);
+
+    /**
+     * \brief Caches a Material, serialize it and return its uuid
+     * \param material material to cache
+     * \return A handle to the cached Material
+     */
+    void CacheMaterial(gfx::MaterialPtr& material);
+
+    /**
+     * \brief Adds a Material to the registry. If the material was registered already, does nothing
+     * \param name name of the material. Should match with the actual cache entry
+     * \param loaded is the material already loaded in cache?
+     */
+    void RegisterMaterial(const std::string& name, bool loaded);
+
+    /**
+     * \brief Loads a material file and caches it. Updates the registry status if the loading is successful
+     * \param name name of the material to load
+     * \return The cached material, or nullopt if the material couldn't be loaded
+     */
+    std::optional<gfx::MaterialPtr> LoadMaterialFromRegistry(const std::string& name);
+
+    /**
+     * \brief Try to get an element of the material register
+     * \param name name of the material
+     * \return nullopt if the material is not registered, a boolean representing the cache loading status of the material
+     * if registered (true if the mat is loaded in cache, false if not)
+     */
+    std::optional<MaterialRegistryEntry> GetRegistryEntry(const std::string& name);
+
+    /**
+     * \brief Initializes the material registry by reading every material file inside the Assets/Materials folder. Does not
+     * load the resources yet, but it allows the ResourcesManager to be aware of what resources are available and where they should be loaded
+     */
+    void BuildMaterialRegistry();
+
+    void GenerateDefaultMaterials();
+    #pragma endregion // Material cache
 };
 } // lum

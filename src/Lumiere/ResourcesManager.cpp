@@ -4,6 +4,8 @@
 
 #include "ResourcesManager.h"
 
+#include "Graphics/MaterialPBR.h"
+
 namespace lum
 {
 ResourcesManager* ResourcesManager::m_instance = nullptr;
@@ -20,6 +22,8 @@ ResourcesManager* ResourcesManager::Instance()
         m_instance = new ResourcesManager();
         m_instance->GenerateDefaultMeshes();
         m_instance->GenerateDefaultTextures();
+        m_instance->GenerateDefaultMaterials();
+        m_instance->BuildMaterialRegistry();
     }
 
     return m_instance;
@@ -91,6 +95,12 @@ void ResourcesManager::GenerateDefaultTextures()
     black->Write(dataBlack, gpu::Texture::RGBA, gpu::GLUtils::Float);
 }
 
+void ResourcesManager::GenerateDefaultMaterials()
+{
+    gfx::MaterialPtr defaultLit = std::make_unique<gfx::MaterialPBR>(DEFAULT_MATERIAL_PBR_LIT);
+    CacheMaterial(defaultLit);
+}
+
 gpu::ShaderPtr ResourcesManager::GetShader(const std::string &name)
 {
     if (const auto it = m_shaderCache.find(name); it != m_shaderCache.end())
@@ -153,5 +163,78 @@ std::vector<std::pair<std::string, std::string>> ResourcesManager::MeshNames()
     for (const auto& m : m_meshCache)
         names.emplace_back(m.second->Path(), m.second->Name());
     return names;
+}
+
+std::optional<gfx::MaterialPtr> ResourcesManager::GetMaterial(const std::string &name)
+{
+    if (auto it = m_materialCache.find(name); it != m_materialCache.end())
+    {
+        return { it->second };
+    }
+
+    return {};
+}
+
+void ResourcesManager::CacheMaterial(gfx::MaterialPtr &material)
+{
+    m_materialCache.emplace(material->Name(), material);
+    material->Serialize(MATERIAL_SAVE_PATH);
+    std::cerr << "loaded material " << material->Name() << "\n";
+}
+
+void ResourcesManager::RegisterMaterial(const std::string &name, bool loaded)
+{
+    if (m_materialRegistry.contains(name) == false)
+        m_materialRegistry.emplace(name, loaded);
+}
+
+std::optional<gfx::MaterialPtr> ResourcesManager::LoadMaterialFromRegistry(const std::string &name)
+{
+    if (m_materialRegistry.contains(name) == false)
+        return {};
+
+    MaterialRegistryEntry entry = m_materialRegistry[name];
+    // skip the loading if the entry is loaded already, although it shouldn't happen
+    if (entry.loaded == true)
+        return m_materialCache[name];
+
+    YAML::Node root;
+    try
+    {
+        root = YAML::LoadFile(entry.path);
+    }
+    catch (YAML::BadFile& e)
+    {
+        std::cerr << "Incompatible material file.\n";
+        return {};
+    }
+
+    gfx::MaterialPtr mat = gfx::MaterialFactory::Create(root["type"].as<std::string>(), name);
+    mat->Deserialize(root);
+    m_materialCache.emplace(name, mat);
+
+    entry.loaded = true;
+
+    return {mat};
+}
+
+std::optional<MaterialRegistryEntry> ResourcesManager::GetRegistryEntry(const std::string &name)
+{
+    if (m_materialRegistry.contains(name))
+        return {m_materialRegistry[name]};
+
+    return {};
+}
+
+void ResourcesManager::BuildMaterialRegistry()
+{
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(MATERIAL_SAVE_PATH))
+    {
+        if (entry.is_regular_file() == false)
+            continue;
+
+        std::string name = entry.path().filename().stem().c_str();
+        m_materialRegistry.emplace(name, MaterialRegistryEntry(false, entry.path()));
+    }
 }
 } // lum

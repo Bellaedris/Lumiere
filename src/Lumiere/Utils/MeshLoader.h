@@ -14,6 +14,7 @@ class MeshLoader
 {
 private:
     std::string directory;
+    std::string loadedObjectName;
 
     void         ProcessNode(aiNode* node, const aiScene* scene, std::vector<gfx::SubMesh> &subMeshes);
 

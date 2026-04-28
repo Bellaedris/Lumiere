@@ -33,32 +33,48 @@ Node3D *SceneDesc::AddNode()
     return n;
 }
 
-std::vector<SceneDesc::RenderInstance> SceneDesc::RenderInstances()
+std::unordered_map<gfx::MaterialPtr, std::vector<SceneDesc::RenderInstance>> SceneDesc::RenderInstances()
 {
-    std::vector<SceneDesc::RenderInstance> renderInstances;
+    std::unordered_map<gfx::MaterialPtr, std::vector<SceneDesc::RenderInstance>> renderInstances;
 
     ForEachNode([&](Node3D* current)
     {
         std::optional<comp::MeshRenderer*> comp = current->GetComponent<comp::MeshRenderer>();
         if (comp.has_value() && comp.value()->Mesh() != nullptr)
         {
-            renderInstances.emplace_back(comp.value()->Mesh(), current->GetTransform()->Model());
+            std::vector<gfx::SubMesh>& primitives = comp.value()->Mesh()->Primitives();
+            std::vector<gfx::MaterialPtr> materials = comp.value()->Materials();
+            size_t size = primitives.size();
+            for (int i = 0; i < size; i++)
+            {
+                if (renderInstances.contains(materials[i]) == false)
+                    renderInstances.emplace(materials[i], std::vector<SceneDesc::RenderInstance>());
+                renderInstances[materials[i]].emplace_back(&primitives[i], current->GetTransform()->Model());
+            }
         }
     });
 
     return renderInstances;
 }
 
-std::vector<SceneDesc::RenderInstance> SceneDesc::UIRenderInstances()
+std::unordered_map<gfx::MaterialPtr, std::vector<SceneDesc::RenderInstance>> SceneDesc::UIRenderInstances()
 {
-    std::vector<SceneDesc::RenderInstance> renderInstances;
+    std::unordered_map<gfx::MaterialPtr, std::vector<SceneDesc::RenderInstance>> renderInstances;
 
     ForEachNode([&](Node3D* current)
     {
         std::optional<comp::UIElement*> comp = current->GetComponent<comp::UIElement>();
         if (comp.has_value() && comp.value()->Mesh() != nullptr)
         {
-            renderInstances.emplace_back(comp.value()->Mesh(), current->GetTransform()->Model());
+            std::vector<gfx::SubMesh>& primitives = comp.value()->Mesh()->Primitives();
+            std::vector<gfx::MaterialPtr> materials = comp.value()->Materials();
+            size_t size = primitives.size();
+            for (int i = 0; i < size; i++)
+            {
+                if (renderInstances.contains(materials[i]) == false)
+                    renderInstances.emplace(materials[i], std::vector<SceneDesc::RenderInstance>());
+                renderInstances[materials[i]].emplace_back(&primitives[i], current->GetTransform()->Model());
+            }
         }
     });
 

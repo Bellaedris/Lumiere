@@ -47,11 +47,11 @@ void UI::Render(const FrameData &frameData)
 
     for (const auto& instance : frameData.scene->UIRenderInstances())
     {
-        uiShader->UniformData("modelMatrix", instance.model);
-        for (const gfx::SubMesh& submesh : instance.mesh->Primitives())
+        instance.first->Bind(uiShader);
+        for (const auto& submesh : instance.second)
         {
-            submesh.Material()->Bind(uiShader);
-            submesh.Draw();
+            uiShader->UniformData("modelMatrix", submesh.model);
+            submesh.mesh->Draw();
         }
     }
 

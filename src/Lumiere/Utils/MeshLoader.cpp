@@ -9,6 +9,7 @@
 #include "../Graphics/Mesh.h"
 #include "Lumiere/ResourcesManager.h"
 #include "Lumiere/Graphics/MaterialPBR.h"
+#include "Lumiere/Utils/FileUtils.h"
 
 namespace lum::utils
 {
@@ -20,7 +21,7 @@ gfx::MeshPtr MeshLoader::LoadMeshFromFile(const std::string &filename)
         filepath = std::filesystem::path(filepath).lexically_relative(cfg::EXECUTABLE_DIR).string();
     std::string path = filepath.string();
 
-    // if we cached the mesh already, just return it
+    // if we cached the mesh already, read it from the resources
     gfx::MeshPtr cachedMesh = ResourcesManager::Instance()->GetMesh(path);
     if (ResourcesManager::Instance()->GetMesh(path) != nullptr)
         return cachedMesh;
@@ -43,6 +44,8 @@ gfx::MeshPtr MeshLoader::LoadMeshFromFile(const std::string &filename)
     }
 
     directory = path.substr(0, path.find_last_of('/'));
+    loadedObjectName = FileUtils::PathToName(path);
+
     std::vector<gfx::SubMesh> meshes;
     ProcessNode(scene->mRootNode, scene, meshes);
 
@@ -98,47 +101,50 @@ gfx::SubMesh MeshLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene, int ind
 
     // Material
     aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
-    gpu::TexturePtr albedo, normals, metalRough, emissive;
-    // we assume that for PBR materials, we only use one texture per channel.
-    aiString texPath;
-    std::string albedoPath;
-    if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == aiReturn_SUCCESS)
+    std::string matName;
+    if (mat->GetName().length == 0)
+        matName = loadedObjectName + "_mat_" + std::to_string(mesh->mMaterialIndex);
+    else
+        matName = loadedObjectName + "_" + mat->GetName().C_Str();
+
+    // check if the mat is registered already
+    std::optional<MaterialRegistryEntry> registeryStatus = ResourcesManager::Instance()->GetRegistryEntry(matName);
+    // if not, we register it and load the resource right after
+    if (registeryStatus.has_value() == false)
     {
-        // try to retrieve the texture, and create it if it was not cached
-        const std::string fullPath = directory + "/" + texPath.C_Str();
-        albedo = ResourcesManager::Instance()->GetTexture(fullPath);
-        albedoPath = fullPath;
-        if (albedo == nullptr)
-            albedo = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
+        ResourcesManager::Instance()->RegisterMaterial(matName, true);
+        // if the Material is not cached already, create it in the resources manager
+        std::optional<gfx::MaterialPtr> cached = ResourcesManager::Instance()->GetMaterial(matName);
+        gpu::TexturePtr albedo, normals, metalRough, emissive;
+        // we assume that for PBR materials, we only use one texture per channel.
+        aiString texPath;
+        std::function<std::string(aiTextureType, aiString)> GetTexturePath = [&](aiTextureType type, aiString texPath)
+        {
+            if (mat->GetTexture(type, 0, &texPath) == aiReturn_SUCCESS)
+            {
+                // try to retrieve the texture, and create it if it was not cached
+                return directory + "/" + texPath.C_Str();
+            }
+            return std::string("");
+        };
+
+        std::string albedoPath = GetTexturePath(aiTextureType_DIFFUSE, texPath);
+        std::string normalPath = GetTexturePath(aiTextureType_NORMALS, texPath);
+        std::string metalRoughPath = GetTexturePath(aiTextureType_DIFFUSE_ROUGHNESS, texPath);
+        std::string emissivePath = GetTexturePath(aiTextureType_EMISSIVE, texPath);
+
+        gfx::MaterialPtr pbrMat = std::make_shared<gfx::MaterialPBR>(matName, albedoPath, normalPath, metalRoughPath, emissivePath);
+        ResourcesManager::Instance()->CacheMaterial(pbrMat);
+    }
+    else
+    {
+        // if in registry but not loaded, create the material by reading from registry
+        if (registeryStatus.value().loaded == false)
+        {
+            ResourcesManager::Instance()->LoadMaterialFromRegistry(matName);
+        }
     }
 
-    if (mat->GetTexture(aiTextureType_NORMALS, 0, &texPath) == aiReturn_SUCCESS)
-    {
-        // try to retrieve the texture, and create it if it was not cached
-        const std::string fullPath = directory + "/" + texPath.C_Str();
-        normals = ResourcesManager::Instance()->GetTexture(fullPath);
-        if (normals == nullptr)
-            normals = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
-    }
-
-    if (mat->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &texPath) == aiReturn_SUCCESS)
-    {
-        const std::string fullPath = directory + "/" + texPath.C_Str();
-        metalRough = ResourcesManager::Instance()->GetTexture(fullPath);
-        if (metalRough == nullptr)
-            metalRough = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
-    }
-
-    if (mat->GetTexture(aiTextureType_EMISSIVE, 0, &texPath) == aiReturn_SUCCESS)
-    {
-        const std::string fullPath = directory + "/" + texPath.C_Str();
-        emissive = ResourcesManager::Instance()->GetTexture(fullPath);
-        if (emissive == nullptr)
-            emissive = ResourcesManager::Instance()->CacheTexture(gpu::Texture::TextureTarget::Target2D, fullPath, true);
-    }
-
-    gfx::MaterialPtr pbrMat = std::make_shared<gfx::MaterialPBR>(albedo, normals, metalRough, emissive);
-
-    return {vertices, indices, pbrMat, name};
+    return {vertices, indices, matName, name};
 }
 } // lum

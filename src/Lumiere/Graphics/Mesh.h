@@ -46,14 +46,15 @@ private:
     uint32_t m_vertexSize, m_indexSize;
     gpu::Buffer m_buffer, m_indexBuffer;
     gpu::Vao m_vao;
-    MaterialPtr m_material;
+    /** \brief Do not store a material here, only a hint of a default material that can be used as a fallback */
+    std::string m_defaultMatPath;
 
     std::string m_name;
     #pragma endregion Members
 public:
-    SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const MaterialPtr& material, const std::string& name);
+    SubMesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices, const std::string& matHint, const std::string& name);
 
-    const MaterialPtr& Material() const { return m_material; };
+    std::string DefaultMat() const { return m_defaultMatPath; };
     const std::string Name() const { return m_name; }
 
     void Draw() const;

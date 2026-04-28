@@ -30,7 +30,7 @@ protected:
 public:
     struct RenderInstance
     {
-        gfx::MeshPtr mesh;
+        gfx::SubMesh* mesh;
         glm::mat4 model;
     };
 
@@ -47,13 +47,13 @@ public:
      * \brief Gathers all renderable components from the scene and returns them in an array
      * \return An array containing a description of all renderable components in the scene
      */
-    std::vector<RenderInstance> RenderInstances();
+    std::unordered_map<gfx::MaterialPtr, std::vector<RenderInstance>> RenderInstances();
 
     /**
      * \brief Gathers all renderable UI components from the scene and returns them in an array
      * \return An array containing a description of all renderable UI components in the scene
      */
-    std::vector<RenderInstance> UIRenderInstances();
+    std::unordered_map<gfx::MaterialPtr, std::vector<SceneDesc::RenderInstance>> UIRenderInstances();
 
     /**
      * \brief Gathers all lights from scene hierarchy and upload their data to the GPU
