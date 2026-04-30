@@ -33,6 +33,7 @@ public:
     std::vector<gfx::MaterialPtr>& Materials() { return m_materials; }
 
     void SetMesh(const std::string& path);
+    void SetMaterial(int matIndex, const std::string handle);
 
     void Serialize(YAML::Node& node) override;
     void Deserialize(YAML::Node& node) override;

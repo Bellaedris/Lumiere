@@ -181,6 +181,12 @@ public:
      */
     void BuildMaterialRegistry();
 
+    /**
+     * \brief Gives the string handle of all available materials. Useful for the editor
+     * \return An array with all material handles
+     */
+    std::vector<std::string> MaterialNames() const;
+
     void GenerateDefaultMaterials();
     #pragma endregion // Material cache
 };

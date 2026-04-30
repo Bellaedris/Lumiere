@@ -4,6 +4,8 @@
 
 #include "ResourcesManager.h"
 
+#include <ranges>
+
 #include "Graphics/MaterialPBR.h"
 
 namespace lum
@@ -236,5 +238,15 @@ void ResourcesManager::BuildMaterialRegistry()
         std::string name = entry.path().filename().stem().c_str();
         m_materialRegistry.emplace(name, MaterialRegistryEntry(false, entry.path()));
     }
+}
+
+std::vector<std::string> ResourcesManager::MaterialNames() const
+{
+    std::vector<std::string> names;
+    names.reserve(m_materialRegistry.size());
+    for (const auto &key: m_materialRegistry | std::views::keys)
+        names.push_back(key);
+
+    return names;
 }
 } // lum

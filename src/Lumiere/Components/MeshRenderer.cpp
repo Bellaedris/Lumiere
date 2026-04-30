@@ -51,6 +51,19 @@ void MeshRenderer::SetMesh(const std::string &path)
     }
 }
 
+void MeshRenderer::SetMaterial(int matIndex, const std::string handle)
+{
+    if (matIndex >= m_materials.size())
+        return;
+
+    ResourcesManager* resources = ResourcesManager::Instance();
+    // at that point, we can only get handles coming from the inspector, that comes from the registry
+    if (resources->GetRegistryEntry(handle).value().loaded == false)
+        resources->LoadMaterialFromRegistry(handle);
+
+    m_materials[matIndex] = resources->GetMaterial(handle).value();
+}
+
 void MeshRenderer::Serialize(YAML::Node& node)
 {
     YAML::Node mr;
