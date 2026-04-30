@@ -6,6 +6,7 @@
 
 #include "../Systems/ScriptEngine.h"
 #include "Lumiere/ResourcesManager.h"
+#include "Lumiere/Graphics/MaterialOverrideBlock.h"
 #include "Lumiere/Utils/MeshLoader.h"
 
 namespace lum::comp
@@ -22,6 +23,16 @@ void MeshRenderer::RegisterType(SystemProvider* systems)
 
     sol::usertype<MeshRenderer> type = lua.new_usertype<MeshRenderer>("MeshRenderer");
     type["mesh"] = sol::property([](MeshRenderer& m) { return m.m_mesh; });
+    type["SetMaterialOverrideBlock"] = &MeshRenderer::SetMaterialOverrideBlock;
+
+    // also register material override block
+    sol::usertype<gfx::MaterialOverrideBlock> mob = lua.new_usertype<gfx::MaterialOverrideBlock>("MaterialOverrideBlock",
+        sol::call_constructor,
+        sol::constructors<gfx::MaterialOverrideBlock()>()
+    );
+    mob["Clear"] = &gfx::MaterialOverrideBlock::Clear;
+    mob["SetFloat"] = &gfx::MaterialOverrideBlock::SetFloat;
+    mob["SetVector"] = &gfx::MaterialOverrideBlock::SetVector;
 
     m_typeRegistered = true;
 }

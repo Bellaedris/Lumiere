@@ -106,6 +106,8 @@ void GBuffer::Render(const FrameData &frameData)
         {
             gbufferShader->UniformData("modelMatrix", submesh.model);
             gbufferShader->UniformData("normalMatrix", glm::inverse(glm::transpose(submesh.model)));
+            if (submesh.overrideBlock != nullptr)
+                submesh.overrideBlock->Bind(gbufferShader);
             submesh.mesh->Draw();
         }
     }

@@ -49,7 +49,7 @@ std::unordered_map<gfx::MaterialPtr, std::vector<SceneDesc::RenderInstance>> Sce
             {
                 if (renderInstances.contains(materials[i]) == false)
                     renderInstances.emplace(materials[i], std::vector<SceneDesc::RenderInstance>());
-                renderInstances[materials[i]].emplace_back(&primitives[i], current->GetTransform()->Model());
+                renderInstances[materials[i]].emplace_back(&primitives[i], current->GetTransform()->Model(), comp.value()->MaterialOverrideBlock());
             }
         }
     });
@@ -73,7 +73,7 @@ std::unordered_map<gfx::MaterialPtr, std::vector<SceneDesc::RenderInstance>> Sce
             {
                 if (renderInstances.contains(materials[i]) == false)
                     renderInstances.emplace(materials[i], std::vector<SceneDesc::RenderInstance>());
-                renderInstances[materials[i]].emplace_back(&primitives[i], current->GetTransform()->Model());
+                renderInstances[materials[i]].emplace_back(&primitives[i], current->GetTransform()->Model(), nullptr);
             }
         }
     });

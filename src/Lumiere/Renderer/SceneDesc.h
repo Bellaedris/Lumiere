@@ -7,6 +7,7 @@
 #include "Lights.h"
 #include "Lumiere/App.h"
 #include "Lumiere/Node3D.h"
+#include "Lumiere/Graphics/MaterialOverrideBlock.h"
 #include "Lumiere/Graphics/Mesh.h"
 
 namespace lum::rdr
@@ -32,6 +33,7 @@ public:
     {
         gfx::SubMesh* mesh;
         glm::mat4 model;
+        gfx::MaterialOverrideBlock* overrideBlock;
     };
 
     SceneDesc(SystemProvider* systemProvider);
