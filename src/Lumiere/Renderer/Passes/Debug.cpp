@@ -212,9 +212,9 @@ std::vector<gfx::DebugVertex> Debug::PrepareData()
     return packedVertices;
 }
 
-void Debug::DrawGrid()
+void Debug::DrawGrid(bool state)
 {
-    m_shouldDrawGridNextFrame = true;
+    m_drawGrid = state;
 }
 
 void Debug::Init()
@@ -240,7 +240,7 @@ void Debug::Render(const FrameData &frameData)
     if (frameData.profilerGPU)
         frameData.profilerGPU->BeginScope("Debug");
 
-    if (m_shouldDrawGridNextFrame || m_debugVertices.empty() == false)
+    if (m_drawGrid || m_debugVertices.empty() == false)
     {
         m_framebuffer->Bind(gpu::Framebuffer::ReadWrite);
 
@@ -249,7 +249,7 @@ void Debug::Render(const FrameData &frameData)
         glBlendFunc(GL_ONE, GL_ONE);
 
         // draw grid
-        if (m_shouldDrawGridNextFrame)
+        if (m_drawGrid)
         {
             gpu::ShaderPtr grid = ResourcesManager::Instance()->GetShader(GRID_SHADER_NAME);
             grid->Bind();
@@ -261,8 +261,6 @@ void Debug::Render(const FrameData &frameData)
             res->Bind(1);
 
             ResourcesManager::Instance()->GetMesh(ResourcesManager::DEFAULT_PLANE_NAME)->Draw();
-
-            m_shouldDrawGridNextFrame = false;
         }
 
         if (m_debugVertices.empty() == false)

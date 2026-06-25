@@ -139,8 +139,8 @@ void Node3D::RegisterType()
 
     sol::usertype<comp::Transform> transform = lua.new_usertype<comp::Transform>("Transform");
 
-    transform["Translate"] = &comp::Transform::Translate;
-    transform["Rotate"] = &comp::Transform::Rotate;
+    transform["Translate"] = [](comp::Transform& t, const glm::vec3& v) {t.Translate(v);};
+    transform["Rotate"]    = &comp::Transform::Rotate;
 
     transform["localPosition"] = sol::property(
         [](comp::Transform& t) -> glm::vec3& { return t.m_position; },

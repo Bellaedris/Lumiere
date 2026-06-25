@@ -22,7 +22,7 @@ private:
     dod::slot_map<std::vector<gfx::DebugVertex>> m_debugVertices {};
     gfx::Lines m_lineRenderer;
     bool m_dirty {false};
-    bool m_shouldDrawGridNextFrame {true};
+    bool m_drawGrid {true};
 
     // internal debug shapes storage
     void AddLine(std::vector<gfx::DebugVertex>& shape, const glm::vec3& start, const glm::vec3& end, const glm::vec3& color);
@@ -48,7 +48,7 @@ public:
     // packs all our vertices data for GPU
     std::vector<gfx::DebugVertex> PrepareData();
 
-    void DrawGrid();
+    void DrawGrid(bool state);
 
     void Init() override;
     void Render(const FrameData &frameData) override;

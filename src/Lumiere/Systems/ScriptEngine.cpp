@@ -7,6 +7,7 @@
 #include "Lumiere/InputManager.h"
 #include "Lumiere/Node3D.h"
 #include "CameraSystem.h"
+#include "Lumiere/EngineCfg.h"
 #include "Lumiere/Components/Script.h"
 #include "Lumiere/Renderer/RenderSettings.h"
 
@@ -20,6 +21,10 @@ ScriptEngine::ScriptEngine(CameraSystem* cameraSystem, rdr::RenderSettings* sett
     m_state.open_libraries(sol::lib::base);
     m_state.open_libraries(sol::lib::math);
     m_state.open_libraries(sol::lib::table);
+    m_state.open_libraries(sol::lib::package);
+    // set package path to scripts path
+    m_state["package"]["path"] = std::string(m_state["package"]["path"]) + ";./scripts/?.lua";
+    m_state["package"]["path"] = std::string(m_state["package"]["path"]) + ";./?.lua";
     m_state.script("print('Lua Scripting engine started')");
 
     // also register types that do not have dependencies on component-related types,
